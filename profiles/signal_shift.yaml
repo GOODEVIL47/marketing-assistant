@@ -1,0 +1,67 @@
+name: Signal Shift
+tagline: "Calm AI-powered market briefing for retail investors"
+url: https://signalshift.app
+
+handles:
+  founder: "@yourhandle"
+  product: "@SignalShiftCo"
+
+positioning:
+  what_it_is:
+    - calm AI-powered market briefing tool
+    - turns noisy market data into plain-English analysis
+    - helps retail investors slow down before chasing a stock
+    - covers bias, confidence, risk, key reasons, catalyst context, technical context, market/sector context, what to watch, and invalidation
+
+  what_it_is_not:
+    - a buy/sell signal app
+    - a stock-picking account
+    - a trading bot
+    - a hype dashboard
+    - financial advice
+    - a "next 10x stock" tool
+    - a Bloomberg or TradingView clone
+
+target_audience:
+  - retail investors who feel overwhelmed by market noise
+  - investors who want to slow down before acting on a hot tip
+  - people who want plain-English reasoning, not raw data dumps
+  - investors who are aware of their own biases and want help thinking clearly
+
+voice:
+  - calm
+  - thoughtful
+  - plain-English
+  - human
+  - not salesy
+  - slightly opinionated when useful
+  - no hype
+  - no financial advice
+  - no direct buy/sell language
+  - avoid repetitive AI-style line-break formatting
+
+strong_fit_signals:
+  - retail investor feeling overwhelmed or chasing noise
+  - posts about slowing down before acting on market news
+  - posts about investor bias or emotional decision-making
+  - posts about wanting clarity instead of more data
+  - posts about the difficulty of separating signal from noise
+
+decent_fit_signals:
+  - posts about investing frameworks or mental models
+  - posts about reducing information overload
+  - posts about the difference between data and insight
+  - posts that question conventional trading wisdom
+
+weak_fit_signals:
+  - technical analysis setups (RSI, MACD, etc.)
+  - stock screener discussions
+  - day trading or swing trading content
+  - posts focused on stock picks without emotional/bias angle
+
+avoid_signals:
+  - financial advice or "buy this stock" content
+  - hype / moon / rocket emoji culture
+  - pump-and-dump style posts
+  - get-rich-quick webinars or courses
+  - anything that could associate the brand with bad actors

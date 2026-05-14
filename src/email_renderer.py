@@ -207,8 +207,28 @@ def _html_post_card(rank, post):
         '</p>'
     ) if _provider_label else ""
 
-    replies_block = _html_replies_block(post)
-    media_block = _html_media_block(post.get("media"))
+    reply_note = post.get("reply_note")
+    inspiration_angles = post.get("inspiration_angles")
+    if reply_note:
+        replies_block = (
+            f'<p style="margin:12px 0 0;font-size:12px;color:#92400e;font-style:italic;">'
+            f'&#x26A0; {_esc(reply_note)}</p>'
+        )
+        media_block = ""
+    elif inspiration_angles:
+        angles_html = "".join(
+            f'<p style="margin:0 0 4px;font-size:12px;color:#374151;">&#x2022; {_esc(a)}</p>'
+            for a in inspiration_angles
+        )
+        replies_block = (
+            '<p style="margin:12px 0 5px;font-size:11px;font-weight:700;color:#6b7280;'
+            'text-transform:uppercase;letter-spacing:0.6px;">Inspiration angles — do not reply</p>'
+            + angles_html
+        )
+        media_block = ""
+    else:
+        replies_block = _html_replies_block(post)
+        media_block = _html_media_block(post.get("media"))
 
     return f"""
     <table width="100%" cellpadding="0" cellspacing="0"
@@ -263,7 +283,54 @@ def _html_post_card(rank, post):
     </table>"""
 
 
-def _html_original_posts(posts_schedule):
+def _html_inspiration(posts_with_replies):
+    inspiration = [
+        p for p in posts_with_replies
+        if p["score"] in ("Strong fit", "Decent fit")
+        and p.get("metrics_confidence") == "low"
+        and p.get("freshness_tier") == "old"
+        and p.get("inspiration_angles")
+    ]
+    if not inspiration:
+        return ""
+
+    items = ""
+    for post in inspiration:
+        angles = post.get("inspiration_angles") or []
+        angles_html = "".join(
+            f'<p style="margin:0 0 3px;font-size:11px;color:#374151;">&#x2022; {_esc(a)}</p>'
+            for a in angles
+        )
+        post_url = _esc(post.get("post_url", "#"))
+        items += (
+            f'<p style="margin:0 0 3px;font-size:12px;font-weight:700;color:#1a2e4a;">'
+            f'{_esc(post["author"])} &mdash; {_esc(post["score"])}</p>'
+            f'<p style="margin:0 0 4px;font-size:11px;color:#6b7280;font-style:italic;">'
+            f'&ldquo;{_esc(post["text"][:120])}{"..." if len(post["text"]) > 120 else ""}&rdquo;</p>'
+            + angles_html
+            + f'<p style="margin:0 0 12px;font-size:11px;">'
+            f'<a href="{post_url}" style="color:#1a2e4a;">View post &#x2197;</a></p>'
+        )
+
+    return f"""
+  <!-- ── Save for Inspiration ── -->
+  <tr><td style="background:#ffffff;border-left:1px solid #e0e6ed;
+                 border-right:1px solid #e0e6ed;padding:0 22px;">
+    <hr style="border:none;border-top:1px solid #e8edf2;margin:0;">
+  </td></tr>
+  <tr><td style="background:#ffffff;border-left:1px solid #e0e6ed;
+                 border-right:1px solid #e0e6ed;padding:16px 22px 10px;">
+    <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#1a2e4a;">
+      Save for Inspiration
+    </p>
+    <p style="margin:0 0 12px;font-size:11px;color:#6b7280;">
+      Good fit but outside the reply window. Use as ideas for original posts &mdash; do not reply.
+    </p>
+    {items}
+  </td></tr>"""
+
+
+def _html_original_posts(posts_schedule, mode="Mock"):
     parts = []
     for role in ("founder", "product"):
         data = posts_schedule[role]
@@ -273,13 +340,19 @@ def _html_original_posts(posts_schedule):
             fmt = _esc((post.get("format") or {}).get("type", ""))
             med = _esc((post.get("media") or {}).get("type", "No media"))
             text = post.get("text", "").replace("\n\n", " ").replace("\n", " ")
+            check_note = (
+                f'<p style="margin:0 0 14px;font-size:11px;color:#92400e;font-style:italic;">'
+                f'Check {handle} manually before posting (posting history unavailable in {_esc(mode)} mode).</p>'
+                if mode != "Mock" else ""
+            )
             parts.append(
                 f'<p style="margin:0 0 5px;font-size:12px;font-weight:700;color:#1a2e4a;">'
                 f'{role.title()} ({handle}) &mdash; Recommended today</p>'
                 f'<p style="margin:0 0 5px;font-size:12px;color:#444;line-height:1.5;'
                 f'font-style:italic;">&ldquo;{_esc(text)}&rdquo;</p>'
-                f'<p style="margin:0 0 14px;font-size:11px;color:#888;">'
+                f'<p style="margin:0 0 5px;font-size:11px;color:#888;">'
                 f'Format: {fmt} &nbsp;&middot;&nbsp; Media: {med}</p>'
+                + check_note
             )
         else:
             reason = _esc(data.get("reason", "Not scheduled today."))
@@ -326,7 +399,8 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule, mode="M
     else:
         cards = '<p style="color:#888;font-size:14px;">No suitable reply opportunities found today. Check the full digest for inspiration posts.</p>'
 
-    original_posts_html = _html_original_posts(posts_schedule)
+    inspiration_html = _html_inspiration(posts_with_replies)
+    original_posts_html = _html_original_posts(posts_schedule, mode=mode)
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -406,6 +480,8 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule, mode="M
     </p>
     {cards}
   </td></tr>
+
+  {inspiration_html}
 
   <!-- ── Divider ── -->
   <tr><td style="background:#ffffff;border-left:1px solid #e0e6ed;
@@ -546,6 +622,31 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule, mode="M
                 "",
             ]
 
+    inspiration = [
+        p for p in posts_with_replies
+        if p["score"] in ("Strong fit", "Decent fit")
+        and p.get("metrics_confidence") == "low"
+        and p.get("freshness_tier") == "old"
+        and p.get("inspiration_angles")
+    ]
+    if inspiration:
+        lines += [
+            "-" * 52,
+            "",
+            "SAVE FOR INSPIRATION",
+            "Good fit but outside reply window. Use as ideas for original posts — do not reply.",
+            "",
+        ]
+        for post in inspiration:
+            lines.append(f"{post['author']} — {post['score']}")
+            lines.append(f'"{post["text"][:120]}{"..." if len(post["text"]) > 120 else ""}"')
+            for angle in (post.get("inspiration_angles") or []):
+                lines.append(f"  • {angle}")
+            post_url = post.get("post_url", "")
+            if post_url:
+                lines.append(f"  {post_url}")
+            lines.append("")
+
     lines += [
         "-" * 52,
         "",
@@ -556,6 +657,11 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule, mode="M
         data = posts_schedule[role]
         status = "Recommended today" if data["needed"] else "Not needed today"
         lines.append(f"{role.title()} ({data['handle']}): {status}")
+        if data["needed"] and mode != "Mock":
+            lines.append(
+                f"  Check {data['handle']} manually before posting "
+                f"(posting history unavailable in {mode} mode)."
+            )
 
     footer = (
         "Full detailed digest (all posts, all reply options) available in the GitHub Actions artifact."

@@ -66,18 +66,43 @@ avoid_signals:
   - get-rich-quick webinars or courses
   - anything that could associate the brand with bad actors
 
-# X post discovery — used by run_x.py (real mode only, not mock)
+# X post discovery — search terms ordered by reply-target priority (most timely first).
+# These are phrased like real X posts, not SEO titles. Ordered so the first few
+# terms produce the most reply-worthy results when MAX_SEARCH_QUERIES is small.
 search_terms:
-  - "retail investor noise"
-  - "information overload investing"
-  - "investing clarity"
-  - "market noise signal"
-  - "investor bias"
-  - "confirmation bias investing"
-  - "investing overwhelmed"
-  - "stock research clarity"
-  - "slow down before investing"
-  - "investing decisions emotions"
+  - "earnings week confused"
+  - "market noise today"
+  - "retail investor FOMO"
+  - "chasing stocks"
+  - "AI stock hype"
+  - "stock market feels confusing"
+  - "why is this stock moving"
+  - "investing thesis changed"
+  - "market is exhausting"
+  - "earnings reaction confused"
+  - "retail traders are exhausted"
+  - "everyone is bullish"
+  - "everyone is bearish"
+  - "too much market data"
+  - "I don't understand this move"
+  - "premarket move confusion"
+  - "stock is ripping"
+  - "stock is dumping"
+  - "market feels broken"
+  - "everyone is chasing"
+
+# Query templates applied to each search term. Templates are iterated in order
+# so the first template (plain quote search) fills MAX_SEARCH_QUERIES first,
+# then time-qualified variants fill remaining slots.
+# Candidates are generated as: template × term, deduplicated, capped at MAX_SEARCH_QUERIES.
+query_templates:
+  - 'site:x.com "{term}"'
+  - 'site:x.com "{term}" "today"'
+  - 'site:x.com "{term}" "this week"'
+  - 'site:x.com "{term}" "stocks"'
+  - 'site:x.com "{term}" "earnings"'
+  - 'site:x.com "{term}" "market"'
+  - 'site:x.com "{term}" "retail"'
 
 # Keyword-based fit scoring for real X posts (dynamic, not ID-based)
 fit_keywords:

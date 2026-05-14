@@ -53,6 +53,30 @@ def _api_key():
     return key
 
 
+_DEFAULT_QUERY_TEMPLATES = ['site:x.com "{term}"']
+
+
+def _build_candidate_queries(profile):
+    """
+    Generate an ordered candidate query list from profile search_terms and
+    query_templates. Templates are iterated first (outer loop) so all terms
+    for template 1 appear before any terms for template 2, preserving the
+    priority intent: base quote searches before time-qualified variants.
+    Duplicates are suppressed.
+    """
+    terms = profile.get("search_terms", [])
+    templates = profile.get("query_templates", _DEFAULT_QUERY_TEMPLATES)
+    seen = set()
+    candidates = []
+    for template in templates:
+        for term in terms:
+            q = template.replace("{term}", term)
+            if q not in seen:
+                seen.add(q)
+                candidates.append(q)
+    return candidates
+
+
 def _build_queries(profile):
     search_terms = profile.get("search_terms", [])
     if not search_terms:
@@ -61,7 +85,16 @@ def _build_queries(profile):
             "Add a 'search_terms' list to profiles/signal_shift.yaml."
         )
     max_q = int(os.environ.get("MAX_SEARCH_QUERIES", "5"))
-    return [f'site:x.com "{term}"' for term in search_terms[:max_q]]
+    candidates = _build_candidate_queries(profile)
+    selected = candidates[:max_q]
+
+    templates = profile.get("query_templates", _DEFAULT_QUERY_TEMPLATES)
+    print(f"[Tavily] Query templates available: {len(templates)}")
+    print(f"[Tavily] Candidate queries: {len(candidates)} | Selected (cap={max_q}): {len(selected)}")
+    for i, q in enumerate(selected, 1):
+        print(f"[Tavily]   {i}. {q}")
+
+    return selected
 
 
 def _post(query, max_results):
@@ -223,12 +256,10 @@ def get_posts(profile):
     TAVILY_API_KEY is never echoed to logs.
     Engagement metrics are unavailable - marked metrics_confidence=low.
     """
+    print(f"[Tavily] Provider: Tavily Search API (read-only, no X API)")
     queries = _build_queries(profile)
     max_results = int(os.environ.get("MAX_RESULTS_PER_QUERY", "5"))
-
-    print(f"[Tavily] Provider: Tavily Search API (read-only, no X API)")
-    print(f"[Tavily] Queries to run: {len(queries)} | Results per query: {max_results}")
-    print(f"[Tavily] Max API calls this run: {len(queries)}")
+    print(f"[Tavily] Results per query: {max_results}")
 
     raw_count = 0
     url_count = 0

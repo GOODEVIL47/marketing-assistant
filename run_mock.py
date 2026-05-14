@@ -3,21 +3,31 @@
 Marketing Assistant — Mock Mode
 
 Runs a full mock daily digest for the Signal Shift product profile.
-No API keys required. All data is hardcoded for demonstration.
+No API keys required for mock mode. Email is optional and off by default.
 
 Usage:
-    python run_mock.py
+    python run_mock.py                  # digest only
+    SEND_EMAIL=true python run_mock.py  # digest + email
+
+Or create a .env file with your settings (see .env.example).
 """
 
-import yaml
 import os
+import yaml
 from datetime import date
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv not required — set env vars directly if preferred
 
 from mock_data.posts import MOCK_POSTS
 from src.scorer import score_posts
 from src.replier import generate_replies
 from src.post_generator import generate_posts
-from src.digest import save_digest
+from src.digest import save_digest, _SCORE_ORDER, _OPP_ORDER
+from src.email_sender import send_digest
 
 
 def load_profile(profile_path):
@@ -50,8 +60,10 @@ def print_summary(posts_with_replies, posts_schedule, filepath):
         and p["opportunity"] in ("High opportunity", "Medium opportunity")
     ]
     print(f"\nToday's Best 3 ({len(best3)} post(s) qualify):")
-    from src.digest import _SCORE_ORDER, _OPP_ORDER
-    for post in sorted(best3, key=lambda p: (_SCORE_ORDER.index(p["score"]), _OPP_ORDER.index(p["opportunity"])))[:3]:
+    for post in sorted(
+        best3,
+        key=lambda p: (_SCORE_ORDER.index(p["score"]), _OPP_ORDER.index(p["opportunity"])),
+    )[:3]:
         print(f"  {post['author']} — {post['score']} · {post['opportunity']}")
 
     print("\nOriginal posts today:")
@@ -61,7 +73,7 @@ def print_summary(posts_with_replies, posts_schedule, filepath):
         print(f"  {role.title()} ({s['handle']}): {status}")
 
     print(f"\nDigest saved to:\n  {filepath}")
-    print("\n" + "=" * 60 + "\n")
+    print("=" * 60 + "\n")
 
 
 def main():
@@ -76,6 +88,12 @@ def main():
 
     filepath = save_digest(profile["name"], with_replies, posts_schedule)
     print_summary(with_replies, posts_schedule, filepath)
+
+    today = date.today().isoformat()
+    subject = f"Mel's Daily Marketing Digest — {today}"
+    with open(filepath) as f:
+        body = f.read()
+    send_digest(subject, body)
 
 
 if __name__ == "__main__":

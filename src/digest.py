@@ -99,13 +99,13 @@ def _build_original_posts(posts_schedule):
     return lines
 
 
-def build_markdown(profile_name, posts_with_replies, posts_schedule):
+def build_markdown(profile_name, posts_with_replies, posts_schedule, mode="Mock"):
     today = date.today().isoformat()
     lines = []
 
     lines.append(f"# Mel's Daily Digest — {today}")
     lines.append(f"**Product:** {profile_name}")
-    lines.append(f"**Mode:** Mock")
+    lines.append(f"**Mode:** {mode}")
     lines.append("")
     lines.append("---")
     lines.append("")
@@ -125,6 +125,11 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule):
         lines.append(f"**Visibility:** {post['visibility']}")
         lines.append(f"**Opportunity:** {post['opportunity']} {opp_e}")
         lines.append(f"**Engagement:** {post['engagement_summary']}")
+        if post.get("discovery_source") == "brave_search":
+            lines.append(
+                "**Source:** Found via Brave Search — "
+                "engagement metrics unavailable. Verify before replying."
+            )
         lines.append(f"**Author followers:** {post.get('author_followers', 0):,}")
         post_url = post.get("post_url")
         if post_url:
@@ -161,7 +166,7 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule):
     return "\n".join(lines)
 
 
-def save_digest(profile_name, posts_with_replies, posts_schedule):
+def save_digest(profile_name, posts_with_replies, posts_schedule, mode="Mock"):
     today = date.today().isoformat()
     output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "output")
     os.makedirs(output_dir, exist_ok=True)
@@ -169,7 +174,7 @@ def save_digest(profile_name, posts_with_replies, posts_schedule):
     filename = f"daily_digest_{today}.md"
     filepath = os.path.join(output_dir, filename)
 
-    content = build_markdown(profile_name, posts_with_replies, posts_schedule)
+    content = build_markdown(profile_name, posts_with_replies, posts_schedule, mode=mode)
 
     with open(filepath, "w") as f:
         f.write(content)

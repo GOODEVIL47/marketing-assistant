@@ -3,6 +3,10 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Generated digest output — runtime artifacts, not for version control
+# Local runs still save here; GitHub Actions uploads as artifact
+output/
+
 # C extensions
 *.so
 

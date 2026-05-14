@@ -164,6 +164,10 @@ output/daily_digest_YYYY-MM-DD.md
 
 One file per day. Rerunning the same day overwrites the existing file.
 
+The `output/` directory is listed in `.gitignore` — generated digest files are never committed to the repository. The directory is created automatically at runtime if it doesn't exist.
+
+For saved runs, use the GitHub Actions artifact (uploaded every run regardless of whether email is enabled). Do not commit output files manually.
+
 ---
 
 ## GitHub Actions — automated digest and email

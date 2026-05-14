@@ -1,0 +1,43 @@
+name: Mel's Daily Digest
+
+on:
+  # Run manually from the GitHub Actions tab at any time
+  workflow_dispatch:
+
+  # Uncomment below to enable automatic daily runs (weekdays at 8am UTC)
+  # schedule:
+  #   - cron: '0 8 * * 1-5'
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Mel's digest
+        env:
+          SEND_EMAIL: ${{ secrets.SEND_EMAIL }}
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: python run_mock.py
+
+      - name: Upload digest as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mel-digest-${{ github.run_id }}
+          path: output/
+          retention-days: 30

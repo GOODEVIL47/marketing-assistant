@@ -1,5 +1,21 @@
 from datetime import date
 
+_DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+_FOUNDER_DAYS = {0, 2, 4}  # Mon, Wed, Fri
+_PRODUCT_DAYS = {1, 3}     # Tue, Thu
+
+# Mock posting history — replace with real tracking in live mode
+MOCK_POSTING_HISTORY = {
+    "founder": {
+        "last_posted_hours_ago": 48,
+        "last_post_note": "2 days ago",
+    },
+    "product": {
+        "last_posted_hours_ago": 3,
+        "last_post_note": "earlier today (~3h ago)",
+    },
+}
+
 # Scheduled post content
 
 FOUNDER_POST = {
@@ -70,40 +86,84 @@ PRODUCT_IDEA = {
     },
 }
 
-_FOUNDER_DAYS = {0, 2, 4}  # Mon, Wed, Fri
-_PRODUCT_DAYS = {1, 3}     # Tue, Thu
 
-_DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+def _next_scheduled_day(weekday, scheduled_days):
+    for i in range(1, 8):
+        if (weekday + i) % 7 in scheduled_days:
+            return _DAY_NAMES[(weekday + i) % 7]
+    return "Unknown"
 
 
-def generate_posts(weekday=None):
+def generate_posts(weekday=None, posting_history=None):
     if weekday is None:
         weekday = date.today().weekday()
+    if posting_history is None:
+        posting_history = MOCK_POSTING_HISTORY
 
     day_name = _DAY_NAMES[weekday]
-    founder_needed = weekday in _FOUNDER_DAYS
-    product_needed = weekday in _PRODUCT_DAYS
+    founder_scheduled = weekday in _FOUNDER_DAYS
+    product_scheduled = weekday in _PRODUCT_DAYS
+
+    founder_hist = posting_history.get("founder", {})
+    product_hist = posting_history.get("product", {})
+    founder_last_h = founder_hist.get("last_posted_hours_ago", 999)
+    product_last_h = product_hist.get("last_posted_hours_ago", 999)
+    founder_last_note = founder_hist.get("last_post_note", f"~{founder_last_h}h ago")
+    product_last_note = product_hist.get("last_post_note", f"~{product_last_h}h ago")
+
+    # Founder schedule
+    if founder_last_h < 24:
+        founder_needed = False
+        founder_reason = (
+            f"Already posted {founder_last_note} — no post needed today."
+        )
+    elif founder_scheduled:
+        founder_needed = True
+        founder_reason = (
+            f"Scheduled Mon / Wed / Fri — today ({day_name}) is a post day. "
+            f"Last posted {founder_last_note}."
+        )
+    else:
+        next_day = _next_scheduled_day(weekday, _FOUNDER_DAYS)
+        founder_needed = False
+        founder_reason = (
+            f"Not a scheduled day (Mon / Wed / Fri). Today is {day_name}. "
+            f"Last posted {founder_last_note}. Next scheduled: {next_day}."
+        )
+
+    # Product schedule
+    if product_last_h < 24:
+        product_needed = False
+        product_reason = (
+            f"@SignalShiftCo already posted {product_last_note} — "
+            f"skip today even though {day_name} is a scheduled day."
+        )
+    elif product_scheduled:
+        product_needed = True
+        product_reason = (
+            f"Scheduled Tue / Thu — today ({day_name}) is a post day. "
+            f"Last posted {product_last_note}."
+        )
+    else:
+        next_day = _next_scheduled_day(weekday, _PRODUCT_DAYS)
+        product_needed = False
+        product_reason = (
+            f"Not a scheduled day (Tue / Thu). Today is {day_name}. "
+            f"Last posted {product_last_note}. Next scheduled: {next_day}."
+        )
 
     return {
         "founder": {
             "needed": founder_needed,
             "handle": "Founder",
-            "reason": (
-                f"Scheduled Mon / Wed / Fri. Today is {day_name}."
-                if not founder_needed
-                else f"Scheduled Mon / Wed / Fri — today ({day_name}) is a post day."
-            ),
+            "reason": founder_reason,
             "post": FOUNDER_POST if founder_needed else None,
             "optional_idea": FOUNDER_IDEA if not founder_needed else None,
         },
         "product": {
             "needed": product_needed,
             "handle": "@SignalShiftCo",
-            "reason": (
-                f"Scheduled Tue / Thu. Today is {day_name}."
-                if not product_needed
-                else f"Scheduled Tue / Thu — today ({day_name}) is a post day."
-            ),
+            "reason": product_reason,
             "post": PRODUCT_POST if product_needed else None,
             "optional_idea": PRODUCT_IDEA if not product_needed else None,
         },

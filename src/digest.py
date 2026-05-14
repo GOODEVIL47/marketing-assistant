@@ -36,7 +36,7 @@ def _build_best_3(posts_with_replies):
     lines.append("")
 
     if not top3:
-        lines.append("*No Strong or Decent fit posts with High or Medium opportunity found today.*")
+        lines.append("*No posts with strong enough fit and timing found today.*")
         lines.append("")
         return lines
 
@@ -47,7 +47,11 @@ def _build_best_3(posts_with_replies):
         media = post.get("media") or {}
         reply_text = best.get("text", "N/A")
         lines.append(f"**{i}. {post['author']}**")
-        lines.append(f"Fit: {post['score']} {fit_e} · Opportunity: {post['opportunity']} {opp_e}")
+        lines.append(
+            f"Fit: {post['score']} {fit_e} · "
+            f"Visibility: {post['visibility']} · "
+            f"Opportunity: {post['opportunity']} {opp_e}"
+        )
         lines.append(f"Engagement: {post['engagement_summary']}")
         lines.append(f"Reply from: {post['reply_account']} · Action: {post['suggested_action']}")
         lines.append(f"Best reply: *\"{reply_text}\"*")
@@ -117,10 +121,9 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule):
         fit_e = _fit_emoji(post["score"])
         opp_e = _opp_emoji(post["opportunity"])
         lines.append(f"### Post {post['id']} — {post['author']}")
-        lines.append(
-            f"**Fit:** {post['score']} {fit_e} · "
-            f"**Opportunity:** {post['opportunity']} {opp_e}"
-        )
+        lines.append(f"**Fit:** {post['score']} {fit_e}")
+        lines.append(f"**Visibility:** {post['visibility']}")
+        lines.append(f"**Opportunity:** {post['opportunity']} {opp_e}")
         lines.append(f"**Engagement:** {post['engagement_summary']}")
         lines.append(f"**Author followers:** {post.get('author_followers', 0):,}")
         lines.append(f"**Suggested account:** {post['reply_account']}")
@@ -129,7 +132,7 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule):
         lines.append(f"**Post:** {post['text']}")
         lines.append("")
         lines.append(f"**Why it fits:** {post['reason']}")
-        lines.append(f"**Why this opportunity score:** {post['opportunity_reason']}")
+        lines.append(f"**Why this is / is not worth engaging:** {post['opportunity_reason']}")
         lines.append("")
 
         if post["replies"]:

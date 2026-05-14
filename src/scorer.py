@@ -93,71 +93,115 @@ def _engagement_summary(post):
     return f"{likes:,} likes · {reply_count} replies · {reposts} reposts · {age_str}"
 
 
-def _score_opportunity(post, fit_score):
-    if fit_score == "Avoid":
-        return (
-            "Poor opportunity",
-            "Content type is on the avoid list — no engagement regardless of timing.",
-        )
-
+def _compute_visibility(post):
     age = post.get("age_hours", 9999)
     likes = post.get("likes", 0)
     reply_count = post.get("reply_count", 0)
 
+    if age <= 24 and (likes >= 50 or reply_count >= 15):
+        return "Strong visibility"
+    if age <= 72 and (likes >= 20 or reply_count >= 5):
+        return "Decent visibility"
+    return "Low visibility"
+
+
+def _score_opportunity(post, fit_score, visibility):
+    age = post.get("age_hours", 9999)
+    likes = post.get("likes", 0)
+    reply_count = post.get("reply_count", 0)
+
+    # Avoid: always Poor regardless of reach
+    if fit_score == "Avoid":
+        return (
+            "Poor opportunity",
+            "Content type is on the avoid list — no engagement regardless of timing or reach.",
+        )
+
+    # Weak fit: call out the visibility vs strategic opportunity gap explicitly
+    if fit_score == "Weak fit":
+        if visibility == "Strong visibility":
+            return (
+                "Low opportunity",
+                f"Visibility is strong — {likes:,} likes, {reply_count} replies, {int(age)}h old. "
+                "But the fit is poor — the audience here is misaligned with Signal Shift. "
+                "High reach doesn't translate to a useful reply opportunity when the fit isn't there.",
+            )
+        if visibility == "Decent visibility":
+            return (
+                "Poor opportunity",
+                f"Fit is weak and visibility is moderate ({likes:,} likes, {int(age)}h old). "
+                "Not worth the brand exposure here.",
+            )
+        return (
+            "Poor opportunity",
+            "Weak fit and minimal visibility. Nothing to gain from engaging.",
+        )
+
+    # Strong or Decent fit — evaluate on timing and engagement
     if age > 8760:
-        return "Poor opportunity", "Post is over a year old — the window is long gone."
+        return "Poor opportunity", "Post is over a year old — the reply window is long gone."
 
-    # Age points
-    if 1 <= age <= 8:
-        age_pts = 3
-        age_note = f"{int(age)}h old — prime reply window"
-    elif age <= 24:
-        age_pts = 2
-        age_note = f"{int(age)}h old — still a good window"
-    elif age <= 48:
-        age_pts = 1
-        age_note = f"{int(age)}h old — getting stale"
-    else:
-        days = int(age) // 24
-        age_pts = 0
-        age_note = f"{days}d old — window has closed"
-
-    # Engagement points
     dead = likes < 10 and reply_count < 3
+    if dead:
+        return (
+            "Poor opportunity",
+            "Post has minimal engagement — a reply would get no visibility.",
+        )
+
     crowded = reply_count >= 500
 
-    if dead:
-        eng_pts = 0
-        eng_note = "minimal engagement — reply would get no visibility"
-    elif crowded:
-        eng_pts = 1
-        eng_note = f"{likes:,} likes · {reply_count} replies — crowded thread, high competition"
-    elif 10 <= reply_count <= 150 and 50 <= likes <= 2000:
-        eng_pts = 3
-        eng_note = f"{likes:,} likes · {reply_count} replies — sweet spot engagement"
-    elif likes >= 30 or reply_count >= 5:
-        eng_pts = 2
-        eng_note = f"{likes:,} likes · {reply_count} replies — decent engagement"
-    else:
-        eng_pts = 1
-        eng_note = f"{likes:,} likes · {reply_count} replies — light but alive"
+    if visibility == "Strong visibility":
+        if crowded:
+            return (
+                "Medium opportunity",
+                f"Good fit but the thread is crowded — {reply_count} replies means your reply may get buried. "
+                "Worth doing only if the take is sharp and specific enough to stand out.",
+            )
+        if age <= 8:
+            return (
+                "High opportunity",
+                f"Strong fit and prime timing — {int(age)}h old, {likes:,} likes, {reply_count} replies. "
+                "Reply window is wide open.",
+            )
+        return (
+            "High opportunity",
+            f"Strong fit with good timing — {int(age)}h old, {likes:,} likes, {reply_count} replies. "
+            "Still well within the reply window.",
+        )
 
-    total = age_pts + eng_pts
+    if visibility == "Decent visibility":
+        if age > 48:
+            days = int(age) // 24
+            return (
+                "Low opportunity",
+                f"Post is {days}d old — the reply window is closing. "
+                "Good content but timing has passed. Save the thought for a future original post.",
+            )
+        if fit_score == "Strong fit":
+            return (
+                "Medium opportunity",
+                f"Strong fit but engagement is moderate — {int(age)}h old, {likes:,} likes, {reply_count} replies. "
+                "Still worth a reply if you have something real to add.",
+            )
+        return (
+            "Medium opportunity",
+            f"Decent fit and moderate visibility — {int(age)}h old, {likes:,} likes, {reply_count} replies. "
+            "Light engagement but recent enough to get eyes on it.",
+        )
 
-    # Weak fit caps at Low opportunity max
-    if fit_score == "Weak fit":
-        total = min(total, 2)
-
-    reason = f"{age_note}. {eng_note}."
-
-    if total >= 5:
-        return "High opportunity", reason
-    elif total >= 3:
-        return "Medium opportunity", reason
-    elif total >= 1:
-        return "Low opportunity", reason
-    else:
-        return "Poor opportunity", reason
+    # Low visibility
+    if age > 48:
+        days = int(age) // 24
+        return (
+            "Low opportunity",
+            f"Post is {days}d old with minimal recent activity. "
+            "Reply would get very little visibility at this point.",
+        )
+    return (
+        "Low opportunity",
+        f"Light engagement — {likes:,} likes, {reply_count} replies. "
+        "A reply might not get much visibility even with a strong take.",
+    )
 
 
 def _suggested_action(fit_score, opportunity, reply_count):
@@ -182,13 +226,15 @@ def score_posts(posts):
             "reply_account": "Do not reply",
         })
         fit_score = fit_data["score"]
-        opportunity, opp_reason = _score_opportunity(post, fit_score)
+        visibility = _compute_visibility(post)
+        opportunity, opp_reason = _score_opportunity(post, fit_score, visibility)
         action = _suggested_action(fit_score, opportunity, post.get("reply_count", 0))
         eng_summary = _engagement_summary(post)
 
         results.append({
             **post,
             **fit_data,
+            "visibility": visibility,
             "opportunity": opportunity,
             "opportunity_reason": opp_reason,
             "engagement_summary": eng_summary,

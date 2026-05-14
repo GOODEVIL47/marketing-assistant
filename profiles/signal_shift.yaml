@@ -65,3 +65,65 @@ avoid_signals:
   - pump-and-dump style posts
   - get-rich-quick webinars or courses
   - anything that could associate the brand with bad actors
+
+# X post discovery — used by run_x.py (real mode only, not mock)
+search_terms:
+  - "retail investor noise"
+  - "information overload investing"
+  - "investing clarity"
+  - "market noise signal"
+  - "investor bias"
+  - "confirmation bias investing"
+  - "investing overwhelmed"
+  - "stock research clarity"
+  - "slow down before investing"
+  - "investing decisions emotions"
+
+# Keyword-based fit scoring for real X posts (dynamic, not ID-based)
+fit_keywords:
+  strong:
+    - overwhelmed
+    - noise
+    - clarity
+    - bias
+    - slow down
+    - chasing
+    - emotional
+    - panic
+    - information overload
+    - signal
+    - thesis
+    - conviction
+    - retail investor
+  decent:
+    - framework
+    - mental model
+    - discipline
+    - process
+    - research
+    - due diligence
+    - data vs insight
+    - thinking clearly
+    - overreacting
+    - reactive
+  weak:
+    - RSI
+    - MACD
+    - moving average
+    - chart pattern
+    - day trading
+    - swing trade
+    - screener
+    - entry point
+    - exit point
+    - technical analysis
+  avoid:
+    - "buy this"
+    - "next 10x"
+    - "moon"
+    - "🚀"
+    - "get rich"
+    - webinar
+    - "guaranteed"
+    - "insider"
+    - "pump"

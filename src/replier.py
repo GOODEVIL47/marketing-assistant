@@ -26,10 +26,10 @@ REPLIES = {
             },
         ],
         "media": {
-            "type": "GIF",
+            "type": "Optional GIF",
             "reason": (
                 "The post is relatable and a little exasperated — earnings week stress is universally felt. "
-                "A well-chosen 'overwhelmed' GIF fits the casual tone without trying too hard."
+                "An 'overwhelmed' GIF could work here, but text alone is fine. Skip if unsure."
             ),
         },
         "best_option_index": 1,
@@ -89,8 +89,8 @@ REPLIES = {
         "media": {
             "type": "No media",
             "reason": (
-                "The topic is conceptual and the reply is punchy on its own. "
-                "Adding media here would dilute the one-liner rather than help it."
+                "The topic is conceptual and the one-liner is punchy on its own. "
+                "Adding media here would dilute it rather than help."
             ),
         },
         "best_option_index": 0,
@@ -119,10 +119,10 @@ REPLIES = {
             },
         ],
         "media": {
-            "type": "GIF",
+            "type": "Optional GIF",
             "reason": (
                 "The 'finally turned off the TV' energy is casual and relatable. "
-                "A GIF of someone visibly relaxing or tuning out fits the tone without feeling forced."
+                "A GIF could work, but this post is 2+ days old — probably not worth it at this stage."
             ),
         },
         "best_option_index": 1,

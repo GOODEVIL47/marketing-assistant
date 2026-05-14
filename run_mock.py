@@ -11,6 +11,7 @@ Usage:
 
 import yaml
 import os
+from datetime import date
 
 from mock_data.posts import MOCK_POSTS
 from src.scorer import score_posts
@@ -24,27 +25,40 @@ def load_profile(profile_path):
         return yaml.safe_load(f)
 
 
-def print_summary(posts_with_replies, founder_post, product_post, filepath):
+def print_summary(posts_with_replies, posts_schedule, filepath):
     print("\n" + "=" * 60)
-    print("  SIGNAL SHIFT — MOCK DAILY DIGEST")
+    print("  SIGNAL SHIFT — MOCK DAILY DIGEST (Mel)")
     print("=" * 60)
 
-    score_counts = {}
+    fit_counts = {}
+    opp_counts = {}
     for post in posts_with_replies:
-        score_counts[post["score"]] = score_counts.get(post["score"], 0) + 1
+        fit_counts[post["score"]] = fit_counts.get(post["score"], 0) + 1
+        opp_counts[post["opportunity"]] = opp_counts.get(post["opportunity"], 0) + 1
 
-    print("\nPost scores:")
+    print("\nFit scores:")
     for label in ("Strong fit", "Decent fit", "Weak fit", "Avoid"):
-        count = score_counts.get(label, 0)
-        print(f"  {label}: {count}")
+        print(f"  {label}: {fit_counts.get(label, 0)}")
 
-    print("\nPosts with replies generated:")
-    for post in posts_with_replies:
-        if post["replies"]:
-            print(f"  Post {post['id']} ({post['author']}) — {len(post['replies'])} reply options")
+    print("\nOpportunity scores:")
+    for label in ("High opportunity", "Medium opportunity", "Low opportunity", "Poor opportunity"):
+        print(f"  {label}: {opp_counts.get(label, 0)}")
 
-    print(f"\nFounder post draft ready ({founder_post['account']})")
-    print(f"Product post draft ready ({product_post['account']})")
+    best3 = [
+        p for p in posts_with_replies
+        if p["score"] in ("Strong fit", "Decent fit")
+        and p["opportunity"] in ("High opportunity", "Medium opportunity")
+    ]
+    print(f"\nToday's Best 3 ({len(best3)} post(s) qualify):")
+    from src.digest import _SCORE_ORDER, _OPP_ORDER
+    for post in sorted(best3, key=lambda p: (_SCORE_ORDER.index(p["score"]), _OPP_ORDER.index(p["opportunity"])))[:3]:
+        print(f"  {post['author']} — {post['score']} · {post['opportunity']}")
+
+    print("\nOriginal posts today:")
+    for role in ("founder", "product"):
+        s = posts_schedule[role]
+        status = "Recommended" if s["needed"] else "Not needed (optional idea included)"
+        print(f"  {role.title()} ({s['handle']}): {status}")
 
     print(f"\nDigest saved to:\n  {filepath}")
     print("\n" + "=" * 60 + "\n")
@@ -58,10 +72,10 @@ def main():
 
     scored = score_posts(MOCK_POSTS)
     with_replies = generate_replies(scored)
-    founder_post, product_post = generate_posts()
+    posts_schedule = generate_posts(date.today().weekday())
 
-    filepath = save_digest(profile["name"], with_replies, founder_post, product_post)
-    print_summary(with_replies, founder_post, product_post, filepath)
+    filepath = save_digest(profile["name"], with_replies, posts_schedule)
+    print_summary(with_replies, posts_schedule, filepath)
 
 
 if __name__ == "__main__":

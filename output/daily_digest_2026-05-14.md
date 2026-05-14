@@ -1,4 +1,4 @@
-# Marketing Digest — 2026-05-14
+# Mel's Daily Digest — 2026-05-14
 **Product:** Signal Shift
 **Mode:** Mock
 
@@ -6,20 +6,26 @@
 
 ## Today's Best 3
 
-Top posts worth engaging with today.
+Mel found today's best reply opportunities.
 
-**1. @quietinvestor — Strong fit ✅**
-Reply from: Founder
+**1. @quietinvestor**
+Fit: Strong fit ✅ · Opportunity: High opportunity 🎯
+Engagement: 287 likes · 42 replies · 31 reposts · 3h old
+Reply from: Founder · Action: Reply
 Best reply: *"It's not even the numbers that are tiring. It's the 48 hours of takes that follow — most of which are just reactions to other reactions. Hard to find what actually changed in all that."*
-Media: GIF
+Media: Optional GIF
 
-**2. @patientcapital_ — Strong fit ✅**
-Reply from: Either
+**2. @patientcapital_**
+Fit: Strong fit ✅ · Opportunity: High opportunity 🎯
+Engagement: 612 likes · 78 replies · 89 reposts · 11h old
+Reply from: Either · Action: Reply
 Best reply: *"You can usually tell it's kicked in when your reasoning starts sounding like a closing argument — dismissing everything that disagrees, explaining away the bad signals. That's the moment to pause, not push harder."*
 Media: Quote repost
 
-**3. @retailrethink — Decent fit 🟡**
-Reply from: Founder
+**3. @retailrethink**
+Fit: Decent fit 🟡 · Opportunity: Medium opportunity ⚡
+Engagement: 23 likes · 4 replies · 3 reposts · 6h old
+Reply from: Founder · Action: Reply
 Best reply: *"More dashboards, same fog."*
 Media: No media
 
@@ -27,16 +33,20 @@ Media: No media
 
 ## Post Scoring & Reply Suggestions
 
-### Post 1 — Strong fit ✅
-**Author:** @quietinvestor
+### Post 1 — @quietinvestor
+**Fit:** Strong fit ✅ · **Opportunity:** High opportunity 🎯
+**Engagement:** 287 likes · 42 replies · 31 reposts · 3h old
+**Author followers:** 2,100
+**Suggested account:** Founder
+**Suggested action:** Reply
+
 **Post:** Anyone else feel like they completely lose their head during earnings week? I'm not trying to pick winners. I just want to understand what's actually happening without the noise. It's exhausting.
 
-**Score:** Strong fit
-**Why:** This post captures exactly the overwhelmed retail investor Signal Shift is built for. The author isn't chasing alpha — they want clarity. The phrase 'just want to understand what's actually happening without the noise' is essentially Signal Shift's value prop in the user's own words. High relevance, low risk.
-**Suggested account:** Founder
+**Why it fits:** This post captures exactly the overwhelmed retail investor Signal Shift is built for. The author isn't chasing alpha — they want to understand what's happening. 'Just want to understand what's actually happening without the noise' is essentially the product's value prop in the user's own words. High relevance, low risk.
+**Why this opportunity score:** 3h old — prime reply window. 287 likes · 42 replies — sweet spot engagement.
 
-**Media suggestion:** GIF
-*The post is relatable and a little exasperated — earnings week stress is universally felt. A well-chosen 'overwhelmed' GIF fits the casual tone without trying too hard.*
+**Media suggestion:** Optional GIF
+*The post is relatable and a little exasperated — earnings week stress is universally felt. An 'overwhelmed' GIF could work here, but text alone is fine. Skip if unsure.*
 
 **Reply options:**
 
@@ -51,13 +61,17 @@ Media: No media
 
 ---
 
-### Post 2 — Strong fit ✅
-**Author:** @patientcapital_
+### Post 2 — @patientcapital_
+**Fit:** Strong fit ✅ · **Opportunity:** High opportunity 🎯
+**Engagement:** 612 likes · 78 replies · 89 reposts · 11h old
+**Author followers:** 8,400
+**Suggested account:** Either
+**Suggested action:** Reply
+
 **Post:** The hardest part of investing isn't finding ideas. It's recognizing when your own bias is making you think something looks better than it is. Most of us never catch it in the moment.
 
-**Score:** Strong fit
-**Why:** Bias recognition is a core part of what Signal Shift surfaces in every brief. This post hits the exact tension the product addresses: the gap between having an idea and knowing whether your own head is getting in the way. Thoughtful audience, good opportunity to add perspective.
-**Suggested account:** Either
+**Why it fits:** Bias recognition is a core part of what Signal Shift surfaces in every brief. This post hits the exact tension the product addresses: having an idea but not knowing whether your own head is getting in the way. Thoughtful audience, good opportunity to add real perspective.
+**Why this opportunity score:** 11h old — still a good window. 612 likes · 78 replies — sweet spot engagement.
 
 **Media suggestion:** Quote repost
 *The original post is strong enough to anchor a bigger founder take. A quote repost with reply C lets the original do the setup while the reply adds real weight.*
@@ -75,16 +89,20 @@ Media: No media
 
 ---
 
-### Post 3 — Decent fit 🟡
-**Author:** @retailrethink
+### Post 3 — @retailrethink
+**Fit:** Decent fit 🟡 · **Opportunity:** Medium opportunity ⚡
+**Engagement:** 23 likes · 4 replies · 3 reposts · 6h old
+**Author followers:** 1,200
+**Suggested account:** Founder
+**Suggested action:** Reply
+
 **Post:** Hot take: most retail investors don't need more data. They need a better framework for thinking about the data they already have. More dashboards won't fix a foggy mental model.
 
-**Score:** Decent fit
-**Why:** The 'frameworks over more data' angle aligns well with Signal Shift's positioning. But the post is broad — it's not specifically about emotional investing or noise. There's a real opening here, though a reply needs to add something rather than just agree.
-**Suggested account:** Founder
+**Why it fits:** The 'more data isn't the answer' angle aligns with Signal Shift's positioning. But the post is broad — it's not specifically about emotional investing or acting on noise. There's a real opening here, though a reply needs to add something rather than just agree.
+**Why this opportunity score:** 6h old — prime reply window. 23 likes · 4 replies — light but alive.
 
 **Media suggestion:** No media
-*The topic is conceptual and the reply is punchy on its own. Adding media here would dilute the one-liner rather than help it.*
+*The topic is conceptual and the one-liner is punchy on its own. Adding media here would dilute it rather than help.*
 
 **Reply options:**
 
@@ -99,16 +117,20 @@ Media: No media
 
 ---
 
-### Post 4 — Decent fit 🟡
-**Author:** @slowmoneymoves
+### Post 4 — @slowmoneymoves
+**Fit:** Decent fit 🟡 · **Opportunity:** Low opportunity ⏳
+**Engagement:** 1,840 likes · 234 replies · 201 reposts · 2d 4h old
+**Author followers:** 12,300
+**Suggested account:** Either
+**Suggested action:** Save for inspiration
+
 **Post:** I stopped watching financial news every morning six months ago. My investing decisions got noticeably calmer. Not sure if that means better. But definitely less reactive.
 
-**Score:** Decent fit
-**Why:** Reducing reactive behavior is adjacent to what Signal Shift helps with. The author is describing a behavioral shift without a clear tool behind it. A founder reply that acknowledges the insight without pushing the product feels natural here.
-**Suggested account:** Either
+**Why it fits:** Reducing reactive behavior is adjacent to what Signal Shift helps with. The author is describing a behavioral shift without having a clear tool behind it. A founder reply that acknowledges the insight without pushing the product feels natural here.
+**Why this opportunity score:** 2d old — window has closed. 1,840 likes · 234 replies — decent engagement.
 
-**Media suggestion:** GIF
-*The 'finally turned off the TV' energy is casual and relatable. A GIF of someone visibly relaxing or tuning out fits the tone without feeling forced.*
+**Media suggestion:** Optional GIF
+*The 'finally turned off the TV' energy is casual and relatable. A GIF could work, but this post is 2+ days old — probably not worth it at this stage.*
 
 **Reply options:**
 
@@ -123,49 +145,65 @@ Media: No media
 
 ---
 
-### Post 5 — Weak fit 🔸
-**Author:** @chartwhisperer99
+### Post 5 — @chartwhisperer99
+**Fit:** Weak fit 🔸 · **Opportunity:** Low opportunity ⏳
+**Engagement:** 1,200 likes · 340 replies · 156 reposts · 2h old
+**Author followers:** 31,000
+**Suggested account:** Do not reply
+**Suggested action:** Do not engage
+
 **Post:** Here's the RSI + MACD combo setup I've been running for Q2. Entry on the divergence, stop just below the prior swing low. Backtested 18 months. Thread below 🧵
 
-**Score:** Weak fit
-**Why:** Technical analysis setups are outside Signal Shift's lane. The audience here is likely active traders optimizing entry/exit timing — not the retail investor trying to slow down and think clearly. Replying risks misaligning the brand with trading-tool culture.
-**Suggested account:** Do not reply
+**Why it fits:** Technical analysis setups are outside Signal Shift's lane. The audience here is likely active traders optimizing entry/exit timing — not someone trying to slow down and think clearly. Replying risks misaligning the brand with trading-tool culture.
+**Why this opportunity score:** 2h old — prime reply window. 1,200 likes · 340 replies — decent engagement.
 
 *No replies suggested for this post.*
 
 ---
 
-### Post 6 — Weak fit 🔸
-**Author:** @stockstowatch2025
+### Post 6 — @stockstowatch2025
+**Fit:** Weak fit 🔸 · **Opportunity:** Low opportunity ⏳
+**Engagement:** 2,800 likes · 180 replies · 410 reposts · 7h old
+**Author followers:** 47,000
+**Suggested account:** Do not reply
+**Suggested action:** Do not engage
+
 **Post:** These 5 AI infrastructure stocks are going to be massive by end of year. Screenshot this post and thank me later. DYOR but the setup is too obvious to ignore. 🚀
 
-**Score:** Weak fit
-**Why:** Stock pick content with hype framing ('screenshot this, thank me later'). The audience may overlap with retail investors but the energy is the opposite of Signal Shift's voice. Any reply here would likely be ignored or attract the wrong crowd.
-**Suggested account:** Do not reply
+**Why it fits:** Stock pick content with hype framing. The audience may overlap with retail investors but the energy is the opposite of Signal Shift's voice. Any reply here would likely be ignored or attract the wrong crowd.
+**Why this opportunity score:** 7h old — prime reply window. 2,800 likes · 180 replies — decent engagement.
 
 *No replies suggested for this post.*
 
 ---
 
-### Post 7 — Avoid 🚫
-**Author:** @wealthcoach_pro
+### Post 7 — @wealthcoach_pro
+**Fit:** Avoid 🚫 · **Opportunity:** Poor opportunity ❌
+**Engagement:** 89 likes · 12 replies · 45 reposts · 5h old
+**Author followers:** 28,000
+**Suggested account:** Do not reply
+**Suggested action:** Do not engage
+
 **Post:** FREE WEBINAR this Thursday: How I turned a $6k account into $140k in 14 months using a simple 3-step options strategy. Spots are limited. Link in bio. 🔥
 
-**Score:** Avoid
-**Why:** Classic get-rich-quick webinar pitch. Associating Signal Shift with this type of content would damage brand credibility immediately. The voice, the claims, and the audience are incompatible with what Signal Shift stands for. Hard pass.
-**Suggested account:** Do not reply
+**Why it fits:** Classic get-rich-quick webinar pitch. Associating Signal Shift with this type of content would damage brand credibility immediately. The voice, the claims, and the audience are incompatible with what Signal Shift stands for. Hard pass.
+**Why this opportunity score:** Content type is on the avoid list — no engagement regardless of timing.
 
 *No replies suggested for this post.*
 
 ---
 
-### Post 8 — Avoid 🚫
-**Author:** @alphahunter_x
+### Post 8 — @alphahunter_x
+**Fit:** Avoid 🚫 · **Opportunity:** Poor opportunity ❌
+**Engagement:** 430 likes · 67 replies · 88 reposts · 1h old
+**Author followers:** 5,600
+**Suggested account:** Do not reply
+**Suggested action:** Do not engage
+
 **Post:** BREAKING: Strong unusual options activity in $XYZ ahead of next week's catalyst. Smart money is positioning now. This one's going to move hard. Do your own research. 🚀🚀🚀
 
-**Score:** Avoid
-**Why:** Unusual options activity speculation with rocket emojis and vague insider framing. This is exactly the kind of noise Signal Shift is designed to help people step back from. No reply, no engagement — this post is the problem, not an opportunity.
-**Suggested account:** Do not reply
+**Why it fits:** Unusual options activity speculation with rocket emojis and vague insider framing. This is exactly the kind of post Signal Shift helps people step back from. No reply, no engagement — this post is the problem, not an opportunity.
+**Why this opportunity score:** Content type is on the avoid list — no engagement regardless of timing.
 
 *No replies suggested for this post.*
 
@@ -174,13 +212,19 @@ Media: No media
 ## Original Posts to Publish
 
 ### Founder Post (Founder)
+*Scheduled Mon / Wed / Fri. Today is Thursday.*
 
-> Most people don't need a smarter stock screen. They need a way to check whether they're thinking clearly before they act. Those are different problems — and almost nothing is built for the second one.
+No original post needed today.
 
-**Format:** Short paragraph — *Reads like a real observation, not a pitch. Three sentences that build on each other without needing a list or a hook.*
-**Media:** No media — *A standalone thought like this lands better on its own. Adding an image risks making it feel like a campaign instead of a genuine take.*
+**Optional idea (Optional idea — save for next scheduled post day):**
+
+> There's a version of 'doing your research' that's just reading more takes until you feel confident enough to act. That's not research. That's permission-seeking dressed up as due diligence.
+
+**Format:** 2-3 line structure — *Two lines, the second reframes the first. Standalone thought, no context needed.*
+**Media:** No media — *Let the words do the work.*
 
 ### Product Post (@SignalShiftCo)
+*Scheduled Tue / Thu — today (Thursday) is a post day.*
 
 > Signal Shift doesn't tell you what to do.
 
@@ -188,5 +232,5 @@ It gives you a plain-English breakdown of the thesis: where the bias is, what th
 
 Before you decide anything.
 
-**Format:** 2-3 line structure — *Each block lands on its own on X. The structure lets the product explain itself without reading like a sales script.*
-**Media:** Simple branded image — *A clean visual gives this post presence in the feed. Works well for product posts that need a little visual weight without overselling.*
+**Format:** 2-3 line structure — *Each block lands on its own on X. Lets the product explain itself without reading like a sales script.*
+**Media:** Simple branded image — *A clean visual gives this post feed presence without overselling.*

@@ -77,6 +77,20 @@ FIT_SCORES = {
 
 
 def _engagement_summary(post):
+    if post.get("metrics_confidence") == "low":
+        age = post.get("age_hours", 0)
+        if age < 1:
+            age_str = "< 1h old"
+        elif age < 24:
+            age_str = f"~{int(age)}h old"
+        elif age < 9999:
+            days = int(age) // 24
+            rem = int(age) % 24
+            age_str = f"~{days}d {rem}h old" if rem else f"~{days}d old"
+        else:
+            age_str = "age unknown"
+        return f"Engagement unknown · found via web search · {age_str}"
+
     age = post.get("age_hours", 0)
     if age < 1:
         age_str = "< 1h old"
@@ -94,6 +108,9 @@ def _engagement_summary(post):
 
 
 def _compute_visibility(post):
+    if post.get("metrics_confidence") == "low":
+        return "Unknown visibility"
+
     age = post.get("age_hours", 9999)
     likes = post.get("likes", 0)
     reply_count = post.get("reply_count", 0)
@@ -135,6 +152,15 @@ def _score_opportunity(post, fit_score, visibility):
         return (
             "Poor opportunity",
             "Weak fit and minimal visibility. Nothing to gain from engaging.",
+        )
+
+    # Unknown visibility (Brave Search / web discovery — engagement metrics unavailable).
+    # Only reached for Strong or Decent fit (Avoid and Weak fit already returned above).
+    if visibility == "Unknown visibility":
+        return (
+            "Medium opportunity",
+            "Post found via web search — engagement metrics unavailable. "
+            "Fit looks good but verify engagement manually before replying.",
         )
 
     # Strong or Decent fit — evaluate on timing and engagement

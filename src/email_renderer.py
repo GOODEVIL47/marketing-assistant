@@ -18,9 +18,10 @@ _OPP_BADGE = {
 }
 
 _VIS_BADGE = {
-    "Strong visibility": ("Strong visibility", "#e0f2fe", "#0369a1"),
-    "Decent visibility": ("Decent visibility", "#f3f4f6", "#6b7280"),
-    "Low visibility":    ("Low visibility",    "#f3f4f6", "#9ca3af"),
+    "Strong visibility":  ("Strong visibility",  "#e0f2fe", "#0369a1"),
+    "Decent visibility":  ("Decent visibility",  "#f3f4f6", "#6b7280"),
+    "Low visibility":     ("Low visibility",     "#f3f4f6", "#9ca3af"),
+    "Unknown visibility": ("Unknown visibility", "#fef3c7", "#92400e"),
 }
 
 
@@ -189,6 +190,16 @@ def _html_post_card(rank, post):
     eng = _esc(post.get("engagement_summary", ""))
     account = _esc(post.get("reply_account", ""))
 
+    source_note = ""
+    if post.get("discovery_source") == "brave_search":
+        source_note = (
+            '<p style="margin:0 0 8px;font-size:11px;color:#92400e;'
+            'font-style:italic;line-height:1.4;">'
+            '&#x1F50D; Found via Brave Search &mdash; '
+            'check engagement manually before replying.'
+            '</p>'
+        )
+
     replies_block = _html_replies_block(post)
     media_block = _html_media_block(post.get("media"))
 
@@ -209,6 +220,8 @@ def _html_post_card(rank, post):
           </p>
 
           <p style="margin:0 0 8px;color:#888;font-size:12px;">{eng}</p>
+
+          {source_note}
 
           <p style="margin:0 0 12px;font-size:12px;color:#444;">
             <strong>Reply from:</strong> {account}
@@ -272,7 +285,7 @@ def _html_original_posts(posts_schedule):
     return "".join(parts)
 
 
-def render_digest_html(profile_name, posts_with_replies, posts_schedule):
+def render_digest_html(profile_name, posts_with_replies, posts_schedule, mode="Mock"):
     today = _date.today().isoformat()
     best3 = _get_best3(posts_with_replies)
 
@@ -326,7 +339,7 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule):
       Mel&apos;s Daily Digest
     </h1>
     <p style="margin:0;font-size:12px;color:#a0b8cc;">
-      {_esc(profile_name)} &nbsp;&middot;&nbsp; {today} &nbsp;&middot;&nbsp; Mock mode
+      {_esc(profile_name)} &nbsp;&middot;&nbsp; {today} &nbsp;&middot;&nbsp; {_esc(mode)} mode
     </p>
   </td></tr>
 
@@ -399,7 +412,7 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule):
   <tr><td style="background:#f0f4f8;border:1px solid #e0e6ed;border-top:none;
                  border-radius:0 0 8px 8px;padding:12px 22px;">
     <p style="margin:0;font-size:11px;color:#999;line-height:1.6;">
-      Full digest &mdash; all 8 posts, all reply options &mdash; in the GitHub Actions artifact.
+      {"Full digest &mdash; all posts, all reply options &mdash; in the GitHub Actions artifact." if mode == "Mock" else "Full digest with all scoring details saved locally."}
     </p>
   </td></tr>
 
@@ -411,7 +424,7 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule):
 </html>"""
 
 
-def render_digest_text(profile_name, posts_with_replies, posts_schedule):
+def render_digest_text(profile_name, posts_with_replies, posts_schedule, mode="Mock"):
     today = _date.today().isoformat()
     best3 = _get_best3(posts_with_replies)
 
@@ -428,7 +441,7 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule):
 
     lines = [
         "MEL'S DAILY DIGEST",
-        f"{profile_name} · {today} · Mock mode",
+        f"{profile_name} · {today} · {mode} mode",
         "=" * 52,
         "",
         "QUICK SUMMARY",
@@ -461,13 +474,20 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule):
             all_replies = post.get("replies") or []
             other_replies = [r for r in all_replies if r.get("style") != best_style]
 
+            brave_note = (
+                "   [Brave Search] Check engagement manually before replying."
+                if post.get("discovery_source") == "brave_search"
+                else ""
+            )
             lines += [
                 f"{i}. {author}",
                 f"   {post['score']} · {post['visibility']} · {post['opportunity']}",
                 f"   {post.get('engagement_summary', '')}",
                 f"   Reply from: {post.get('reply_account', '')}",
-                "",
             ]
+            if brave_note:
+                lines.append(brave_note)
+            lines.append("")
 
             if best_text:
                 lines += [
@@ -527,9 +547,11 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule):
         status = "Recommended today" if data["needed"] else "Not needed today"
         lines.append(f"{role.title()} ({data['handle']}): {status}")
 
-    lines += [
-        "",
-        "Full detailed digest (all 8 posts, all reply options) available in the GitHub Actions artifact.",
-    ]
+    footer = (
+        "Full detailed digest (all posts, all reply options) available in the GitHub Actions artifact."
+        if mode == "Mock"
+        else "Full digest with all scoring details saved locally."
+    )
+    lines += ["", footer]
 
     return "\n".join(lines)

@@ -491,3 +491,97 @@ To enable it, edit `.github/workflows/mel_digest.yml` and uncomment these lines:
 
 Change the cron expression to suit your timezone and preferred run time.
 [crontab.guru](https://crontab.guru) is useful for checking cron syntax.
+
+---
+
+## GitHub Actions — Mel Search Digest (Tavily)
+
+The workflow at `.github/workflows/mel_search_digest.yml` runs Tavily web
+search discovery manually from GitHub's infrastructure. Your Tavily API key
+is stored as a GitHub Secret — it is never committed to the repository.
+
+**Safety:** Read-only. Nothing is posted, liked, replied to, followed, or DM'd.
+This uses Tavily Search, not the X API. No X account or X billing required.
+All reply suggestions are for manual review only — verify engagement before replying.
+
+> **Security reminder:** Never put API keys in code, workflow files, or chat.
+> Use GitHub Secrets and Variables exclusively.
+
+### Step 1 — Add the Tavily API key as a GitHub Secret
+
+Go to your repository on GitHub:
+
+**Settings → Secrets and variables → Actions → New repository secret**
+
+| Secret name | Required | Value to set |
+|---|---|---|
+| `TAVILY_API_KEY` | Yes | Your Tavily API key (starts with `tvly-`) |
+| `SEND_EMAIL` | No | `true` to email the digest, `false` to skip |
+| `EMAIL_PROVIDER` | No | `resend` |
+| `RESEND_API_KEY` | No | Your Resend API key (starts with `re_`) |
+| `EMAIL_FROM` | No | e.g. `Mel <mel@yourdomain.com>` |
+| `EMAIL_TO` | No | The address you want the digest sent to |
+
+Get a free Tavily API key (no credit card) at [app.tavily.com](https://app.tavily.com).
+
+### Step 2 — Optionally set query limits as GitHub Variables
+
+Query limits are stored as repository **Variables** (not Secrets) so they are
+visible and easy to adjust without touching code.
+
+**Settings → Secrets and variables → Actions → Variables tab → New repository variable**
+
+| Variable name | Default if not set | Recommended for first test |
+|---|---|---|
+| `MAX_SEARCH_QUERIES` | `2` | `2` |
+| `MAX_RESULTS_PER_QUERY` | `3` | `3` |
+
+If neither variable is set, the workflow defaults to 2 queries × 3 results =
+at most 6 Tavily API calls per run. Increase these once you are happy with
+the output quality.
+
+### Step 3 — Run Mel Search Digest manually
+
+From a browser or the GitHub mobile app:
+
+1. Go to your repository
+2. Tap the **Actions** tab
+3. Select **Mel Search Digest** from the left sidebar
+4. Tap **Run workflow** (top right of the workflow runs table)
+5. Leave the branch as `main` and tap the green **Run workflow** button
+
+The run will appear in the list within a few seconds. Tap it to watch the logs.
+
+### Step 4 — Download the digest
+
+Every run uploads the digest as a GitHub Actions artifact regardless of whether
+email is enabled. To download it:
+
+1. Open the completed workflow run
+2. Scroll to the **Artifacts** section at the bottom
+3. Download **mel-search-digest-\<run-id\>** — it contains the Markdown digest file
+
+### What Mel Search Digest does
+
+- Runs up to `MAX_SEARCH_QUERIES` Tavily Search queries (one per search term
+  from `profiles/signal_shift.yaml`)
+- Scores discovered posts for fit, visibility, and opportunity
+- Generates reply suggestions for Strong and Decent fit posts
+- Saves a Markdown digest to `output/` and uploads it as an artifact
+- Optionally emails the digest if `SEND_EMAIL=true` and email secrets are set
+
+### What Mel Search Digest does NOT do
+
+- Does not call the X API
+- Does not scrape X pages or log into X
+- Does not post, reply, like, follow, or DM anything automatically
+- Does not run on a schedule — manual trigger only
+- Does not commit secrets or API keys
+
+### How to use results safely
+
+1. Run the workflow and download the digest artifact
+2. Open each linked X post URL in a browser to verify it exists and has real engagement
+3. Check the author's follower count and post quality before replying
+4. Edit reply options A/B/C before posting — do not copy-paste without review
+5. **Nothing is posted automatically**

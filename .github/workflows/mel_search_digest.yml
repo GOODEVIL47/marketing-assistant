@@ -1,0 +1,48 @@
+name: Mel Search Digest
+
+# Manual trigger only — no scheduled runs.
+# Run from: Actions tab → Mel Search Digest → Run workflow.
+on:
+  workflow_dispatch:
+
+jobs:
+  search-digest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Mel's Tavily search digest
+        env:
+          SEARCH_PROVIDER: tavily
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          SEND_EMAIL: ${{ secrets.SEND_EMAIL }}
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          # MAX_SEARCH_QUERIES and MAX_RESULTS_PER_QUERY come from GitHub
+          # repository variables (Settings → Secrets and variables → Variables).
+          # Safe defaults (2 / 3) are used when the variables are not set,
+          # keeping the first live test small.
+          MAX_SEARCH_QUERIES: ${{ vars.MAX_SEARCH_QUERIES || '2' }}
+          MAX_RESULTS_PER_QUERY: ${{ vars.MAX_RESULTS_PER_QUERY || '3' }}
+        run: python run_search.py
+
+      - name: Upload digest as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mel-search-digest-${{ github.run_id }}
+          path: output/
+          retention-days: 30

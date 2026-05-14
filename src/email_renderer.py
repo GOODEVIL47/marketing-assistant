@@ -31,8 +31,8 @@ def _esc(text):
 def _badge(label, bg, color):
     return (
         f'<span style="display:inline-block;background:{bg};color:{color};'
-        f'padding:3px 9px;border-radius:4px;font-size:12px;font-weight:600;'
-        f'white-space:nowrap;margin-right:4px;">{_esc(label)}</span>'
+        f'padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;'
+        f'white-space:nowrap;margin-right:5px;margin-bottom:4px;">{_esc(label)}</span>'
     )
 
 
@@ -93,6 +93,139 @@ def _mel_recommendation(best3, posts_schedule):
     return rec
 
 
+def _html_media_block(media):
+    if not media:
+        return ""
+
+    media_type = media.get("type", "No media")
+    rows = []
+
+    if media_type == "No media":
+        reason = media.get("reason", "")
+        rows.append(
+            f'<p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#374151;">'
+            f'📎 Media: No media</p>'
+        )
+        if reason:
+            rows.append(
+                f'<p style="margin:0;font-size:12px;color:#888;line-height:1.55;">'
+                f'{_esc(reason)}</p>'
+            )
+
+    elif media_type == "Optional GIF":
+        idea = media.get("idea", "")
+        use_if = media.get("use_if", "")
+        skip_if = media.get("skip_if", "")
+        rows.append(
+            f'<p style="margin:0 0 7px;font-size:13px;font-weight:700;color:#374151;">'
+            f'📎 Media: Optional GIF</p>'
+        )
+        if idea:
+            rows.append(
+                f'<p style="margin:0 0 5px;font-size:12px;color:#555;line-height:1.55;">'
+                f'💡 <strong>Suggested GIF:</strong> {_esc(idea)}</p>'
+            )
+        if use_if:
+            rows.append(
+                f'<p style="margin:0 0 4px;font-size:12px;color:#555;line-height:1.55;">'
+                f'✓ <strong>Use if:</strong> {_esc(use_if)}</p>'
+            )
+        if skip_if:
+            rows.append(
+                f'<p style="margin:0;font-size:12px;color:#888;line-height:1.55;">'
+                f'✗ <strong>Skip if:</strong> {_esc(skip_if)}</p>'
+            )
+
+    elif media_type == "Quote repost":
+        use_if = media.get("use_if", "")
+        skip_if = media.get("skip_if", "")
+        rows.append(
+            f'<p style="margin:0 0 7px;font-size:13px;font-weight:700;color:#374151;">'
+            f'📎 Media: Quote repost</p>'
+        )
+        if use_if:
+            rows.append(
+                f'<p style="margin:0 0 4px;font-size:12px;color:#555;line-height:1.55;">'
+                f'✓ <strong>Use if:</strong> {_esc(use_if)}</p>'
+            )
+        if skip_if:
+            rows.append(
+                f'<p style="margin:0;font-size:12px;color:#888;line-height:1.55;">'
+                f'✗ <strong>Skip if:</strong> {_esc(skip_if)}</p>'
+            )
+
+    else:
+        reason = media.get("reason", "")
+        rows.append(
+            f'<p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#374151;">'
+            f'📎 Media: {_esc(media_type)}</p>'
+        )
+        if reason:
+            rows.append(
+                f'<p style="margin:0;font-size:12px;color:#888;line-height:1.55;">'
+                f'{_esc(reason)}</p>'
+            )
+
+    inner = "".join(rows)
+    return f"""
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0 0;">
+        <tr>
+          <td style="background:#f8fafc;border:1px solid #e8edf2;border-radius:6px;padding:12px 14px;">
+            {inner}
+          </td>
+        </tr>
+      </table>"""
+
+
+def _html_replies_block(post):
+    best_reply = post.get("best_reply") or {}
+    best_style = best_reply.get("style", "")
+    best_text = best_reply.get("text", "")
+    all_replies = post.get("replies") or []
+    other_replies = [r for r in all_replies if r.get("style") != best_style]
+
+    if not best_text:
+        return ""
+
+    # Recommended reply
+    recommended = f"""
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="background:#f0f4f8;border-left:3px solid #1a2e4a;
+                     border-radius:0 5px 5px 0;padding:13px 16px;">
+            <p style="margin:0 0 7px;font-size:11px;color:#1a2e4a;
+                       text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">
+              &#x2705; Recommended &mdash; {_esc(best_style)}
+            </p>
+            <p style="margin:0;font-size:14px;color:#1a2e4a;line-height:1.65;">
+              &ldquo;{_esc(best_text)}&rdquo;
+            </p>
+          </td>
+        </tr>
+      </table>"""
+
+    # Other options
+    other_html = ""
+    if other_replies:
+        items = ""
+        for i, reply in enumerate(other_replies):
+            bottom_margin = "14px" if i < len(other_replies) - 1 else "0"
+            items += (
+                f'<p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#374151;">'
+                f'{_esc(reply.get("style", ""))}</p>'
+                f'<p style="margin:0 0 {bottom_margin};font-size:13px;color:#555;line-height:1.6;">'
+                f'&ldquo;{_esc(reply.get("text", ""))}&rdquo;</p>'
+            )
+        other_html = f"""
+      <p style="margin:16px 0 10px;font-size:11px;color:#888;
+                 text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">
+        Other options
+      </p>
+      {items}"""
+
+    return recommended + other_html
+
+
 def _html_post_card(rank, post):
     author = post["author"]
     handle = author.lstrip("@")
@@ -111,63 +244,54 @@ def _html_post_card(rank, post):
 
     eng = _esc(post.get("engagement_summary", ""))
     account = _esc(post.get("reply_account", ""))
-    media_type = _esc((post.get("media") or {}).get("type", "No media"))
 
-    best_reply = post.get("best_reply") or {}
-    reply_text = best_reply.get("text", "")
-
-    reply_block = ""
-    if reply_text:
-        reply_block = f"""
-        <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 14px;">
-          <tr>
-            <td style="background:#f0f4f8;border-left:3px solid #1a2e4a;
-                       border-radius:0 4px 4px 0;padding:10px 12px;">
-              <p style="margin:0 0 5px;font-size:11px;color:#888;
-                         text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">
-                Best reply to copy
-              </p>
-              <p style="margin:0;font-size:14px;color:#1a2e4a;line-height:1.65;">
-                &ldquo;{_esc(reply_text)}&rdquo;
-              </p>
-            </td>
-          </tr>
-        </table>"""
+    replies_block = _html_replies_block(post)
+    media_block = _html_media_block(post.get("media"))
 
     return f"""
     <table width="100%" cellpadding="0" cellspacing="0"
            style="background:#ffffff;border:1px solid #e0e6ed;border-radius:8px;
-                  margin-bottom:14px;">
+                  margin-bottom:22px;">
       <tr>
-        <td style="padding:16px;">
-          <p style="margin:0 0 8px;font-size:16px;font-weight:700;
+        <td style="padding:20px 22px;">
+
+          <p style="margin:0 0 12px;font-size:16px;font-weight:700;
                     color:#1a2e4a;line-height:1.3;">
             {rank}. {_esc(author)}
           </p>
-          <p style="margin:0 0 10px;line-height:2.0;">
+
+          <p style="margin:0 0 14px;line-height:2.2;">
             {_badge(fit_label, fit_bg, fit_color)}{_badge(vis_label, vis_bg, vis_color)}{_badge(opp_label, opp_bg, opp_color)}
           </p>
-          <p style="margin:0 0 10px;color:#888;font-size:13px;">{eng}</p>
-          <p style="margin:0 0 14px;font-size:13px;color:#444;">
+
+          <p style="margin:0 0 14px;color:#888;font-size:13px;">{eng}</p>
+
+          <p style="margin:0 0 18px;font-size:13px;color:#444;">
             <strong>Reply from:</strong> {account}
-            &nbsp;&nbsp;
-            <strong>Media:</strong> {media_type}
           </p>
-          {reply_block}
-          <p style="margin:0;">
-            <a href="{_esc(post_url)}"
-               style="display:inline-block;background:#1a2e4a;color:#ffffff;
-                      text-decoration:none;padding:8px 16px;border-radius:5px;
-                      font-size:13px;font-weight:600;margin-right:8px;">
-              Open post ↗
-            </a>
-            <a href="{_esc(profile_url)}"
-               style="display:inline-block;background:#f0f2f5;color:#374151;
-                      text-decoration:none;padding:8px 16px;border-radius:5px;
-                      font-size:13px;">
-              View profile
-            </a>
-          </p>
+
+          {replies_block}
+          {media_block}
+
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0 0;">
+            <tr>
+              <td>
+                <a href="{_esc(post_url)}"
+                   style="display:inline-block;background:#1a2e4a;color:#ffffff;
+                          text-decoration:none;padding:9px 18px;border-radius:5px;
+                          font-size:13px;font-weight:600;margin-right:8px;">
+                  Open post &#x2197;
+                </a>
+                <a href="{_esc(profile_url)}"
+                   style="display:inline-block;background:#f0f2f5;color:#374151;
+                          text-decoration:none;padding:9px 18px;border-radius:5px;
+                          font-size:13px;">
+                  View profile
+                </a>
+              </td>
+            </tr>
+          </table>
+
         </td>
       </tr>
     </table>"""
@@ -184,19 +308,20 @@ def _html_original_posts(posts_schedule):
             med = _esc((post.get("media") or {}).get("type", "No media"))
             text = post.get("text", "").replace("\n\n", " ").replace("\n", " ")
             parts.append(
-                f'<p style="margin:0 0 3px;font-size:13px;font-weight:700;color:#1a2e4a;">'
-                f'{role.title()} ({handle}) — Recommended today</p>'
-                f'<p style="margin:0 0 4px;font-size:13px;color:#444;line-height:1.55;'
+                f'<p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#1a2e4a;">'
+                f'{role.title()} ({handle}) &mdash; Recommended today</p>'
+                f'<p style="margin:0 0 8px;font-size:13px;color:#444;line-height:1.6;'
                 f'font-style:italic;">&ldquo;{_esc(text)}&rdquo;</p>'
-                f'<p style="margin:0 0 14px;font-size:12px;color:#888;">'
-                f'Format: {fmt} &nbsp;·&nbsp; Media: {med}</p>'
+                f'<p style="margin:0 0 20px;font-size:12px;color:#888;">'
+                f'Format: {fmt} &nbsp;&middot;&nbsp; Media: {med}</p>'
             )
         else:
             reason = _esc(data.get("reason", "Not scheduled today."))
             parts.append(
-                f'<p style="margin:0 0 3px;font-size:13px;font-weight:600;color:#888;">'
-                f'{role.title()} ({handle}) — Not needed today</p>'
-                f'<p style="margin:0 0 14px;font-size:12px;color:#aaa;">{reason}</p>'
+                f'<p style="margin:0 0 5px;font-size:13px;font-weight:600;color:#888;">'
+                f'{role.title()} ({handle}) &mdash; Not needed today</p>'
+                f'<p style="margin:0 0 18px;font-size:12px;color:#aaa;line-height:1.55;">'
+                f'{reason}</p>'
             )
     return "".join(parts)
 
@@ -241,16 +366,16 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule):
              font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
 
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f7fa;">
-<tr><td align="center" style="padding:24px 12px;">
+<tr><td align="center" style="padding:28px 12px;">
 <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
 
   <!-- ── Header ── -->
-  <tr><td style="background:#1a2e4a;border-radius:8px 8px 0 0;padding:24px 24px 18px;">
-    <p style="margin:0 0 4px;font-size:11px;color:#6b8faf;
+  <tr><td style="background:#1a2e4a;border-radius:8px 8px 0 0;padding:26px 26px 20px;">
+    <p style="margin:0 0 5px;font-size:11px;color:#6b8faf;
                text-transform:uppercase;letter-spacing:1px;font-weight:600;">
-      Internal tool &nbsp;·&nbsp; Not for distribution
+      Internal tool &nbsp;&middot;&nbsp; Not for distribution
     </p>
-    <h1 style="margin:0 0 6px;font-size:22px;font-weight:700;
+    <h1 style="margin:0 0 7px;font-size:22px;font-weight:700;
                color:#ffffff;line-height:1.2;">
       Mel&apos;s Daily Digest
     </h1>
@@ -260,14 +385,14 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule):
   </td></tr>
 
   <!-- ── Quick summary bar ── -->
-  <tr><td style="background:#1e3a5f;padding:14px 24px;">
+  <tr><td style="background:#1e3a5f;padding:15px 26px;">
     <table width="100%" cellpadding="0" cellspacing="0">
       <tr>
-        <td width="50%" style="color:#a0c4e8;font-size:13px;padding-bottom:6px;">
-          🎯 High opportunity: <strong style="color:#ffffff;">{high_count}</strong>
+        <td width="50%" style="color:#a0c4e8;font-size:13px;padding-bottom:7px;">
+          &#x1F3AF; High opportunity: <strong style="color:#ffffff;">{high_count}</strong>
         </td>
-        <td width="50%" style="color:#a0c4e8;font-size:13px;padding-bottom:6px;">
-          ⚡ Medium opportunity: <strong style="color:#ffffff;">{med_count}</strong>
+        <td width="50%" style="color:#a0c4e8;font-size:13px;padding-bottom:7px;">
+          &#x26A1; Medium opportunity: <strong style="color:#ffffff;">{med_count}</strong>
         </td>
       </tr>
       <tr>
@@ -283,26 +408,29 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule):
 
   <!-- ── Mel's take ── -->
   <tr><td style="background:#ffffff;border-left:1px solid #e0e6ed;
-                 border-right:1px solid #e0e6ed;padding:16px 24px 14px;">
-    <p style="margin:0 0 5px;font-size:11px;color:#888;
+                 border-right:1px solid #e0e6ed;padding:18px 26px 16px;">
+    <p style="margin:0 0 6px;font-size:11px;color:#888;
                text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">
       Mel&apos;s take
     </p>
-    <p style="margin:0;font-size:14px;color:#2d3748;line-height:1.65;">
+    <p style="margin:0 0 10px;font-size:14px;color:#2d3748;line-height:1.65;">
       {recommendation}
+    </p>
+    <p style="margin:0;font-size:12px;color:#9aa8b8;font-style:italic;line-height:1.5;">
+      Pick one reply, open the post, paste lightly edited if needed. No need to do all three.
     </p>
   </td></tr>
 
   <!-- ── Divider ── -->
   <tr><td style="background:#ffffff;border-left:1px solid #e0e6ed;
-                 border-right:1px solid #e0e6ed;padding:0 24px;">
+                 border-right:1px solid #e0e6ed;padding:0 26px;">
     <hr style="border:none;border-top:1px solid #e8edf2;margin:0;">
   </td></tr>
 
   <!-- ── Today's Best 3 ── -->
   <tr><td style="background:#ffffff;border-left:1px solid #e0e6ed;
-                 border-right:1px solid #e0e6ed;padding:18px 24px 10px;">
-    <p style="margin:0 0 14px;font-size:15px;font-weight:700;color:#1a2e4a;">
+                 border-right:1px solid #e0e6ed;padding:20px 26px 12px;">
+    <p style="margin:0 0 16px;font-size:15px;font-weight:700;color:#1a2e4a;">
       Today&apos;s Best 3
     </p>
     {cards}
@@ -310,14 +438,14 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule):
 
   <!-- ── Divider ── -->
   <tr><td style="background:#ffffff;border-left:1px solid #e0e6ed;
-                 border-right:1px solid #e0e6ed;padding:0 24px;">
+                 border-right:1px solid #e0e6ed;padding:0 26px;">
     <hr style="border:none;border-top:1px solid #e8edf2;margin:0;">
   </td></tr>
 
   <!-- ── Original posts ── -->
   <tr><td style="background:#ffffff;border-left:1px solid #e0e6ed;
-                 border-right:1px solid #e0e6ed;padding:18px 24px 12px;">
-    <p style="margin:0 0 14px;font-size:15px;font-weight:700;color:#1a2e4a;">
+                 border-right:1px solid #e0e6ed;padding:20px 26px 14px;">
+    <p style="margin:0 0 16px;font-size:15px;font-weight:700;color:#1a2e4a;">
       Original Posts
     </p>
     {original_posts_html}
@@ -325,9 +453,9 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule):
 
   <!-- ── Footer ── -->
   <tr><td style="background:#f0f4f8;border:1px solid #e0e6ed;border-top:none;
-                 border-radius:0 0 8px 8px;padding:14px 24px;">
-    <p style="margin:0;font-size:12px;color:#999;line-height:1.6;">
-      The full Markdown digest &mdash; all 8 posts, detailed scoring, and complete reply options
+                 border-radius:0 0 8px 8px;padding:16px 26px;">
+    <p style="margin:0;font-size:12px;color:#999;line-height:1.7;">
+      The full Markdown digest &mdash; all 8 posts, detailed scoring, and all reply options
       &mdash; is available in the GitHub Actions artifact for this run.
       <br>
       X post links in mock mode use placeholder URLs. Real links will be added when
@@ -371,6 +499,7 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule):
         "",
         "MEL'S TAKE",
         _mel_recommendation(best3, posts_schedule),
+        "Pick one reply, open the post, paste lightly edited if needed.",
         "",
         "TODAY'S BEST 3",
         "-" * 52,
@@ -386,22 +515,59 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule):
             post_url = post.get("post_url") or f"https://x.com/{handle}"
             profile_url = post.get("author_profile_url") or f"https://x.com/{handle}"
 
+            best_reply = post.get("best_reply") or {}
+            best_style = best_reply.get("style", "")
+            best_text = best_reply.get("text", "")
+            all_replies = post.get("replies") or []
+            other_replies = [r for r in all_replies if r.get("style") != best_style]
+
             lines += [
                 f"{i}. {author}",
                 f"   {post['score']} · {post['visibility']} · {post['opportunity']}",
                 f"   {post.get('engagement_summary', '')}",
                 f"   Reply from: {post.get('reply_account', '')}",
-                f"   Media: {(post.get('media') or {}).get('type', 'No media')}",
+                "",
             ]
 
-            best_reply = post.get("best_reply") or {}
-            reply_text = best_reply.get("text", "")
-            if reply_text:
+            if best_text:
                 lines += [
-                    "",
-                    "   Best reply to copy:",
-                    f'   "{reply_text}"',
+                    f"   * Recommended — {best_style}:",
+                    f'   "{best_text}"',
                 ]
+
+            if other_replies:
+                lines += ["", "   Other options:"]
+                for reply in other_replies:
+                    lines += [
+                        f"   {reply.get('style', '')}:",
+                        f'   "{reply.get("text", "")}"',
+                        "",
+                    ]
+
+            media = post.get("media") or {}
+            media_type = media.get("type", "No media")
+            lines.append(f"   Media: {media_type}")
+            if media_type == "Optional GIF":
+                idea = media.get("idea", "")
+                use_if = media.get("use_if", "")
+                skip_if = media.get("skip_if", "")
+                if idea:
+                    lines.append(f"   Suggested: {idea}")
+                if use_if:
+                    lines.append(f"   Use if: {use_if}")
+                if skip_if:
+                    lines.append(f"   Skip if: {skip_if}")
+            elif media_type == "Quote repost":
+                use_if = media.get("use_if", "")
+                skip_if = media.get("skip_if", "")
+                if use_if:
+                    lines.append(f"   Use if: {use_if}")
+                if skip_if:
+                    lines.append(f"   Skip if: {skip_if}")
+            elif media_type == "No media":
+                reason = media.get("reason", "")
+                if reason:
+                    lines.append(f"   ({reason})")
 
             lines += [
                 "",
@@ -423,7 +589,7 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule):
 
     lines += [
         "",
-        "Full detailed digest available in the GitHub Actions artifact.",
+        "Full detailed digest (all 8 posts, all reply options) available in the GitHub Actions artifact.",
     ]
 
     return "\n".join(lines)

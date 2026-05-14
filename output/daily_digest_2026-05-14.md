@@ -111,7 +111,7 @@ Media: No media
 **Why this is / is not worth engaging:** Decent fit and moderate visibility — 6h old, 23 likes, 4 replies. Light engagement but recent enough to get eyes on it.
 
 **Media suggestion:** No media
-*The topic is conceptual and the one-liner is punchy on its own. Adding media here would dilute it rather than help.*
+*The reply is punchy enough on its own — adding media would dilute it rather than help.*
 
 **Reply options:**
 

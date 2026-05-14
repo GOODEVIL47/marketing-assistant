@@ -32,13 +32,18 @@ def _build_best_3(posts_with_replies):
     lines = []
     lines.append("## Today's Best 3")
     lines.append("")
-    lines.append("Mel found today's best reply opportunities.")
-    lines.append("")
 
     if not top3:
-        lines.append("*No posts with strong enough fit and timing found today.*")
+        lines.append("*No suitable reply opportunities found today.*")
+        lines.append("*Check the Save for Inspiration section below for older posts worth referencing.*")
         lines.append("")
         return lines
+
+    count = len(top3)
+    if count < 3:
+        noun = "opportunity" if count == 1 else "opportunities"
+        lines.append(f"*Only {count} suitable reply {noun} found today.*")
+        lines.append("")
 
     for i, post in enumerate(top3, 1):
         fit_e = _fit_emoji(post["score"])
@@ -53,11 +58,41 @@ def _build_best_3(posts_with_replies):
             f"Opportunity: {post['opportunity']} {opp_e}"
         )
         lines.append(f"Engagement: {post['engagement_summary']}")
+        if post.get("age_label"):
+            lines.append(post["age_label"])
         lines.append(f"Reply from: {post['reply_account']} · Action: {post['suggested_action']}")
         lines.append(f"Best reply: *\"{reply_text}\"*")
         lines.append(f"Media: {media.get('type', 'No media')}")
         lines.append("")
 
+    return lines
+
+
+def _build_inspiration(posts_with_replies):
+    """
+    Posts that are too old for replies but have good fit — worth keeping as
+    content inspiration for original posts.
+    """
+    inspiration = [
+        p for p in posts_with_replies
+        if p["score"] in ("Strong fit", "Decent fit")
+        and p.get("metrics_confidence") == "low"
+        and p.get("freshness_tier") == "old"
+    ]
+    if not inspiration:
+        return []
+
+    lines = ["## Save for Inspiration", ""]
+    lines.append(
+        "These posts have good fit but are outside the reply window. "
+        "Use them as inspiration for original posts — do not reply."
+    )
+    lines.append("")
+    for post in inspiration:
+        lines.append(f"- **{post['author']}** · {post['score']} · {post.get('age_label', '')}")
+        lines.append(f"  > {post['text'][:120]}{'...' if len(post['text']) > 120 else ''}")
+        lines.append(f"  {post.get('post_url', '')}")
+        lines.append("")
     return lines
 
 
@@ -112,6 +147,12 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule, mode="Mock"
 
     lines.extend(_build_best_3(posts_with_replies))
 
+    inspiration = _build_inspiration(posts_with_replies)
+    if inspiration:
+        lines.append("---")
+        lines.append("")
+        lines.extend(inspiration)
+
     lines.append("---")
     lines.append("")
     lines.append("## Post Scoring & Reply Suggestions")
@@ -125,6 +166,8 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule, mode="Mock"
         lines.append(f"**Visibility:** {post['visibility']}")
         lines.append(f"**Opportunity:** {post['opportunity']} {opp_e}")
         lines.append(f"**Engagement:** {post['engagement_summary']}")
+        if post.get("age_label"):
+            lines.append(f"**{post['age_label']}**")
         _src_labels = {"brave_search": "Brave Search", "tavily_search": "Tavily Search"}
         _src = _src_labels.get(post.get("discovery_source", ""), "")
         if _src:
@@ -132,7 +175,13 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule, mode="Mock"
                 f"**Source:** Found via {_src} — "
                 "engagement metrics unavailable. Verify before replying."
             )
-        lines.append(f"**Author followers:** {post.get('author_followers', 0):,}")
+        followers = post.get("author_followers", 0)
+        followers_str = (
+            "Unknown"
+            if (followers == 0 and post.get("metrics_confidence") == "low")
+            else f"{followers:,}"
+        )
+        lines.append(f"**Author followers:** {followers_str}")
         post_url = post.get("post_url")
         if post_url:
             lines.append(f"**Post URL:** {post_url}")

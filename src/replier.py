@@ -176,6 +176,27 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index": 1,
+        "options_b": [
+            {
+                "style": "A — Short and clean",
+                "text": "The loudest signals in markets are usually the least useful ones.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "Most of what trends on investing Twitter has a half-life of about 48 hours. "
+                    "The information worth actually knowing rarely shows up as a headline."
+                ),
+            },
+            {
+                "style": "C — Sharper take",
+                "text": (
+                    "There's a real skill in knowing when more information is just noise "
+                    "with better packaging. Hard to develop when you're inside the feed."
+                ),
+            },
+        ],
+        "best_option_index_b": 1,
         "media": {
             "type": "Optional GIF",
             "reason": (
@@ -212,6 +233,27 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index": 2,
+        "options_b": [
+            {
+                "style": "A — Short and clean",
+                "text": "Conviction and correctness feel identical from the inside.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "One useful test: could you explain the bear case as convincingly as the bull case? "
+                    "If not, the thesis probably has gaps you've been filling in emotionally."
+                ),
+            },
+            {
+                "style": "C — Sharper take",
+                "text": (
+                    "The gap between 'I've thought about this a lot' and 'I've thought about this clearly' "
+                    "is bigger than it looks — and the first can feel exactly like the second."
+                ),
+            },
+        ],
+        "best_option_index_b": 2,
         "media": {
             "type": "Quote repost",
             "reason": (
@@ -247,6 +289,27 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index": 1,
+        "options_b": [
+            {
+                "style": "A — Short and clean",
+                "text": "The right question matters more than the right answer.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "Clarity usually comes from getting more specific about what you're actually "
+                    "trying to figure out — not from reading more takes on it."
+                ),
+            },
+            {
+                "style": "C — Sharper take",
+                "text": (
+                    "Most serious investors spend more time defining the question than answering it. "
+                    "Most people do it the other way around."
+                ),
+            },
+        ],
+        "best_option_index_b": 1,
         "media": {
             "type": "No media",
             "reason": "These replies land better as clean text — adding media would dilute the point.",
@@ -280,6 +343,28 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index": 1,
+        "options_b": [
+            {
+                "style": "A — Short and clean",
+                "text": "The urge to react is not the same as the need to act.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "Most of what financial media calls 'new information' is existing information "
+                    "with fresh packaging and a tighter deadline on your attention."
+                ),
+            },
+            {
+                "style": "C — Sharper take",
+                "text": (
+                    "Keeping you engaged and helping you make better decisions are almost perfectly "
+                    "opposing incentives for most financial platforms. "
+                    "Worth knowing which one your feed is optimized for."
+                ),
+            },
+        ],
+        "best_option_index_b": 1,
         "media": {
             "type": "Optional GIF",
             "reason": (
@@ -315,6 +400,28 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index": 0,
+        "options_b": [
+            {
+                "style": "A — One-liner",
+                "text": "Information isn't understanding.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "The bottleneck is almost never more data. "
+                    "It's a cleaner framework for deciding what to do with the data you already have."
+                ),
+            },
+            {
+                "style": "C — Sharper take",
+                "text": (
+                    "Being well-informed and being clear are different things. "
+                    "More of one doesn't automatically give you more of the other — "
+                    "and most platforms are only built for the first."
+                ),
+            },
+        ],
+        "best_option_index_b": 0,
         "media": {
             "type": "No media",
             "reason": "Reply A is punchy enough on its own — adding media would dilute it.",
@@ -344,6 +451,27 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index": 1,
+        "options_b": [
+            {
+                "style": "A — Short and clean",
+                "text": "The hard part is rarely finding the information — it's knowing what to do with it.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "Most serious investors spend more time on process than most people realize. "
+                    "The research is usually the easier part."
+                ),
+            },
+            {
+                "style": "C — Sharper take",
+                "text": (
+                    "Getting clear on what you're actually trying to decide — before you start researching — "
+                    "changes everything about which information ends up being useful."
+                ),
+            },
+        ],
+        "best_option_index_b": 2,
         "media": {
             "type": "No media",
             "reason": "Generic fallback reply works better as clean text.",
@@ -373,6 +501,27 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index": 1,
+        "options_b": [
+            {
+                "style": "A — Short and clean",
+                "text": "The assumptions you start with shape everything you find.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "Worth thinking about whether the difficulty here is finding the right information "
+                    "or having a clear enough lens to know what to do with it."
+                ),
+            },
+            {
+                "style": "C — Sharper take",
+                "text": (
+                    "Good questions tend to surface faster than good answers. "
+                    "Usually the best next move is making the question sharper."
+                ),
+            },
+        ],
+        "best_option_index_b": 0,
         "media": {
             "type": "No media",
             "reason": "Generic fallback reply works better as clean text.",
@@ -388,6 +537,22 @@ _THEME_KEYWORDS = [
     ("data_vs_insight",   ["dashboard", "more data", "more information", "another tool", "screener", "research rabbit"]),
     ("clarity_signal",    ["clarity", "signal", "clear", "thesis", "what would need", "understand"]),
 ]
+
+
+def _pick_reply_options(tweet_id, template):
+    """
+    Select A/B/C options from a template, rotating between the primary set and
+    the 'options_b' alternate set based on the tweet ID. Posts with different IDs
+    that share the same theme get different wording. Mock posts are never routed here.
+    """
+    try:
+        use_b = int(tweet_id) % 2 == 1
+    except (ValueError, TypeError):
+        use_b = False
+
+    if use_b and "options_b" in template:
+        return template["options_b"], template.get("best_option_index_b", 0)
+    return template["options"], template.get("best_option_index", 0)
 
 
 def _detect_reply_theme(post):
@@ -416,9 +581,8 @@ def generate_replies(scored_posts):
                 if theme is None:
                     theme = "generic_strong" if post["score"] == "Strong fit" else "generic_decent"
                 template = _DYNAMIC_TEMPLATES[theme]
-                options = template["options"]
+                options, best_idx = _pick_reply_options(post_id, template)
                 media = template["media"]
-                best_idx = template["best_option_index"]
                 best_reply = options[best_idx]
             results.append({**post, "replies": options, "media": media, "best_reply": best_reply})
         else:

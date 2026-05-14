@@ -28,6 +28,8 @@ from datetime import datetime, timezone
 
 import requests
 
+_TWITTER_EPOCH_MS = 1288834974657  # Twitter epoch: 2010-11-04 01:42:54 UTC
+
 _TAVILY_API_URL = "https://api.tavily.com/search"
 _X_STATUS_RE = re.compile(
     r"https?://(?:www\.)?(?:x\.com|twitter\.com)/([^/?#\s]+)/status/(\d+)",
@@ -99,6 +101,23 @@ def _post(query, max_results):
     return None
 
 
+def _decode_snowflake(tweet_id):
+    """
+    Decode creation time from a Twitter/X Snowflake ID.
+    Returns (age_hours, age_source). age_source is 'snowflake' on success,
+    'unknown' on failure. Pure math — no network calls.
+    """
+    try:
+        tid = int(tweet_id)
+        created_ms = (tid >> 22) + _TWITTER_EPOCH_MS
+        created_dt = datetime.fromtimestamp(created_ms / 1000, tz=timezone.utc)
+        delta = datetime.now(timezone.utc) - created_dt
+        age_hours = round(max(delta.total_seconds(), 0) / 3600, 1)
+        return age_hours, "snowflake"
+    except Exception:
+        return None, "unknown"
+
+
 def _parse_age_hours(published_date):
     """
     Parse Tavily's published_date (ISO 8601) to age in hours.
@@ -161,8 +180,20 @@ def _normalize(url, title, content, published_date):
 
     author = f"@{username}"
     text = _clean_text(title, content, username)
-    age_hours = _parse_age_hours(published_date)
     post_url = f"https://x.com/{username}/status/{tweet_id}"
+
+    # Prefer Snowflake-decoded age (accurate to the second) over Tavily's
+    # published_date (search index lag, may differ by hours or days).
+    sf_age, sf_source = _decode_snowflake(tweet_id)
+    if sf_source == "snowflake":
+        age_hours = sf_age
+        age_source = "snowflake"
+    elif published_date:
+        age_hours = _parse_age_hours(published_date)
+        age_source = "tavily"
+    else:
+        age_hours = None   # truly unknown — do not guess
+        age_source = "unknown"
 
     return {
         "id": tweet_id,                        # string ID → dynamic reply generation
@@ -176,6 +207,7 @@ def _normalize(url, title, content, published_date):
         "reply_count": 0,                       # unavailable
         "impressions": 0,                       # unavailable
         "age_hours": age_hours,
+        "age_source": age_source,
         "post_url": post_url,
         "url": post_url,
         "discovery_source": "tavily_search",

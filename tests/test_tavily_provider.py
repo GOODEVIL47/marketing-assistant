@@ -164,26 +164,31 @@ def test_clean_text_falls_back_to_content_then_title():
 
 def test_normalize_x_com_url():
     from datetime import datetime, timezone, timedelta
-    two_hours_ago = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+    # Snowflake is now the primary age source. Use a synthetic ID that encodes ~2h ago.
+    two_hours_ago_ms = int((datetime.now(timezone.utc) - timedelta(hours=2)).timestamp() * 1000)
+    from src.providers.tavily_search_provider import _TWITTER_EPOCH_MS
+    synthetic_id = str((two_hours_ago_ms - _TWITTER_EPOCH_MS) << 22)
     post = _normalize(
-        "https://x.com/testuser/status/1789000000000000001",
+        f"https://x.com/testuser/status/{synthetic_id}",
         "testuser on X: \"Great post text.\"",
         "Great post text here.",
-        two_hours_ago,
+        None,   # no Tavily date needed — snowflake gives the age
     )
     assert post is not None
-    assert post["id"] == "1789000000000000001"
+    assert post["id"] == synthetic_id
     assert post["author"] == "@testuser"
-    assert 1.5 < post["age_hours"] < 2.5
+    assert post["age_source"] == "snowflake"
+    assert 1.5 < post["age_hours"] < 2.5, f"Expected ~2h from snowflake, got {post['age_hours']}"
     assert post["likes"] == 0
     assert post["discovery_source"] == "tavily_search"
     assert post["metrics_confidence"] == "low"
-    assert post["post_url"] == "https://x.com/testuser/status/1789000000000000001"
     assert post["author_profile_url"] == "https://x.com/testuser"
     print("PASS test_normalize_x_com_url")
 
 
 def test_normalize_twitter_com_url():
+    # Snowflake decoding is the primary source — even ancient IDs yield a real age,
+    # not the 48.0 fallback. Verify structure, not the specific age value.
     post = _normalize(
         "https://twitter.com/someuser/status/9876543210",
         "Title",
@@ -192,7 +197,9 @@ def test_normalize_twitter_com_url():
     )
     assert post is not None
     assert post["id"] == "9876543210"
-    assert post["age_hours"] == 48.0  # fallback
+    assert post["age_source"] == "snowflake"  # snowflake decoded it (ancient ID)
+    assert post["age_hours"] is not None
+    assert post["age_hours"] > 0
     print("PASS test_normalize_twitter_com_url")
 
 

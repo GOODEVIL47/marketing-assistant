@@ -76,19 +76,58 @@ FIT_SCORES = {
 }
 
 
+def _freshness_tier(age_hours):
+    """Classify post age into a freshness tier for opportunity gating."""
+    if age_hours is None:
+        return "unknown"
+    if age_hours <= 24:
+        return "fresh"
+    if age_hours <= 48:
+        return "borderline"
+    if age_hours <= 168:   # 7 days
+        return "old"
+    if age_hours <= 720:   # 30 days
+        return "stale"
+    return "very_stale"
+
+
+def _age_label(post):
+    """Human-readable age label for display in digest and email."""
+    age = post.get("age_hours")
+    source = post.get("age_source", "")
+
+    if age is None:
+        return "Age: unknown"
+
+    if age < 24:
+        label = f"Age: {int(age)}h old"
+    elif age < 48:
+        label = f"Age: {age / 24:.1f}d old — older but possibly usable"
+    elif age < 168:
+        label = f"Age: {int(age // 24)}d old — save for inspiration"
+    elif age < 720:
+        label = f"Age: {int(age // 24)}d old — stale, do not reply"
+    else:
+        label = f"Age: {int(age // 24)}d old — stale"
+
+    if source == "snowflake":
+        label += " (estimated from X status ID)"
+    return label
+
+
 def _engagement_summary(post):
     if post.get("metrics_confidence") == "low":
-        age = post.get("age_hours", 0)
-        if age < 1:
+        age = post.get("age_hours")
+        if age is None:
+            age_str = "age unknown"
+        elif age < 1:
             age_str = "< 1h old"
         elif age < 24:
             age_str = f"~{int(age)}h old"
-        elif age < 9999:
+        else:
             days = int(age) // 24
             rem = int(age) % 24
             age_str = f"~{days}d {rem}h old" if rem else f"~{days}d old"
-        else:
-            age_str = "age unknown"
         return f"Engagement unknown · found via web search · {age_str}"
 
     age = post.get("age_hours", 0)
@@ -154,9 +193,46 @@ def _score_opportunity(post, fit_score, visibility):
             "Weak fit and minimal visibility. Nothing to gain from engaging.",
         )
 
-    # Unknown visibility (Brave Search / web discovery — engagement metrics unavailable).
+    # Unknown visibility (web search discovery — engagement metrics unavailable).
     # Only reached for Strong or Decent fit (Avoid and Weak fit already returned above).
+    # Apply freshness gate: old/stale posts cap at Low/Poor regardless of fit.
     if visibility == "Unknown visibility":
+        tier = _freshness_tier(age)
+        if tier in ("stale", "very_stale"):
+            days = int(age // 24)
+            return (
+                "Poor opportunity",
+                f"Post is {days}d old — too stale to reply to. "
+                "Save as inspiration for original content if the topic resonates.",
+            )
+        if tier == "old":
+            days = int(age // 24)
+            return (
+                "Low opportunity",
+                f"Post is {days}d old — outside the ideal reply window. "
+                "Engagement metrics unavailable. Save for inspiration rather than replying.",
+            )
+        if tier == "borderline":
+            if fit_score == "Strong fit":
+                return (
+                    "Medium opportunity",
+                    "Post is 1-2 days old — borderline for replies. "
+                    "Strong fit may still be worth engaging; verify the post is still active "
+                    "and check engagement manually before replying.",
+                )
+            return (
+                "Low opportunity",
+                "Post is 1-2 days old with decent but not strong fit. "
+                "Engagement metrics unavailable — check if it is still getting traction "
+                "before committing to a reply.",
+            )
+        if tier == "unknown":
+            return (
+                "Medium opportunity",
+                "Post found via web search — age and engagement metrics unavailable. "
+                "Verify recency and engagement manually before replying.",
+            )
+        # fresh (0-24h)
         return (
             "Medium opportunity",
             "Post found via web search — engagement metrics unavailable. "
@@ -345,5 +421,7 @@ def score_posts(posts, profile=None):
             "opportunity_reason": opp_reason,
             "engagement_summary": eng_summary,
             "suggested_action": action,
+            "freshness_tier": _freshness_tier(post.get("age_hours")),
+            "age_label": _age_label(post) if post.get("metrics_confidence") == "low" else None,
         })
     return results

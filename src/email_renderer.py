@@ -3,6 +3,13 @@ from datetime import date as _date
 
 from src.digest import _SCORE_ORDER, _OPP_ORDER
 
+# Maps discovery_source values to human-readable provider labels.
+# Add new web search providers here — source notes update automatically.
+_WEB_SEARCH_LABELS = {
+    "brave_search":  "Brave Search",
+    "tavily_search": "Tavily Search",
+}
+
 _FIT_BADGE = {
     "Strong fit":  ("✅ Strong fit",  "#d1fae5", "#065f46"),
     "Decent fit":  ("🟡 Decent fit",  "#fef3c7", "#92400e"),
@@ -190,15 +197,14 @@ def _html_post_card(rank, post):
     eng = _esc(post.get("engagement_summary", ""))
     account = _esc(post.get("reply_account", ""))
 
-    source_note = ""
-    if post.get("discovery_source") == "brave_search":
-        source_note = (
-            '<p style="margin:0 0 8px;font-size:11px;color:#92400e;'
-            'font-style:italic;line-height:1.4;">'
-            '&#x1F50D; Found via Brave Search &mdash; '
-            'check engagement manually before replying.'
-            '</p>'
-        )
+    _provider_label = _WEB_SEARCH_LABELS.get(post.get("discovery_source", ""), "")
+    source_note = (
+        '<p style="margin:0 0 8px;font-size:11px;color:#92400e;'
+        'font-style:italic;line-height:1.4;">'
+        f'&#x1F50D; Found via {_esc(_provider_label)} &mdash; '
+        'check engagement manually before replying.'
+        '</p>'
+    ) if _provider_label else ""
 
     replies_block = _html_replies_block(post)
     media_block = _html_media_block(post.get("media"))
@@ -474,19 +480,15 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule, mode="M
             all_replies = post.get("replies") or []
             other_replies = [r for r in all_replies if r.get("style") != best_style]
 
-            brave_note = (
-                "   [Brave Search] Check engagement manually before replying."
-                if post.get("discovery_source") == "brave_search"
-                else ""
-            )
+            _src_label = _WEB_SEARCH_LABELS.get(post.get("discovery_source", ""), "")
             lines += [
                 f"{i}. {author}",
                 f"   {post['score']} · {post['visibility']} · {post['opportunity']}",
                 f"   {post.get('engagement_summary', '')}",
                 f"   Reply from: {post.get('reply_account', '')}",
             ]
-            if brave_note:
-                lines.append(brave_note)
+            if _src_label:
+                lines.append(f"   [{_src_label}] Check engagement manually before replying.")
             lines.append("")
 
             if best_text:

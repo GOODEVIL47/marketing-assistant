@@ -125,9 +125,11 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule, mode="Mock"
         lines.append(f"**Visibility:** {post['visibility']}")
         lines.append(f"**Opportunity:** {post['opportunity']} {opp_e}")
         lines.append(f"**Engagement:** {post['engagement_summary']}")
-        if post.get("discovery_source") == "brave_search":
+        _src_labels = {"brave_search": "Brave Search", "tavily_search": "Tavily Search"}
+        _src = _src_labels.get(post.get("discovery_source", ""), "")
+        if _src:
             lines.append(
-                "**Source:** Found via Brave Search — "
+                f"**Source:** Found via {_src} — "
                 "engagement metrics unavailable. Verify before replying."
             )
         lines.append(f"**Author followers:** {post.get('author_followers', 0):,}")

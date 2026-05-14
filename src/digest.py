@@ -126,6 +126,9 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule):
         lines.append(f"**Opportunity:** {post['opportunity']} {opp_e}")
         lines.append(f"**Engagement:** {post['engagement_summary']}")
         lines.append(f"**Author followers:** {post.get('author_followers', 0):,}")
+        post_url = post.get("post_url")
+        if post_url:
+            lines.append(f"**Post URL:** {post_url}")
         lines.append(f"**Suggested account:** {post['reply_account']}")
         lines.append(f"**Suggested action:** {post['suggested_action']}")
         lines.append("")

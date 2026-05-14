@@ -13,6 +13,8 @@ MOCK_POSTS = [
         "reposts": 31,
         "views": 8400,
         "author_followers": 2100,
+        "post_url": "https://x.com/quietinvestor/status/1789234567890001001",
+        "author_profile_url": "https://x.com/quietinvestor",
     },
     {
         "id": 2,
@@ -28,6 +30,8 @@ MOCK_POSTS = [
         "reposts": 89,
         "views": 22000,
         "author_followers": 8400,
+        "post_url": "https://x.com/patientcapital_/status/1789234567890001002",
+        "author_profile_url": "https://x.com/patientcapital_",
     },
     {
         "id": 3,
@@ -43,6 +47,8 @@ MOCK_POSTS = [
         "reposts": 3,
         "views": 890,
         "author_followers": 1200,
+        "post_url": "https://x.com/retailrethink/status/1789234567890001003",
+        "author_profile_url": "https://x.com/retailrethink",
     },
     {
         "id": 4,
@@ -58,6 +64,8 @@ MOCK_POSTS = [
         "reposts": 201,
         "views": 71000,
         "author_followers": 12300,
+        "post_url": "https://x.com/slowmoneymoves/status/1789234567890001004",
+        "author_profile_url": "https://x.com/slowmoneymoves",
     },
     {
         "id": 5,
@@ -65,7 +73,7 @@ MOCK_POSTS = [
         "text": (
             "Here's the RSI + MACD combo setup I've been running for Q2. "
             "Entry on the divergence, stop just below the prior swing low. "
-            "Backtested 18 months. Thread below 🧵"
+            "Backtested 18 months. Thread below \U0001f9f5"
         ),
         "age_hours": 2,
         "likes": 1200,
@@ -73,6 +81,8 @@ MOCK_POSTS = [
         "reposts": 156,
         "views": 45000,
         "author_followers": 31000,
+        "post_url": "https://x.com/chartwhisperer99/status/1789234567890001005",
+        "author_profile_url": "https://x.com/chartwhisperer99",
     },
     {
         "id": 6,
@@ -80,7 +90,7 @@ MOCK_POSTS = [
         "text": (
             "These 5 AI infrastructure stocks are going to be massive by end of year. "
             "Screenshot this post and thank me later. "
-            "DYOR but the setup is too obvious to ignore. 🚀"
+            "DYOR but the setup is too obvious to ignore. \U0001f680"
         ),
         "age_hours": 7,
         "likes": 2800,
@@ -88,6 +98,8 @@ MOCK_POSTS = [
         "reposts": 410,
         "views": 89000,
         "author_followers": 47000,
+        "post_url": "https://x.com/stockstowatch2025/status/1789234567890001006",
+        "author_profile_url": "https://x.com/stockstowatch2025",
     },
     {
         "id": 7,
@@ -95,7 +107,7 @@ MOCK_POSTS = [
         "text": (
             "FREE WEBINAR this Thursday: How I turned a $6k account into $140k in 14 months "
             "using a simple 3-step options strategy. "
-            "Spots are limited. Link in bio. 🔥"
+            "Spots are limited. Link in bio. \U0001f525"
         ),
         "age_hours": 5,
         "likes": 89,
@@ -103,6 +115,8 @@ MOCK_POSTS = [
         "reposts": 45,
         "views": 3100,
         "author_followers": 28000,
+        "post_url": "https://x.com/wealthcoach_pro/status/1789234567890001007",
+        "author_profile_url": "https://x.com/wealthcoach_pro",
     },
     {
         "id": 8,
@@ -110,7 +124,7 @@ MOCK_POSTS = [
         "text": (
             "BREAKING: Strong unusual options activity in $XYZ ahead of next week's catalyst. "
             "Smart money is positioning now. "
-            "This one's going to move hard. Do your own research. 🚀🚀🚀"
+            "This one's going to move hard. Do your own research. \U0001f680\U0001f680\U0001f680"
         ),
         "age_hours": 1,
         "likes": 430,
@@ -118,5 +132,7 @@ MOCK_POSTS = [
         "reposts": 88,
         "views": 18000,
         "author_followers": 5600,
+        "post_url": "https://x.com/alphahunter_x/status/1789234567890001008",
+        "author_profile_url": "https://x.com/alphahunter_x",
     },
 ]

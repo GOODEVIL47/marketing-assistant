@@ -39,6 +39,7 @@ Media: No media
 **Opportunity:** High opportunity 🎯
 **Engagement:** 287 likes · 42 replies · 31 reposts · 3h old
 **Author followers:** 2,100
+**Post URL:** https://x.com/quietinvestor/status/1789234567890001001
 **Suggested account:** Founder
 **Suggested action:** Reply
 
@@ -69,6 +70,7 @@ Media: No media
 **Opportunity:** High opportunity 🎯
 **Engagement:** 612 likes · 78 replies · 89 reposts · 11h old
 **Author followers:** 8,400
+**Post URL:** https://x.com/patientcapital_/status/1789234567890001002
 **Suggested account:** Either
 **Suggested action:** Reply
 
@@ -99,6 +101,7 @@ Media: No media
 **Opportunity:** Medium opportunity ⚡
 **Engagement:** 23 likes · 4 replies · 3 reposts · 6h old
 **Author followers:** 1,200
+**Post URL:** https://x.com/retailrethink/status/1789234567890001003
 **Suggested account:** Founder
 **Suggested action:** Reply
 
@@ -129,6 +132,7 @@ Media: No media
 **Opportunity:** Low opportunity ⏳
 **Engagement:** 1,840 likes · 234 replies · 201 reposts · 2d 4h old
 **Author followers:** 12,300
+**Post URL:** https://x.com/slowmoneymoves/status/1789234567890001004
 **Suggested account:** Either
 **Suggested action:** Save for inspiration
 
@@ -159,6 +163,7 @@ Media: No media
 **Opportunity:** Low opportunity ⏳
 **Engagement:** 1,200 likes · 340 replies · 156 reposts · 2h old
 **Author followers:** 31,000
+**Post URL:** https://x.com/chartwhisperer99/status/1789234567890001005
 **Suggested account:** Do not reply
 **Suggested action:** Do not engage
 
@@ -177,6 +182,7 @@ Media: No media
 **Opportunity:** Low opportunity ⏳
 **Engagement:** 2,800 likes · 180 replies · 410 reposts · 7h old
 **Author followers:** 47,000
+**Post URL:** https://x.com/stockstowatch2025/status/1789234567890001006
 **Suggested account:** Do not reply
 **Suggested action:** Do not engage
 
@@ -195,6 +201,7 @@ Media: No media
 **Opportunity:** Poor opportunity ❌
 **Engagement:** 89 likes · 12 replies · 45 reposts · 5h old
 **Author followers:** 28,000
+**Post URL:** https://x.com/wealthcoach_pro/status/1789234567890001007
 **Suggested account:** Do not reply
 **Suggested action:** Do not engage
 
@@ -213,6 +220,7 @@ Media: No media
 **Opportunity:** Poor opportunity ❌
 **Engagement:** 430 likes · 67 replies · 88 reposts · 1h old
 **Author followers:** 5,600
+**Post URL:** https://x.com/alphahunter_x/status/1789234567890001008
 **Suggested account:** Do not reply
 **Suggested action:** Do not engage
 

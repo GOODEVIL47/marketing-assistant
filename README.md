@@ -536,9 +536,9 @@ visible and easy to adjust without touching code.
 | `MAX_SEARCH_QUERIES` | `2` | `2` |
 | `MAX_RESULTS_PER_QUERY` | `3` | `3` |
 
-If neither variable is set, the workflow defaults to 2 queries × 3 results =
-at most 6 Tavily API calls per run. Increase these once you are happy with
-the output quality.
+If neither variable is set, the workflow makes at most 2 Tavily API calls per
+run (one per query), returning up to 6 total results (3 per query). Increase
+these once you are happy with the output quality.
 
 ### Step 3 — Run Mel Search Digest manually
 

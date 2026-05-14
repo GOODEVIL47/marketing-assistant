@@ -27,6 +27,7 @@ from src.scorer import score_posts
 from src.replier import generate_replies
 from src.post_generator import generate_posts
 from src.digest import save_digest, _SCORE_ORDER, _OPP_ORDER
+from src.email_renderer import render_digest_html, render_digest_text
 from src.email_sender import send_digest
 
 
@@ -91,9 +92,16 @@ def main():
 
     today = date.today().isoformat()
     subject = f"Mel's Daily Marketing Digest — {today}"
-    with open(filepath) as f:
-        body = f.read()
-    send_digest(subject, body)
+    html_body = render_digest_html(profile["name"], with_replies, posts_schedule)
+    text_body = render_digest_text(profile["name"], with_replies, posts_schedule)
+
+    send_email = os.getenv("SEND_EMAIL", "false").strip().lower() == "true"
+    if not send_email:
+        print("\n--- Email plain-text preview ---")
+        print(text_body)
+        print("--- End preview ---\n")
+
+    send_digest(subject, html_body, text_body)
 
 
 if __name__ == "__main__":

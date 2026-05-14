@@ -133,6 +133,20 @@ SEND_EMAIL=true RESEND_API_KEY=re_xxx EMAIL_FROM=mel@yourdomain.com EMAIL_TO=you
 
 ---
 
+## Email vs Markdown artifact
+
+Mel produces two outputs every run:
+
+| Output | What it contains | Where it goes |
+|---|---|---|
+| **HTML email** | Today's Best 3 only — cards with badges, copy-ready reply, clickable post + profile links | Sent via Resend if `SEND_EMAIL=true` |
+| **Markdown artifact** | All 8 posts — full scoring detail, all 3 reply options per post, original post drafts | Saved to `output/` and uploaded as a GitHub Actions artifact |
+
+The email is designed for mobile: one tap to open the post on X, one tap to view the profile.
+The Markdown artifact is the complete reference for every post in the run.
+
+---
+
 ## Where digests are saved
 
 ```

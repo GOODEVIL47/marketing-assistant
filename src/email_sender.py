@@ -20,7 +20,7 @@ def _missing_vars(config):
     return [name for name, val in required.items() if not val]
 
 
-def _send_via_resend(config, subject, body):
+def _send_via_resend(config, subject, html_body, text_body):
     try:
         import resend
     except ImportError:
@@ -32,12 +32,13 @@ def _send_via_resend(config, subject, body):
         "from": config["email_from"],
         "to": [config["email_to"]],
         "subject": subject,
-        "text": body,
+        "html": html_body,
+        "text": text_body,
     }
 
     try:
         response = resend.Emails.send(params)
-        email_id = response.get("id") or response["id"]
+        email_id = response["id"]
         print(f"Email sent successfully. Resend ID: {email_id}")
         return True
     except Exception as e:
@@ -46,7 +47,7 @@ def _send_via_resend(config, subject, body):
         return False
 
 
-def send_digest(subject, body):
+def send_digest(subject, html_body, text_body):
     """
     Send the digest by email if SEND_EMAIL=true.
 
@@ -76,4 +77,4 @@ def send_digest(subject, body):
         )
         return False
 
-    return _send_via_resend(config, subject, body)
+    return _send_via_resend(config, subject, html_body, text_body)

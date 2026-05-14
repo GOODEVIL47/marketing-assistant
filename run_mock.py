@@ -95,6 +95,14 @@ def main():
     html_body = render_digest_html(profile["name"], with_replies, posts_schedule)
     text_body = render_digest_text(profile["name"], with_replies, posts_schedule)
 
+    print("[EMAIL DEBUG] HTML generated:", "yes" if html_body else "NO — EMPTY")
+    print("[EMAIL DEBUG] HTML length:", len(html_body))
+    print(
+        "[EMAIL DEBUG] HTML looks like HTML:",
+        "yes" if html_body.lstrip().startswith("<!") else "NO — UNEXPECTED CONTENT",
+    )
+    print("[EMAIL DEBUG] Text fallback length:", len(text_body))
+
     send_email = os.getenv("SEND_EMAIL", "false").strip().lower() == "true"
     if not send_email:
         print("\n--- Email plain-text preview ---")

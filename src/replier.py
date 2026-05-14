@@ -31,6 +31,9 @@ REPLIES = {
                 "The post is relatable and a little exasperated — earnings week stress is universally felt. "
                 "An 'overwhelmed' GIF could work here, but text alone is fine. Skip if unsure."
             ),
+            "idea": "overwhelmed trader / too many browser tabs / 'information overload' reaction",
+            "use_if": "the reply feels casual or the original post has a self-aware, relatable tone",
+            "skip_if": "the thread turns serious or the reply already lands cleanly as text",
         },
         "best_option_index": 1,
     },
@@ -62,6 +65,8 @@ REPLIES = {
                 "The original post is strong enough to anchor a bigger founder take. "
                 "A quote repost with reply C lets the original do the setup while the reply adds real weight."
             ),
+            "use_if": "you want to turn this into a bigger founder take on how Signal Shift helps with this",
+            "skip_if": "you only have 2 minutes and just want to leave a quick reply",
         },
         "best_option_index": 2,
     },
@@ -88,10 +93,7 @@ REPLIES = {
         ],
         "media": {
             "type": "No media",
-            "reason": (
-                "The topic is conceptual and the one-liner is punchy on its own. "
-                "Adding media here would dilute it rather than help."
-            ),
+            "reason": "The reply is punchy enough on its own — adding media would dilute it rather than help.",
         },
         "best_option_index": 0,
     },
@@ -124,6 +126,9 @@ REPLIES = {
                 "The 'finally turned off the TV' energy is casual and relatable. "
                 "A GIF could work, but this post is 2+ days old — probably not worth it at this stage."
             ),
+            "idea": "someone turning off a TV / 'finally' relief reaction / unplugging gif",
+            "use_if": "you have time to make the reply feel warm and relatable",
+            "skip_if": "the post is 2+ days old — probably not worth the extra effort at this stage",
         },
         "best_option_index": 1,
     },

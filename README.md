@@ -139,10 +139,19 @@ Mel produces two outputs every run:
 
 | Output | What it contains | Where it goes |
 |---|---|---|
-| **HTML email** | Today's Best 3 only — cards with badges, copy-ready reply, clickable post + profile links | Sent via Resend if `SEND_EMAIL=true` |
-| **Markdown artifact** | All 8 posts — full scoring detail, all 3 reply options per post, original post drafts | Saved to `output/` and uploaded as a GitHub Actions artifact |
+| **HTML email** | Today's Best 3 — all reply options, media guidance, quick links | Sent via Resend if `SEND_EMAIL=true` |
+| **Markdown artifact** | All 8 posts — full scoring detail, all reply options, original post drafts | Saved to `output/` and uploaded as a GitHub Actions artifact |
 
-The email is designed for mobile: one tap to open the post on X, one tap to view the profile.
+### What the HTML email includes per card
+
+- Fit, visibility, and opportunity badges
+- Engagement summary
+- **Recommended reply** highlighted (the best option, copy-ready)
+- **Other reply options** shown below so you can pick the right tone
+- **Media guidance** — type, specific GIF idea or use-case, when to use it, when to skip it
+- "Open post ↗" and "View profile" buttons
+
+The email is designed for mobile: scan, pick a reply, open the post, done.
 The Markdown artifact is the complete reference for every post in the run.
 
 ---

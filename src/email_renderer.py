@@ -195,6 +195,7 @@ def _html_post_card(rank, post):
     )
 
     eng = _esc(post.get("engagement_summary", ""))
+    age_label = post.get("age_label") or ""
     account = _esc(post.get("reply_account", ""))
 
     _provider_label = _WEB_SEARCH_LABELS.get(post.get("discovery_source", ""), "")
@@ -226,7 +227,7 @@ def _html_post_card(rank, post):
           </p>
 
           <p style="margin:0 0 8px;color:#888;font-size:12px;">{eng}</p>
-
+          {f'<p style="margin:0 0 8px;font-size:11px;color:#6b7280;">{_esc(age_label)}</p>' if age_label else ""}
           {source_note}
 
           <p style="margin:0 0 12px;font-size:12px;color:#444;">
@@ -314,9 +315,16 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule, mode="M
     recommendation = _esc(_mel_recommendation(best3, posts_schedule))
 
     if best3:
-        cards = "".join(_html_post_card(i + 1, p) for i, p in enumerate(best3))
+        count_note = ""
+        if len(best3) < 3:
+            noun = "opportunity" if len(best3) == 1 else "opportunities"
+            count_note = (
+                f'<p style="margin:0 0 12px;font-size:12px;color:#92400e;font-style:italic;">'
+                f'Only {len(best3)} suitable reply {noun} found today.</p>'
+            )
+        cards = count_note + "".join(_html_post_card(i + 1, p) for i, p in enumerate(best3))
     else:
-        cards = '<p style="color:#888;font-size:14px;">No strong reply opportunities found today.</p>'
+        cards = '<p style="color:#888;font-size:14px;">No suitable reply opportunities found today. Check the full digest for inspiration posts.</p>'
 
     original_posts_html = _html_original_posts(posts_schedule)
 

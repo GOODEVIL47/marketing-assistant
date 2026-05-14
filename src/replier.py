@@ -1,106 +1,132 @@
 REPLIES = {
-    1: [
-        {
-            "style": "A — Short and clean",
-            "text": (
-                "Earnings week turns up the volume on everything. "
-                "The move that helps most: get a clear plain-English summary of what actually changed "
-                "before the noise kicks in."
+    1: {
+        "options": [
+            {
+                "style": "A — Short and clean",
+                "text": (
+                    "Earnings week is just the financial media's quarterly excuse to max out the volume. "
+                    "Most of it won't change your actual thesis."
+                ),
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "It's not even the numbers that are tiring. "
+                    "It's the 48 hours of takes that follow — most of which are just reactions to other reactions. "
+                    "Hard to find what actually changed in all that."
+                ),
+            },
+            {
+                "style": "C — Sharper take",
+                "text": (
+                    "Hot take: most earnings 'surprises' aren't surprising if you'd already mapped out "
+                    "the range of outcomes beforehand. "
+                    "The surprise is usually that people hadn't done that part."
+                ),
+            },
+        ],
+        "media": {
+            "type": "GIF",
+            "reason": (
+                "The post is relatable and a little exasperated — earnings week stress is universally felt. "
+                "A well-chosen 'overwhelmed' GIF fits the casual tone without trying too hard."
             ),
         },
-        {
-            "style": "B — Slightly more thoughtful",
-            "text": (
-                "This is a real thing. The problem isn't that earnings week is complicated — "
-                "it's that the coverage optimizes for drama, not clarity. "
-                "What helps is separating the actual catalyst from the reaction to the reaction. "
-                "Most of the noise is commentary on commentary."
+        "best_option_index": 1,
+    },
+    2: {
+        "options": [
+            {
+                "style": "A — One-liner",
+                "text": "By the time you see it clearly, you've usually already acted on it.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "The tricky part is that bias doesn't feel like bias. It feels like conviction. "
+                    "Same internal sensation, completely different reliability."
+                ),
+            },
+            {
+                "style": "C — Sharper take",
+                "text": (
+                    "You can usually tell it's kicked in when your reasoning starts sounding like a closing argument — "
+                    "dismissing everything that disagrees, explaining away the bad signals. "
+                    "That's the moment to pause, not push harder."
+                ),
+            },
+        ],
+        "media": {
+            "type": "Quote repost",
+            "reason": (
+                "The original post is strong enough to anchor a bigger founder take. "
+                "A quote repost with reply C lets the original do the setup while the reply adds real weight."
             ),
         },
-        {
-            "style": "C — Sharper / more opinionated",
-            "text": (
-                "The exhaustion usually isn't from the earnings themselves. "
-                "It's from trying to process 40 takes from people with different time horizons and agendas "
-                "as if they all apply to you. They don't. Filter by your actual thesis, not the ticker trending."
+        "best_option_index": 2,
+    },
+    3: {
+        "options": [
+            {
+                "style": "A — One-liner",
+                "text": "More dashboards, same fog.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "Most platforms solve 'here's more information' when the actual problem is "
+                    "'I don't know what to do with what I already have.' Not the same problem."
+                ),
+            },
+            {
+                "style": "C — Sharper take",
+                "text": (
+                    "The thing most investing tools optimize for is comprehensiveness. Not usefulness. "
+                    "Those aren't the same thing, and the gap between them is where most people get stuck."
+                ),
+            },
+        ],
+        "media": {
+            "type": "No media",
+            "reason": (
+                "The topic is conceptual and the reply is punchy on its own. "
+                "Adding media here would dilute the one-liner rather than help it."
             ),
         },
-    ],
-    2: [
-        {
-            "style": "A — Short and clean",
-            "text": (
-                "Bias is the hardest thing to catch in real time. "
-                "By the time you recognize it, you've usually already acted on it."
+        "best_option_index": 0,
+    },
+    4: {
+        "options": [
+            {
+                "style": "A — One-liner",
+                "text": "Less reactive is underrated.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "Probably not a coincidence. Most financial media is built to make you feel like "
+                    "something is happening right now that needs your attention. "
+                    "That pressure is kind of the product."
+                ),
+            },
+            {
+                "style": "C — Sharper take",
+                "text": (
+                    "Financial media isn't designed to help you think clearly. "
+                    "It's designed to keep you engaged. "
+                    "Those two goals are almost perfectly opposed."
+                ),
+            },
+        ],
+        "media": {
+            "type": "GIF",
+            "reason": (
+                "The 'finally turned off the TV' energy is casual and relatable. "
+                "A GIF of someone visibly relaxing or tuning out fits the tone without feeling forced."
             ),
         },
-        {
-            "style": "B — Slightly more thoughtful",
-            "text": (
-                "Most investing mistakes aren't analytical errors — they're bias errors dressed up as analysis. "
-                "The conviction felt earned, the reasoning felt solid, "
-                "and neither one was actually the driver of the decision."
-            ),
-        },
-        {
-            "style": "C — Sharper / more opinionated",
-            "text": (
-                "The tell is usually when your thesis starts sounding like a closing argument. "
-                "You stop weighing evidence and start explaining away anything that disagrees. "
-                "That shift is worth noticing — it usually precedes a bad entry."
-            ),
-        },
-    ],
-    3: [
-        {
-            "style": "A — Short and clean",
-            "text": (
-                "Agreed. More data without a clearer way to reason about it "
-                "just produces faster, more confident bad decisions."
-            ),
-        },
-        {
-            "style": "B — Slightly more thoughtful",
-            "text": (
-                "The dashboard problem is real. Most retail investors aren't missing information — "
-                "they're missing a way to hold it together into an actual view. "
-                "A framework helps you know what matters, not just what exists."
-            ),
-        },
-        {
-            "style": "C — Sharper / more opinionated",
-            "text": (
-                "Data without structure is just noise with a chart on top of it. "
-                "The question most tools don't answer is: what does this change about my current view? "
-                "That's the framework gap — and it's a big one."
-            ),
-        },
-    ],
-    4: [
-        {
-            "style": "A — Short and clean",
-            "text": (
-                "Calmer usually is better, even if it doesn't feel like it. "
-                "Most market news is designed to create urgency, not clarity."
-            ),
-        },
-        {
-            "style": "B — Slightly more thoughtful",
-            "text": (
-                "Less reactive isn't just a mindset shift — it's a genuine edge for retail investors. "
-                "Most of the people trading against you are reacting too. "
-                "Slowing down is an underrated strategy."
-            ),
-        },
-        {
-            "style": "C — Sharper / more opinionated",
-            "text": (
-                "Financial news is optimized for engagement, not for helping you make a good decision. "
-                "Those two things are almost completely at odds. "
-                "Your investing getting calmer after cutting the feed is not a coincidence."
-            ),
-        },
-    ],
+        "best_option_index": 1,
+    },
 }
 
 
@@ -108,8 +134,12 @@ def generate_replies(scored_posts):
     results = []
     for post in scored_posts:
         if post["score"] in ("Strong fit", "Decent fit"):
-            post_replies = REPLIES.get(post["id"], [])
-            results.append({**post, "replies": post_replies})
+            post_data = REPLIES.get(post["id"], {})
+            options = post_data.get("options", [])
+            media = post_data.get("media", {"type": "No media", "reason": "No media suggested."})
+            best_idx = post_data.get("best_option_index", 0)
+            best_reply = options[best_idx] if options else None
+            results.append({**post, "replies": options, "media": media, "best_reply": best_reply})
         else:
-            results.append({**post, "replies": []})
+            results.append({**post, "replies": [], "media": None, "best_reply": None})
     return results

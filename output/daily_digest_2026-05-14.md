@@ -4,6 +4,27 @@
 
 ---
 
+## Today's Best 3
+
+Top posts worth engaging with today.
+
+**1. @quietinvestor — Strong fit ✅**
+Reply from: Founder
+Best reply: *"It's not even the numbers that are tiring. It's the 48 hours of takes that follow — most of which are just reactions to other reactions. Hard to find what actually changed in all that."*
+Media: GIF
+
+**2. @patientcapital_ — Strong fit ✅**
+Reply from: Either
+Best reply: *"You can usually tell it's kicked in when your reasoning starts sounding like a closing argument — dismissing everything that disagrees, explaining away the bad signals. That's the moment to pause, not push harder."*
+Media: Quote repost
+
+**3. @retailrethink — Decent fit 🟡**
+Reply from: Founder
+Best reply: *"More dashboards, same fog."*
+Media: No media
+
+---
+
 ## Post Scoring & Reply Suggestions
 
 ### Post 1 — Strong fit ✅
@@ -14,16 +35,19 @@
 **Why:** This post captures exactly the overwhelmed retail investor Signal Shift is built for. The author isn't chasing alpha — they want clarity. The phrase 'just want to understand what's actually happening without the noise' is essentially Signal Shift's value prop in the user's own words. High relevance, low risk.
 **Suggested account:** Founder
 
+**Media suggestion:** GIF
+*The post is relatable and a little exasperated — earnings week stress is universally felt. A well-chosen 'overwhelmed' GIF fits the casual tone without trying too hard.*
+
 **Reply options:**
 
 **A — Short and clean**
-> Earnings week turns up the volume on everything. The move that helps most: get a clear plain-English summary of what actually changed before the noise kicks in.
+> Earnings week is just the financial media's quarterly excuse to max out the volume. Most of it won't change your actual thesis.
 
-**B — Slightly more thoughtful**
-> This is a real thing. The problem isn't that earnings week is complicated — it's that the coverage optimizes for drama, not clarity. What helps is separating the actual catalyst from the reaction to the reaction. Most of the noise is commentary on commentary.
+**B — Casual paragraph**
+> It's not even the numbers that are tiring. It's the 48 hours of takes that follow — most of which are just reactions to other reactions. Hard to find what actually changed in all that.
 
-**C — Sharper / more opinionated**
-> The exhaustion usually isn't from the earnings themselves. It's from trying to process 40 takes from people with different time horizons and agendas as if they all apply to you. They don't. Filter by your actual thesis, not the ticker trending.
+**C — Sharper take**
+> Hot take: most earnings 'surprises' aren't surprising if you'd already mapped out the range of outcomes beforehand. The surprise is usually that people hadn't done that part.
 
 ---
 
@@ -35,16 +59,19 @@
 **Why:** Bias recognition is a core part of what Signal Shift surfaces in every brief. This post hits the exact tension the product addresses: the gap between having an idea and knowing whether your own head is getting in the way. Thoughtful audience, good opportunity to add perspective.
 **Suggested account:** Either
 
+**Media suggestion:** Quote repost
+*The original post is strong enough to anchor a bigger founder take. A quote repost with reply C lets the original do the setup while the reply adds real weight.*
+
 **Reply options:**
 
-**A — Short and clean**
-> Bias is the hardest thing to catch in real time. By the time you recognize it, you've usually already acted on it.
+**A — One-liner**
+> By the time you see it clearly, you've usually already acted on it.
 
-**B — Slightly more thoughtful**
-> Most investing mistakes aren't analytical errors — they're bias errors dressed up as analysis. The conviction felt earned, the reasoning felt solid, and neither one was actually the driver of the decision.
+**B — Casual paragraph**
+> The tricky part is that bias doesn't feel like bias. It feels like conviction. Same internal sensation, completely different reliability.
 
-**C — Sharper / more opinionated**
-> The tell is usually when your thesis starts sounding like a closing argument. You stop weighing evidence and start explaining away anything that disagrees. That shift is worth noticing — it usually precedes a bad entry.
+**C — Sharper take**
+> You can usually tell it's kicked in when your reasoning starts sounding like a closing argument — dismissing everything that disagrees, explaining away the bad signals. That's the moment to pause, not push harder.
 
 ---
 
@@ -56,16 +83,19 @@
 **Why:** The 'frameworks over more data' angle aligns well with Signal Shift's positioning. But the post is broad — it's not specifically about emotional investing or noise. There's a real opening here, though a reply needs to add something rather than just agree.
 **Suggested account:** Founder
 
+**Media suggestion:** No media
+*The topic is conceptual and the reply is punchy on its own. Adding media here would dilute the one-liner rather than help it.*
+
 **Reply options:**
 
-**A — Short and clean**
-> Agreed. More data without a clearer way to reason about it just produces faster, more confident bad decisions.
+**A — One-liner**
+> More dashboards, same fog.
 
-**B — Slightly more thoughtful**
-> The dashboard problem is real. Most retail investors aren't missing information — they're missing a way to hold it together into an actual view. A framework helps you know what matters, not just what exists.
+**B — Casual paragraph**
+> Most platforms solve 'here's more information' when the actual problem is 'I don't know what to do with what I already have.' Not the same problem.
 
-**C — Sharper / more opinionated**
-> Data without structure is just noise with a chart on top of it. The question most tools don't answer is: what does this change about my current view? That's the framework gap — and it's a big one.
+**C — Sharper take**
+> The thing most investing tools optimize for is comprehensiveness. Not usefulness. Those aren't the same thing, and the gap between them is where most people get stuck.
 
 ---
 
@@ -77,16 +107,19 @@
 **Why:** Reducing reactive behavior is adjacent to what Signal Shift helps with. The author is describing a behavioral shift without a clear tool behind it. A founder reply that acknowledges the insight without pushing the product feels natural here.
 **Suggested account:** Either
 
+**Media suggestion:** GIF
+*The 'finally turned off the TV' energy is casual and relatable. A GIF of someone visibly relaxing or tuning out fits the tone without feeling forced.*
+
 **Reply options:**
 
-**A — Short and clean**
-> Calmer usually is better, even if it doesn't feel like it. Most market news is designed to create urgency, not clarity.
+**A — One-liner**
+> Less reactive is underrated.
 
-**B — Slightly more thoughtful**
-> Less reactive isn't just a mindset shift — it's a genuine edge for retail investors. Most of the people trading against you are reacting too. Slowing down is an underrated strategy.
+**B — Casual paragraph**
+> Probably not a coincidence. Most financial media is built to make you feel like something is happening right now that needs your attention. That pressure is kind of the product.
 
-**C — Sharper / more opinionated**
-> Financial news is optimized for engagement, not for helping you make a good decision. Those two things are almost completely at odds. Your investing getting calmer after cutting the feed is not a coincidence.
+**C — Sharper take**
+> Financial media isn't designed to help you think clearly. It's designed to keep you engaged. Those two goals are almost perfectly opposed.
 
 ---
 
@@ -142,8 +175,18 @@
 
 ### Founder Post (Founder)
 
-> The retail investor problem isn't a lack of information. It's that all the information arrives at the same volume, with the same urgency, and none of it tells you what actually changed about your thesis. That gap between data and clarity is what I've been thinking about for a while now.
+> Most people don't need a smarter stock screen. They need a way to check whether they're thinking clearly before they act. Those are different problems — and almost nothing is built for the second one.
+
+**Format:** Short paragraph — *Reads like a real observation, not a pitch. Three sentences that build on each other without needing a list or a hook.*
+**Media:** No media — *A standalone thought like this lands better on its own. Adding an image risks making it feel like a campaign instead of a genuine take.*
 
 ### Product Post (@SignalShiftCo)
 
-> Before you act on a hot ticker, Signal Shift gives you a plain-English brief: what the bias looks like, where the real risk is, what would need to be true for this to work, and what would invalidate it. Not a signal. Not a trade. Just clarity before you decide.
+> Signal Shift doesn't tell you what to do.
+
+It gives you a plain-English breakdown of the thesis: where the bias is, what the real risk is, what would need to be true, what would break it.
+
+Before you decide anything.
+
+**Format:** 2-3 line structure — *Each block lands on its own on X. The structure lets the product explain itself without reading like a sales script.*
+**Media:** Simple branded image — *A clean visual gives this post presence in the feed. Works well for product posts that need a little visual weight without overselling.*

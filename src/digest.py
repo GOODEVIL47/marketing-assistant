@@ -146,8 +146,105 @@ def _build_original_posts(posts_schedule, mode="Mock"):
     return lines
 
 
+def _categorize_rejected(posts_with_replies):
+    """
+    Classify posts not selected for Best 3 or Inspiration into reject categories.
+    Returns a dict with keys: stale, out_of_scope, avoid, weak, other.
+    """
+    eligible = [
+        p for p in posts_with_replies
+        if p["score"] in ("Strong fit", "Decent fit")
+        and p["opportunity"] in ("High opportunity", "Medium opportunity")
+    ]
+    top3_ids = {
+        p["id"]
+        for p in sorted(
+            eligible,
+            key=lambda p: (_SCORE_ORDER.index(p["score"]), _OPP_ORDER.index(p["opportunity"])),
+        )[:3]
+    }
+    inspiration_ids = {
+        p["id"] for p in posts_with_replies
+        if p["score"] in ("Strong fit", "Decent fit")
+        and p.get("metrics_confidence") == "low"
+        and p.get("freshness_tier") == "old"
+        and p.get("inspiration_angles")
+    }
+
+    stale, out_of_scope, avoid, weak, other = [], [], [], [], []
+    for post in posts_with_replies:
+        if post["id"] in top3_ids or post["id"] in inspiration_ids:
+            continue
+        tier = post.get("freshness_tier", "unknown")
+        if tier in ("stale", "very_stale"):
+            stale.append(post)
+        elif post.get("out_of_scope"):
+            out_of_scope.append(post)
+        elif post["score"] == "Avoid":
+            avoid.append(post)
+        elif post["score"] == "Weak fit":
+            weak.append(post)
+        else:
+            other.append(post)
+
+    return {
+        "stale": stale,
+        "out_of_scope": out_of_scope,
+        "avoid": avoid,
+        "weak": weak,
+        "other": other,
+    }
+
+
+def _build_rejected_summary(posts_with_replies):
+    """Compact summary of posts not selected, with category breakdown and 3 examples."""
+    cats = _categorize_rejected(posts_with_replies)
+    total = sum(len(v) for v in cats.values())
+    if total == 0:
+        return []
+
+    lines = ["## Rejected Posts Summary", ""]
+    lines.append(f"**{total} post{'s' if total != 1 else ''} scanned but not selected for replies.**")
+    lines.append("")
+
+    breakdown = []
+    if cats["stale"]:
+        breakdown.append(f"Stale (>7d old): {len(cats['stale'])}")
+    if cats["out_of_scope"]:
+        breakdown.append(f"Out of scope (non-US market): {len(cats['out_of_scope'])}")
+    if cats["avoid"]:
+        breakdown.append(f"Avoid (hype/promo/crypto): {len(cats['avoid'])}")
+    if cats["weak"]:
+        breakdown.append(f"Weak fit (TA/misaligned): {len(cats['weak'])}")
+    if cats["other"]:
+        breakdown.append(f"Other (low opportunity): {len(cats['other'])}")
+    lines.append(" · ".join(breakdown))
+    lines.append("")
+
+    examples = []
+    for cat_name in ("avoid", "weak", "stale", "out_of_scope", "other"):
+        for post in cats[cat_name]:
+            if len(examples) >= 3:
+                break
+            examples.append(post)
+        if len(examples) >= 3:
+            break
+
+    if examples:
+        lines.append("**Examples:**")
+        lines.append("")
+        for post in examples:
+            raw = post.get("text", "")
+            snippet = raw[:80] + ("..." if len(raw) > 80 else "")
+            lines.append(f"- {post['author']} ({post['score']}): *\"{snippet}\"*")
+        lines.append("")
+
+    return lines
+
+
 def build_markdown(profile_name, posts_with_replies, posts_schedule, mode="Mock"):
     today = date.today().isoformat()
+    debug_mode = os.environ.get("DIGEST_DEBUG", "").lower() == "true"
     lines = []
 
     lines.append(f"# Mel's Daily Digest — {today}")
@@ -167,73 +264,81 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule, mode="Mock"
 
     lines.append("---")
     lines.append("")
-    lines.append("## Post Scoring & Reply Suggestions")
-    lines.append("")
 
-    for post in posts_with_replies:
-        fit_e = _fit_emoji(post["score"])
-        opp_e = _opp_emoji(post["opportunity"])
-        lines.append(f"### Post {post['id']} — {post['author']}")
-        lines.append(f"**Fit:** {post['score']} {fit_e}")
-        lines.append(f"**Visibility:** {post['visibility']}")
-        lines.append(f"**Opportunity:** {post['opportunity']} {opp_e}")
-        lines.append(f"**Engagement:** {post['engagement_summary']}")
-        if post.get("age_label"):
-            lines.append(f"**{post['age_label']}**")
-        _src_labels = {"brave_search": "Brave Search", "tavily_search": "Tavily Search"}
-        _src = _src_labels.get(post.get("discovery_source", ""), "")
-        if _src:
-            lines.append(
-                f"**Source:** Found via {_src} — "
-                "engagement metrics unavailable. Verify before replying."
+    if debug_mode:
+        lines.append("## Post Scoring & Reply Suggestions")
+        lines.append("")
+
+        for post in posts_with_replies:
+            fit_e = _fit_emoji(post["score"])
+            opp_e = _opp_emoji(post["opportunity"])
+            lines.append(f"### Post {post['id']} — {post['author']}")
+            lines.append(f"**Fit:** {post['score']} {fit_e}")
+            lines.append(f"**Visibility:** {post['visibility']}")
+            lines.append(f"**Opportunity:** {post['opportunity']} {opp_e}")
+            lines.append(f"**Engagement:** {post['engagement_summary']}")
+            if post.get("age_label"):
+                lines.append(f"**{post['age_label']}**")
+            _src_labels = {"brave_search": "Brave Search", "tavily_search": "Tavily Search"}
+            _src = _src_labels.get(post.get("discovery_source", ""), "")
+            if _src:
+                lines.append(
+                    f"**Source:** Found via {_src} — "
+                    "engagement metrics unavailable. Verify before replying."
+                )
+            followers = post.get("author_followers", 0)
+            followers_str = (
+                "Unknown"
+                if (followers == 0 and post.get("metrics_confidence") == "low")
+                else f"{followers:,}"
             )
-        followers = post.get("author_followers", 0)
-        followers_str = (
-            "Unknown"
-            if (followers == 0 and post.get("metrics_confidence") == "low")
-            else f"{followers:,}"
-        )
-        lines.append(f"**Author followers:** {followers_str}")
-        post_url = post.get("post_url")
-        if post_url:
-            lines.append(f"**Post URL:** {post_url}")
-        lines.append(f"**Suggested account:** {post['reply_account']}")
-        lines.append(f"**Suggested action:** {post['suggested_action']}")
-        lines.append("")
-        lines.append(f"**Post:** {post['text']}")
-        lines.append("")
-        lines.append(f"**Why it fits:** {post['reason']}")
-        lines.append(f"**Why this is / is not worth engaging:** {post['opportunity_reason']}")
-        lines.append("")
+            lines.append(f"**Author followers:** {followers_str}")
+            post_url = post.get("post_url")
+            if post_url:
+                lines.append(f"**Post URL:** {post_url}")
+            lines.append(f"**Suggested account:** {post['reply_account']}")
+            lines.append(f"**Suggested action:** {post['suggested_action']}")
+            lines.append("")
+            lines.append(f"**Post:** {post['text']}")
+            lines.append("")
+            lines.append(f"**Why it fits:** {post['reason']}")
+            lines.append(f"**Why this is / is not worth engaging:** {post['opportunity_reason']}")
+            lines.append("")
 
-        reply_note = post.get("reply_note")
-        inspiration_angles = post.get("inspiration_angles")
-        if reply_note:
-            lines.append(f"*{reply_note}*")
-            lines.append("")
-        elif inspiration_angles:
-            lines.append("**Inspiration angles (do not reply — use for original posts):**")
-            lines.append("")
-            for angle in inspiration_angles:
-                lines.append(f"- {angle}")
-            lines.append("")
-        elif post["replies"]:
-            media = post.get("media") or {}
-            lines.append(f"**Media suggestion:** {media.get('type', 'No media')}")
-            lines.append(f"*{media.get('reason', '')}*")
-            lines.append("")
-            lines.append("**Reply options:**")
-            lines.append("")
-            for reply in post["replies"]:
-                lines.append(f"**{reply['style']}**")
-                lines.append(f"> {reply['text']}")
+            reply_note = post.get("reply_note")
+            inspiration_angles = post.get("inspiration_angles")
+            if reply_note:
+                lines.append(f"*{reply_note}*")
                 lines.append("")
-        else:
-            lines.append("*No replies suggested for this post.*")
-            lines.append("")
+            elif inspiration_angles:
+                lines.append("**Inspiration angles (do not reply — use for original posts):**")
+                lines.append("")
+                for angle in inspiration_angles:
+                    lines.append(f"- {angle}")
+                lines.append("")
+            elif post["replies"]:
+                media = post.get("media") or {}
+                lines.append(f"**Media suggestion:** {media.get('type', 'No media')}")
+                lines.append(f"*{media.get('reason', '')}*")
+                lines.append("")
+                lines.append("**Reply options:**")
+                lines.append("")
+                for reply in post["replies"]:
+                    lines.append(f"**{reply['style']}**")
+                    lines.append(f"> {reply['text']}")
+                    lines.append("")
+            else:
+                lines.append("*No replies suggested for this post.*")
+                lines.append("")
 
-        lines.append("---")
-        lines.append("")
+            lines.append("---")
+            lines.append("")
+    else:
+        rejected_summary = _build_rejected_summary(posts_with_replies)
+        if rejected_summary:
+            lines.extend(rejected_summary)
+            lines.append("---")
+            lines.append("")
 
     lines.extend(_build_original_posts(posts_schedule, mode=mode))
 

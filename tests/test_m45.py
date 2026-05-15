@@ -186,11 +186,12 @@ class TestStalePostMarkdown(unittest.TestCase):
         md = self._stale_digest()
         self.assertNotIn("**Reply options:**", md)
 
-    def test_stale_shows_reply_note(self):
+    def test_stale_shows_in_rejected_summary(self):
+        # M4.10: compact mode shows rejected summary instead of per-post blocks.
+        # Stale posts appear in the "Rejected Posts Summary" section.
         md = self._stale_digest()
-        self.assertIn("No reply suggested", md)
-        self.assertIn("stale post", md)
-        self.assertIn("inspiration only", md)
+        self.assertIn("Rejected Posts Summary", md)
+        self.assertIn("Stale", md)
 
 
 # ---------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 import html as _html
 from datetime import date as _date
 
-from src.digest import _SCORE_ORDER, _OPP_ORDER
+from src.digest import _SCORE_ORDER, _OPP_ORDER, _categorize_rejected
 
 # Maps discovery_source values to human-readable provider labels.
 # Add new web search providers here — source notes update automatically.
@@ -330,6 +330,68 @@ def _html_inspiration(posts_with_replies):
   </td></tr>"""
 
 
+def _html_rejected_summary(posts_with_replies):
+    """Compact HTML section summarising posts not selected, with category counts and 3 examples."""
+    cats = _categorize_rejected(posts_with_replies)
+    total = sum(len(v) for v in cats.values())
+    if total == 0:
+        return ""
+
+    breakdown_parts = []
+    if cats["stale"]:
+        breakdown_parts.append(f'Stale (&gt;7d): <strong>{len(cats["stale"])}</strong>')
+    if cats["out_of_scope"]:
+        breakdown_parts.append(f'Out of scope: <strong>{len(cats["out_of_scope"])}</strong>')
+    if cats["avoid"]:
+        breakdown_parts.append(f'Avoid: <strong>{len(cats["avoid"])}</strong>')
+    if cats["weak"]:
+        breakdown_parts.append(f'Weak fit: <strong>{len(cats["weak"])}</strong>')
+    if cats["other"]:
+        breakdown_parts.append(f'Other: <strong>{len(cats["other"])}</strong>')
+    breakdown_html = " &middot; ".join(breakdown_parts)
+
+    examples = []
+    for cat_name in ("avoid", "weak", "stale", "out_of_scope", "other"):
+        for post in cats[cat_name]:
+            if len(examples) >= 3:
+                break
+            examples.append(post)
+        if len(examples) >= 3:
+            break
+
+    examples_html = ""
+    if examples:
+        items_html = ""
+        for post in examples:
+            raw = post.get("text", "")
+            snippet = raw[:80] + ("..." if len(raw) > 80 else "")
+            items_html += (
+                f'<p style="margin:0 0 3px;font-size:11px;color:#6b7280;">'
+                f'<strong>{_esc(post["author"])}</strong> ({_esc(post["score"])}): '
+                f'&ldquo;{_esc(snippet)}&rdquo;</p>'
+            )
+        examples_html = (
+            '<p style="margin:8px 0 4px;font-size:11px;font-weight:700;color:#374151;">'
+            'Examples:</p>'
+            + items_html
+        )
+
+    return f"""
+  <!-- ── Rejected Summary ── -->
+  <tr><td style="background:#ffffff;border-left:1px solid #e0e6ed;
+                 border-right:1px solid #e0e6ed;padding:0 22px;">
+    <hr style="border:none;border-top:1px solid #e8edf2;margin:0;">
+  </td></tr>
+  <tr><td style="background:#f8fafc;border-left:1px solid #e0e6ed;
+                 border-right:1px solid #e0e6ed;padding:12px 22px 14px;">
+    <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#6b7280;">
+      Rejected Posts &mdash; {total} not selected
+    </p>
+    <p style="margin:0 0 6px;font-size:11px;color:#9ca3af;">{breakdown_html}</p>
+    {examples_html}
+  </td></tr>"""
+
+
 def _html_original_posts(posts_schedule, mode="Mock"):
     parts = []
     for role in ("founder", "product"):
@@ -408,6 +470,7 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule, mode="M
         )
 
     original_posts_html = _html_original_posts(posts_schedule, mode=mode)
+    rejected_summary_html = _html_rejected_summary(posts_with_replies)
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -504,6 +567,8 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule, mode="M
     </p>
     {original_posts_html}
   </td></tr>
+
+  {rejected_summary_html}
 
   <!-- ── Footer ── -->
   <tr><td style="background:#f0f4f8;border:1px solid #e0e6ed;border-top:none;
@@ -669,6 +734,28 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule, mode="M
                 f"  Check {data['handle']} manually before posting "
                 f"(posting history unavailable in {mode} mode)."
             )
+
+    cats = _categorize_rejected(posts_with_replies)
+    total_rejected = sum(len(v) for v in cats.values())
+    if total_rejected > 0:
+        breakdown = []
+        if cats["stale"]:
+            breakdown.append(f"Stale (>7d): {len(cats['stale'])}")
+        if cats["out_of_scope"]:
+            breakdown.append(f"Out of scope: {len(cats['out_of_scope'])}")
+        if cats["avoid"]:
+            breakdown.append(f"Avoid: {len(cats['avoid'])}")
+        if cats["weak"]:
+            breakdown.append(f"Weak fit: {len(cats['weak'])}")
+        if cats["other"]:
+            breakdown.append(f"Other: {len(cats['other'])}")
+        lines += [
+            "",
+            "-" * 52,
+            "",
+            f"REJECTED POSTS — {total_rejected} not selected",
+            " · ".join(breakdown),
+        ]
 
     footer = (
         "Full detailed digest (all posts, all reply options) available in the GitHub Actions artifact."

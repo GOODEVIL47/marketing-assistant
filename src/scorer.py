@@ -91,7 +91,7 @@ def _freshness_tier(age_hours):
     return "very_stale"
 
 
-def _age_label(post):
+def _age_label(post, fit_score=None, out_of_scope=False):
     """Human-readable age label for display in digest and email."""
     age = post.get("age_hours")
     source = post.get("age_source", "")
@@ -104,7 +104,12 @@ def _age_label(post):
     elif age < 48:
         label = f"Age: {age / 24:.1f}d old — older but possibly usable"
     elif age < 168:
-        label = f"Age: {int(age // 24)}d old — save for inspiration"
+        if out_of_scope:
+            label = f"Age: {int(age // 24)}d old — outside current product scope"
+        elif fit_score in ("Strong fit", "Decent fit"):
+            label = f"Age: {int(age // 24)}d old — save for inspiration"
+        else:
+            label = f"Age: {int(age // 24)}d old — not a reply target"
     elif age < 720:
         label = f"Age: {int(age // 24)}d old — stale, do not reply"
     else:
@@ -569,7 +574,7 @@ def score_posts(posts, profile=None):
             "engagement_summary": eng_summary,
             "suggested_action": action,
             "freshness_tier": _freshness_tier(post.get("age_hours")),
-            "age_label": _age_label(post) if post.get("metrics_confidence") == "low" else None,
+            "age_label": _age_label(post, fit_score=fit_score, out_of_scope=out_of_scope) if post.get("metrics_confidence") == "low" else None,
             "out_of_scope": out_of_scope,
         })
     return results

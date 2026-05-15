@@ -386,6 +386,7 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule, mode="M
     product_val = '<span style="color:#4ade80;font-weight:700;">Recommended</span>' if product_ok else "Not needed"
 
     recommendation = _esc(_mel_recommendation(best3, posts_schedule))
+    inspiration_html = _html_inspiration(posts_with_replies)
 
     if best3:
         count_note = ""
@@ -397,9 +398,15 @@ def render_digest_html(profile_name, posts_with_replies, posts_schedule, mode="M
             )
         cards = count_note + "".join(_html_post_card(i + 1, p) for i, p in enumerate(best3))
     else:
-        cards = '<p style="color:#888;font-size:14px;">No suitable reply opportunities found today. Check the full digest for inspiration posts.</p>'
+        no_opp_suffix = (
+            " Check the Save for Inspiration section below."
+            if inspiration_html.strip() else ""
+        )
+        cards = (
+            f'<p style="color:#888;font-size:14px;">'
+            f'No suitable reply opportunities found today.{no_opp_suffix}</p>'
+        )
 
-    inspiration_html = _html_inspiration(posts_with_replies)
     original_posts_html = _html_original_posts(posts_schedule, mode=mode)
 
     return f"""<!DOCTYPE html>

@@ -144,7 +144,8 @@ class TestBuildQueriesCap(unittest.TestCase):
             "search_terms": ["term A", "term B", "term C"],
             "query_templates": ['site:x.com "{term}"', 'site:x.com "{term}" "today"'],
         }
-        with patch.dict(os.environ, {"MAX_SEARCH_QUERIES": "3"}):
+        # QUERY_SEED=0 → offset=0 → rotation starts at first candidate
+        with patch.dict(os.environ, {"MAX_SEARCH_QUERIES": "3", "QUERY_SEED": "0"}):
             queries = _build_queries(profile)
         self.assertEqual(queries[0], 'site:x.com "term A"')
         self.assertEqual(queries[1], 'site:x.com "term B"')

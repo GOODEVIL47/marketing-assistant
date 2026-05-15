@@ -245,12 +245,43 @@ fit_keywords:
   # Today's Best 3. They may appear in Save for Inspiration with a scope label.
   out_of_scope_market:
     - rupee
+    - INR
+    - India
+    - Indian
+    - Modi
     - Nifty
     - Sensex
     - SEBI
+    - RBI
     - FTSE
     - Nikkei
+    - "Hang Seng"
+    - ASX
     - "Indian market"
     - "Indian stock"
     - "UK market"
     - "UK stock"
+    - forex
+    - FX
+    - "currency pair"
+
+  # US-market context signals for Best 3 eligibility.
+  # Web-search posts with Strong/Decent fit but none of these terms are capped
+  # at Low opportunity — they may be investing-related but lack clear US scope.
+  us_scope_market:
+    - "S&P"
+    - Nasdaq
+    - NYSE
+    - Fed
+    - "Federal Reserve"
+    - CPI
+    - earnings
+    - premarket
+    - "after hours"
+    - "Wall Street"
+    - "US stocks"
+    - "US equities"
+    - "US market"
+    - "small cap"
+    - "mega cap"
+    - "$"

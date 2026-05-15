@@ -223,6 +223,28 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index_c": 2,
+        "options_d": [
+            {
+                "style": "A — One-liner",
+                "text": "A lot of market noise is just volume wearing a suit.",
+            },
+            {
+                "style": "B — Agreement + reframe",
+                "text": (
+                    "That pull to do something with every new piece of data is real — "
+                    "and almost every financial platform is designed to amplify it. "
+                    "Worth naming before acting on it."
+                ),
+            },
+            {
+                "style": "C — Question/reframe",
+                "text": (
+                    "What's one thing from the past week that genuinely changed your picture — "
+                    "not what got louder or made you anxious, but what actually shifted the thesis?"
+                ),
+            },
+        ],
+        "best_option_index_d": 1,
         "media": {
             "type": "Optional GIF",
             "reason": (
@@ -305,6 +327,28 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index_c": 2,
+        "options_d": [
+            {
+                "style": "A — One-liner",
+                "text": "Not every loud candle deserves a thesis rewrite.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "One useful test: could you explain the bear case as convincingly as the bull? "
+                    "If the answer is no — not 'I'm not sure' but genuinely no — "
+                    "the thesis may have more emotional load than you think."
+                ),
+            },
+            {
+                "style": "C — Key point",
+                "text": (
+                    "The gap between 'I've thought about this a lot' and 'I've thought about this clearly' "
+                    "is bigger than it looks. The first can feel exactly like the second."
+                ),
+            },
+        ],
+        "best_option_index_d": 1,
         "media": {
             "type": "Quote repost",
             "reason": (
@@ -465,6 +509,29 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index_c": 1,
+        "options_d": [
+            {
+                "style": "A — One-liner",
+                "text": "Sometimes the best edge is not giving every headline a steering wheel.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "The hardest move isn't figuring out what to do — "
+                    "it's resisting the feeling that you need to do something right now. "
+                    "That pressure almost always comes from the feed, not the situation."
+                ),
+            },
+            {
+                "style": "C — Agreement + reframe",
+                "text": (
+                    "Less reactive is chronically underrated. "
+                    "Most platforms are built to tell you that urgency equals importance. "
+                    "Separating those two is most of the work."
+                ),
+            },
+        ],
+        "best_option_index_d": 2,
         "media": {
             "type": "Optional GIF",
             "reason": (
@@ -621,6 +688,30 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index_c": 0,
+        "options_d": [
+            {
+                "style": "A — One-liner",
+                "text": "More tabs, less clarity — classic market browser disease.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "The chart moved. The thesis may not have. "
+                    "That gap — between what's actually different and what just feels different — "
+                    "is where most reactive decisions get made."
+                ),
+            },
+            {
+                "style": "C — Sharper take",
+                "text": (
+                    "Good investing is mostly a process of deciding what you believe "
+                    "before you start researching it. "
+                    "The research rarely produces the decision — "
+                    "it mostly confirms the one you already made."
+                ),
+            },
+        ],
+        "best_option_index_d": 1,
         "media": {
             "type": "No media",
             "reason": "Generic fallback reply works better as clean text.",
@@ -696,6 +787,28 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index_c": 2,
+        "options_d": [
+            {
+                "style": "A — Short and clean",
+                "text": "Worth being specific about what you're trying to figure out — before you start.",
+            },
+            {
+                "style": "B — Casual paragraph",
+                "text": (
+                    "A lot of 'staying informed' is just staying reactive. "
+                    "The question worth asking is whether what you're reading "
+                    "is actually helping you decide anything — or just keeping you occupied."
+                ),
+            },
+            {
+                "style": "C — Question/reframe",
+                "text": (
+                    "Is the difficulty here finding the right information — "
+                    "or having a clear enough frame to know what to do with what you already have?"
+                ),
+            },
+        ],
+        "best_option_index_d": 1,
         "media": {
             "type": "No media",
             "reason": "Generic fallback reply works better as clean text.",
@@ -711,31 +824,55 @@ _INSPIRATION_ANGLES = {
     "noise_overwhelm": [
         "Market noise feels useful because it's urgent. But urgency and usefulness are not the same thing. Worth separating them.",
         "There's a version of research that is just looking for permission to act. Worth checking which one you're doing.",
+        "A lot of market noise is just volume wearing a suit.",
+        "The chart moved. The thesis may not have. That gap is where people usually get spun around.",
     ],
     "bias_emotional": [
         "Conviction and clarity feel identical from the inside. That's the problem — and why process matters more than the conclusion you've already reached.",
         "A calm investing process starts by separating what genuinely changed from what merely got louder. They feel the same in the moment.",
+        "Not every loud candle deserves a thesis rewrite.",
+        "The useful question isn't 'do I have a strong view' — it's 'what would actually change my mind.'",
     ],
     "clarity_signal": [
         "The question matters more than the data. A sharp question makes what you already have useful. More data doesn't fix a blurry question.",
         "Most research is just reading until a position feels defensible — which isn't the same as understanding it.",
+        "Sometimes the best edge is not giving every headline a steering wheel.",
+        "If you can't explain the bear case as convincingly as the bull case, the thesis probably has gaps.",
     ],
     "reactive_slow_down": [
         "Less reactive is the underrated edge. Almost every financial incentive — media, platforms, commentary — points in the other direction.",
         "The market prices in action. It doesn't price in patience. Which is part of why patience keeps being where the edge is.",
+        "The urge to react is not the same as the need to act.",
+        "Most platforms aren't built to help you slow down. That's not an accident — the engagement model depends on the opposite.",
     ],
     "data_vs_insight": [
         "Information and understanding are not the same thing. Most tools are built for the first. Almost nothing is built for the second.",
         "More data often makes decisions harder, not easier — it gives you more things to rationalize with rather than more clarity.",
+        "More tabs, less clarity — classic market browser disease.",
+        "The bottleneck is almost never more data. It's a cleaner framework for what to do with what you already have.",
     ],
     "generic_strong": [
         "The real work happens before you look at any data — getting clear on what you're trying to answer and what would actually change your mind.",
         "Most serious investors talk about process more than outcomes. That probably isn't a coincidence.",
+        "Being well-informed and thinking clearly are different things. More of one doesn't automatically give you more of the other.",
+        "The best investors are very specific about what they're trying to decide — before they start researching.",
     ],
     "generic_decent": [
         "The framing matters as much as the information. The question you start with shapes everything you find.",
         "Good questions tend to surface faster than good answers. Making the question sharper is usually the best next move.",
+        "Worth naming what you're actually trying to figure out — before gathering more information about it.",
+        "There's a version of staying informed that is just staying reactive. Worth knowing which one you're doing.",
     ],
+}
+
+_INSPIRATION_FORMAT_HINTS = {
+    "noise_overwhelm": "one-liner or short paragraph",
+    "bias_emotional": "short paragraph or question/reframe",
+    "clarity_signal": "short paragraph or 3-line founder post",
+    "reactive_slow_down": "one-liner or 3-line founder post",
+    "data_vs_insight": "one-liner or short paragraph",
+    "generic_strong": "short paragraph or 3-line founder post",
+    "generic_decent": "short paragraph",
 }
 
 
@@ -749,24 +886,25 @@ _THEME_KEYWORDS = [
 ]
 
 
-def _pick_reply_options(tweet_id, template):
+def _pick_reply_options(tweet_id, text, theme, template):
     """
-    Select A/B/C options from one of three named variant sets, chosen by
-    tweet_id % 3. Posts with different IDs and the same theme get different
-    wording. Output is deterministic: same ID always yields the same set.
+    Select A/B/C options from available variant sets using a stable hash of
+    tweet ID + theme + post text. Posts with different IDs or text get different
+    wording even for the same theme. Output is deterministic.
     Mock posts are never routed here.
     """
-    try:
-        idx = int(tweet_id) % 3
-    except (ValueError, TypeError):
-        idx = 0
-
-    sets = [
+    import hashlib
+    combined = f"{tweet_id}:{theme}:{(text or '')[:60]}"
+    all_sets = [
         ("options",   "best_option_index"),
         ("options_b", "best_option_index_b"),
         ("options_c", "best_option_index_c"),
+        ("options_d", "best_option_index_d"),
     ]
-    opt_key, best_key = sets[idx]
+    available = [(k, b) for k, b in all_sets if k in template]
+    n = len(available)
+    idx = int(hashlib.md5(combined.encode()).hexdigest(), 16) % n
+    opt_key, best_key = available[idx]
     options = template.get(opt_key) or template["options"]
     best_idx = template.get(best_key, template.get("best_option_index", 0))
     return options, best_idx
@@ -865,7 +1003,7 @@ def generate_replies(scored_posts):
                 if theme is None:
                     theme = "generic_strong" if fit_score == "Strong fit" else "generic_decent"
                 template = _DYNAMIC_TEMPLATES[theme]
-                options, best_idx = _pick_reply_options(post_id, template)
+                options, best_idx = _pick_reply_options(post_id, post.get("text", ""), theme, template)
                 media = template["media"]
                 best_reply = options[best_idx]
             results.append({

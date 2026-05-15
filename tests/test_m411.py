@@ -159,9 +159,9 @@ class TestWorthCheckingAppears(unittest.TestCase):
 
     def test_best3_note_mentions_worth_checking_when_empty(self):
         posts = [self._decent_low_fresh()]
-        lines = _build_best_3(posts, has_worth_checking=True)
+        lines = _build_best_3(posts, worth_checking_count=1)
         content = "\n".join(lines)
-        self.assertIn("Worth Checking Manually", content)
+        self.assertIn("worth checking manually", content.lower())
 
 
 # ---------------------------------------------------------------------------
@@ -220,14 +220,19 @@ class TestBest3StaysStrict(unittest.TestCase):
         ]
         lines = _build_best_3(posts)
         content = "\n".join(lines)
-        self.assertIn("No suitable reply opportunities found today", content)
+        self.assertIn("No strong reply opportunities today", content)
 
     def test_best3_still_strict_when_worth_checking_present(self):
+        # Post must have market context so Worth Checking section appears
         posts = [
-            _make_scored("b3_low", "Retail noise", "Decent fit", "Low opportunity", "fresh")
+            _make_scored(
+                "b3_low",
+                "Market noise is overwhelming retail investors this week.",
+                "Decent fit", "Low opportunity", "fresh",
+            )
         ]
         md = build_markdown("Signal Shift", posts, _make_posts_schedule(), mode="Tavily")
-        self.assertIn("No suitable reply opportunities found today", md)
+        self.assertIn("No strong reply opportunities today", md)
         self.assertIn("Worth Checking Manually", md)
 
 

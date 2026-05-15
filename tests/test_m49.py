@@ -276,7 +276,7 @@ class TestCombinedTextScopeOpportunity(unittest.TestCase):
         with_replies = generate_replies(scored)
         lines = _build_best_3(with_replies)
         content = "\n".join(lines)
-        self.assertIn("No suitable reply opportunities found today", content)
+        self.assertIn("No strong reply opportunities today", content)
 
     def test_rupee_in_combined_text_low_opportunity(self):
         scored = _score(
@@ -321,7 +321,7 @@ class TestUScopePreference(unittest.TestCase):
         with_replies = generate_replies(scored_list)
         lines = _build_best_3(with_replies)
         content = "\n".join(lines)
-        self.assertIn("No suitable reply opportunities found today", content)
+        self.assertIn("No strong reply opportunities today", content)
 
     def test_has_us_scope_returns_true_for_us_signals(self):
         profile = _load_profile()

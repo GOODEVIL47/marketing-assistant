@@ -258,7 +258,7 @@ class TestOutOfScopeOpportunity(unittest.TestCase):
         with_replies = generate_replies(scored)
         lines = _build_best_3(with_replies)
         content = "\n".join(lines)
-        self.assertIn("No suitable reply opportunities found today", content)
+        self.assertIn("No strong reply opportunities today", content)
 
     def test_us_earnings_still_medium_opportunity(self):
         # Fresh US post with strong fit → Medium opportunity (not downgraded)

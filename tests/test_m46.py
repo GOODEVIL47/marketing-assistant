@@ -250,7 +250,7 @@ class TestInspirationMessageWording(unittest.TestCase):
         with_replies = generate_replies(scored)
         lines = _build_best_3(with_replies, has_inspiration=False)
         content = "\n".join(lines)
-        self.assertIn("No suitable reply opportunities found today", content)
+        self.assertIn("No strong reply opportunities today", content)
         self.assertNotIn("Save for Inspiration", content)
 
     def test_inspiration_message_shown_when_inspiration_exists(self):
@@ -259,7 +259,7 @@ class TestInspirationMessageWording(unittest.TestCase):
         with_replies = generate_replies(scored)
         lines = _build_best_3(with_replies, has_inspiration=True)
         content = "\n".join(lines)
-        self.assertIn("Save for Inspiration", content)
+        self.assertIn("Inspiration ideas below", content)
 
     def test_build_markdown_no_inspiration_ref_when_empty(self):
         post = _make_web_post(age_hours=250)
@@ -296,7 +296,7 @@ class TestInspirationMessageWording(unittest.TestCase):
         html = render_digest_html("Signal Shift", with_replies, sched, mode="Tavily Search")
         # No inspiration section → the no-opportunities message should NOT mention it
         self.assertNotIn("Save for Inspiration section below", html)
-        self.assertIn("No suitable reply opportunities found today", html)
+        self.assertIn("No strong reply opportunities today", html)
 
 
 # ---------------------------------------------------------------------------

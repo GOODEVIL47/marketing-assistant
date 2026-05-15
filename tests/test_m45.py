@@ -329,49 +329,39 @@ class TestTavilyModeScheduleWording(unittest.TestCase):
 # ---------------------------------------------------------------------------
 
 class TestThreeVariantReplySelection(unittest.TestCase):
+    # M4.11: _pick_reply_options now takes (tweet_id, text, theme, template)
+    # and uses MD5 hash for stable selection across up to 4 option sets.
 
-    def test_mod_0_gets_options_a(self):
-        # Tweet ID divisible by 3 → idx=0 → options (set A)
-        tweet_id = "1900000000000000002"  # 2 % 3 = 2... need % 3 == 0
-        # Use 1900000000000000000 — ends in 000, divisible by 3? 1+9+0... sum digits irrelevant for %
-        # Just use a known value: 6 % 3 == 0
-        tweet_id = "6"
+    def test_selection_is_deterministic(self):
         template = _DYNAMIC_TEMPLATES["noise_overwhelm"]
-        options, best_idx = _pick_reply_options(tweet_id, template)
-        self.assertEqual(options, template["options"])
-        self.assertEqual(best_idx, template["best_option_index"])
+        opts1, idx1 = _pick_reply_options("12345", "Market noise this week", "noise_overwhelm", template)
+        opts2, idx2 = _pick_reply_options("12345", "Market noise this week", "noise_overwhelm", template)
+        self.assertEqual(opts1, opts2)
+        self.assertEqual(idx1, idx2)
 
-    def test_mod_1_gets_options_b(self):
-        tweet_id = "7"  # 7 % 3 == 1
+    def test_different_ids_yield_variation(self):
+        # 4 different IDs across the same theme should select more than 1 unique set
         template = _DYNAMIC_TEMPLATES["noise_overwhelm"]
-        options, best_idx = _pick_reply_options(tweet_id, template)
-        self.assertEqual(options, template["options_b"])
-        self.assertEqual(best_idx, template["best_option_index_b"])
-
-    def test_mod_2_gets_options_c(self):
-        tweet_id = "8"  # 8 % 3 == 2
-        template = _DYNAMIC_TEMPLATES["noise_overwhelm"]
-        options, best_idx = _pick_reply_options(tweet_id, template)
-        self.assertEqual(options, template["options_c"])
-        self.assertEqual(best_idx, template["best_option_index_c"])
+        seen = set()
+        for tweet_id in ["id_alpha", "id_beta", "id_gamma", "id_delta"]:
+            opts, _ = _pick_reply_options(tweet_id, "market noise overwhelming", "noise_overwhelm", template)
+            seen.add(opts[0]["text"])
+        self.assertGreater(len(seen), 1)
 
     def test_three_ids_in_same_theme_get_different_sets(self):
         template = _DYNAMIC_TEMPLATES["generic_strong"]
-        opts_a, _ = _pick_reply_options("6", template)   # % 3 == 0
-        opts_b, _ = _pick_reply_options("7", template)   # % 3 == 1
-        opts_c, _ = _pick_reply_options("8", template)   # % 3 == 2
-        # All three sets should be distinct
-        texts_a = {r["text"] for r in opts_a}
-        texts_b = {r["text"] for r in opts_b}
-        texts_c = {r["text"] for r in opts_c}
-        self.assertNotEqual(texts_a, texts_b)
-        self.assertNotEqual(texts_b, texts_c)
-        self.assertNotEqual(texts_a, texts_c)
+        results = []
+        for tweet_id in ["id_alpha", "id_beta", "id_gamma", "id_delta"]:
+            opts, _ = _pick_reply_options(tweet_id, "", "generic_strong", template)
+            results.append(frozenset(r["text"] for r in opts))
+        self.assertGreater(len(set(results)), 1)
 
-    def test_invalid_id_falls_back_to_options_a(self):
+    def test_non_numeric_id_does_not_crash(self):
         template = _DYNAMIC_TEMPLATES["generic_strong"]
-        options, best_idx = _pick_reply_options("not-a-number", template)
-        self.assertEqual(options, template["options"])
+        options, best_idx = _pick_reply_options("not-a-number", "", "generic_strong", template)
+        self.assertIsInstance(options, list)
+        self.assertGreater(len(options), 0)
+        self.assertIsInstance(best_idx, int)
         self.assertEqual(best_idx, template.get("best_option_index", 0))
 
 

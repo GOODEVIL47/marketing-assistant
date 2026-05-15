@@ -816,13 +816,36 @@ def generate_replies(scored_posts):
         # Web-search posts that are "old" (48h–7d) with good fit:
         # show inspiration angles instead of reply options.
         if is_web_search and freshness_tier == "old" and fit_score in ("Strong fit", "Decent fit"):
+            if post.get("out_of_scope"):
+                angles = (
+                    ["Out of current product scope (non-US market) — use only as broad inspiration."]
+                    + _get_inspiration_angles(post)[:1]
+                )
+            else:
+                angles = _get_inspiration_angles(post)
             results.append({
                 **post,
                 "replies": [],
                 "media": None,
                 "best_reply": None,
                 "reply_note": None,
-                "inspiration_angles": _get_inspiration_angles(post),
+                "inspiration_angles": angles,
+            })
+            continue
+
+        # Fresh/borderline out-of-scope web-search posts: scope note only, no replies.
+        if is_web_search and post.get("out_of_scope") and fit_score in ("Strong fit", "Decent fit"):
+            results.append({
+                **post,
+                "replies": [],
+                "media": None,
+                "best_reply": None,
+                "reply_note": (
+                    "Investing-related but outside current Signal Shift scope "
+                    "(US equities / US-market retail investors). "
+                    "Use as broad inspiration only — do not reply."
+                ),
+                "inspiration_angles": None,
             })
             continue
 

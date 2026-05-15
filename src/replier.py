@@ -885,6 +885,25 @@ _THEME_KEYWORDS = [
     ("clarity_signal",    ["clarity", "signal", "clear", "thesis", "what would need", "understand"]),
 ]
 
+# Terms that confirm a post is about stock/market decisions, not broader tech/policy/business.
+# Used to gate both Worth Checking eligibility and specific-theme reply assignment.
+_WORTH_CHECKING_MARKET_SIGNALS = frozenset([
+    "stock", "share", "market", "investor",
+    "earnings", "$", "premarket", "after hours",
+    "thesis", "portfolio", "valuation", "price action",
+    "s&p", "nasdaq", "fed", "cpi",
+])
+
+
+def _has_market_signal(post):
+    """Return True if the post contains at least one clear stock/market decision signal.
+
+    Checks combined_text_for_scoring (Tavily title+content) when available;
+    falls back to the display text. Case-insensitive.
+    """
+    text = (post.get("combined_text_for_scoring") or post.get("text") or "").lower()
+    return any(sig in text for sig in _WORTH_CHECKING_MARKET_SIGNALS)
+
 
 def _pick_reply_options(tweet_id, text, theme, template):
     """
@@ -999,7 +1018,13 @@ def generate_replies(scored_posts):
                 best_reply = options[best_idx] if options else None
             else:
                 # Real X post — detect theme, pick variant by tweet ID.
+                # Only apply a specific theme when the post has clear market/US-equity
+                # context. Theme keywords like "noise" or "signal" can appear in
+                # AI/business/policy posts that have nothing to do with investing —
+                # giving those posts a financial-media reply would be off-topic.
                 theme = _detect_reply_theme(post)
+                if theme is not None and not _has_market_signal(post):
+                    theme = None
                 if theme is None:
                     theme = "generic_strong" if fit_score == "Strong fit" else "generic_decent"
                 template = _DYNAMIC_TEMPLATES[theme]

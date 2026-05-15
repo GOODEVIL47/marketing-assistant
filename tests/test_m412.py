@@ -524,7 +524,7 @@ class TestFiltersPreserved(unittest.TestCase):
         from src.digest import _build_best_3
         scored = self._score_post("RSI crossover on SPY looks interesting today")
         with_replies = generate_replies([scored])
-        lines = _build_best_3(with_replies, has_inspiration=False, has_worth_checking=False)
+        lines = _build_best_3(with_replies, has_inspiration=False, worth_checking_count=0)
         content = "\n".join(lines)
         # Weak fit should not appear as a numbered Best 3 entry
         self.assertNotIn("RSI crossover", content)
@@ -534,7 +534,7 @@ class TestFiltersPreserved(unittest.TestCase):
         from src.digest import _build_best_3
         scored = self._score_post("🚀 moon shot! buy this now before it pumps! 100x guaranteed")
         with_replies = generate_replies([scored])
-        lines = _build_best_3(with_replies, has_inspiration=False, has_worth_checking=False)
+        lines = _build_best_3(with_replies, has_inspiration=False, worth_checking_count=0)
         content = "\n".join(lines)
         self.assertNotIn("moon shot", content)
 
@@ -547,7 +547,7 @@ class TestFiltersPreserved(unittest.TestCase):
             age_hours=200.0
         )
         with_replies = generate_replies([scored])
-        lines = _build_best_3(with_replies, has_inspiration=False, has_worth_checking=False)
+        lines = _build_best_3(with_replies, has_inspiration=False, worth_checking_count=0)
         content = "\n".join(lines)
         # Score should be Weak or Avoid for a stale post
         self.assertNotIn("**1.**", content)

@@ -1,7 +1,12 @@
 import os
 from datetime import date
 
-from src.replier import _detect_reply_theme, _INSPIRATION_ANGLES, _INSPIRATION_FORMAT_HINTS
+from src.replier import (
+    _detect_reply_theme,
+    _INSPIRATION_ANGLES,
+    _INSPIRATION_FORMAT_HINTS,
+    _has_market_signal,
+)
 
 _SCORE_ORDER = ["Strong fit", "Decent fit", "Weak fit", "Avoid"]
 _OPP_ORDER = ["High opportunity", "Medium opportunity", "Low opportunity", "Poor opportunity"]
@@ -67,7 +72,7 @@ def _render_media_block(media, lines):
         lines.append(f"*{media['reason']}*")
 
 
-def _build_best_3(posts_with_replies, has_inspiration=False, has_worth_checking=False):
+def _build_best_3(posts_with_replies, has_inspiration=False, worth_checking_count=0):
     eligible = [
         p for p in posts_with_replies
         if p["score"] in ("Strong fit", "Decent fit")
@@ -83,11 +88,13 @@ def _build_best_3(posts_with_replies, has_inspiration=False, has_worth_checking=
     lines.append("")
 
     if not top3:
-        lines.append("*No suitable reply opportunities found today.*")
-        if has_worth_checking:
-            lines.append("*See Worth Checking Manually below for borderline opportunities.*")
+        parts = ["No strong reply opportunities today."]
+        if worth_checking_count > 0:
+            noun = "post" if worth_checking_count == 1 else "posts"
+            parts.append(f"{worth_checking_count} borderline {noun} worth checking manually below.")
         if has_inspiration:
-            lines.append("*Check the Save for Inspiration section below for older posts worth referencing.*")
+            parts.append("Inspiration ideas below.")
+        lines.append(f"*{' '.join(parts)}*")
         lines.append("")
         return lines
 
@@ -277,6 +284,8 @@ def _get_worth_checking_posts(posts_with_replies):
             continue
         if post.get("metrics_confidence") != "low":
             continue
+        if not _has_market_signal(post):
+            continue
         candidates.append(post)
     return candidates[:3]
 
@@ -448,11 +457,12 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule, mode="Mock"
     lines.append("")
 
     inspiration = _build_inspiration(posts_with_replies)
+    wc_count = len(_get_worth_checking_posts(posts_with_replies))
     worth_checking = _build_worth_checking(posts_with_replies)
     lines.extend(_build_best_3(
         posts_with_replies,
         has_inspiration=bool(inspiration),
-        has_worth_checking=bool(worth_checking),
+        worth_checking_count=wc_count,
     ))
 
     if worth_checking:

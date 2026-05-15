@@ -216,7 +216,7 @@ class TestStalePostHTML(unittest.TestCase):
     def test_stale_html_shows_no_opportunities(self):
         # Stale posts have Poor opportunity — Best 3 is empty, shows no-opportunities message
         html = self._stale_html()
-        self.assertIn("No suitable reply opportunities found today", html)
+        self.assertIn("No strong reply opportunities today", html)
 
 
 # ---------------------------------------------------------------------------
@@ -428,7 +428,7 @@ class TestMockModeOutputUnchanged(unittest.TestCase):
         with_replies = generate_replies(scored)
         lines = _build_best_3(with_replies)
         content = "\n".join(lines)
-        self.assertNotIn("No suitable reply", content)
+        self.assertNotIn("No strong reply", content)
 
     def test_mock_mode_schedule_no_check_manually(self):
         from mock_data.posts import MOCK_POSTS
@@ -467,7 +467,7 @@ class TestFreshnesFiltersUnchanged(unittest.TestCase):
         with_replies = generate_replies(scored)
         lines = _build_best_3(with_replies)
         content = "\n".join(lines)
-        self.assertNotIn("No suitable reply", content)
+        self.assertNotIn("No strong reply", content)
 
     def test_old_post_excluded_from_best3(self):
         post = _make_web_post(age_hours=96)
@@ -475,7 +475,7 @@ class TestFreshnesFiltersUnchanged(unittest.TestCase):
         with_replies = generate_replies(scored)
         lines = _build_best_3(with_replies)
         content = "\n".join(lines)
-        self.assertIn("No suitable reply", content)
+        self.assertIn("No strong reply", content)
 
 
 if __name__ == "__main__":

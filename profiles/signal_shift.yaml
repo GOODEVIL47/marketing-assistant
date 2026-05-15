@@ -285,3 +285,118 @@ fit_keywords:
     - "small cap"
     - "mega cap"
     - "$"
+
+# ---------------------------------------------------------------------------
+# Structured query buckets for US-equity discovery (M4.12).
+# Each bucket is a list of complete Tavily search strings — no template
+# substitution needed. The provider selects across buckets to ensure each
+# run draws from multiple conversation types rather than only broad-signal
+# terms. Buckets are ordered by priority; when MAX_SEARCH_QUERIES is small,
+# earlier buckets are preferred.
+#
+# Liquid US tickers included in starter set:
+#   $NVDA $TSLA $PLTR $META $AMD $SOFI $HOOD $COIN $IONQ $APP
+#   $AVGO $MSFT $GOOGL $AMZN $SMCI $MSTR $RBLX $CRWD $UBER $NFLX
+# ---------------------------------------------------------------------------
+query_buckets:
+
+  # Broad psychology/signal posts — anchors Mel's core voice
+  broad_signal:
+    - 'site:x.com "stock reaction makes no sense"'
+    - 'site:x.com "hard to separate signal from noise"'
+    - 'site:x.com "retail investors overwhelmed"'
+    - 'site:x.com "investing information overload"'
+    - 'site:x.com "market noise"'
+    - 'site:x.com "earnings week is exhausting"'
+    - 'site:x.com "too many market takes"'
+    - 'site:x.com "why is this stock moving"'
+    - 'site:x.com "not sure what changed"'
+    - 'site:x.com "trying to understand the move"'
+
+  # Reactions to earnings beats/misses on specific US names
+  earnings_reaction:
+    - 'site:x.com "earnings reaction" "$"'
+    - 'site:x.com "sold off after earnings" "$"'
+    - 'site:x.com "ripping after earnings" "$"'
+    - 'site:x.com "$NVDA" "earnings reaction"'
+    - 'site:x.com "$TSLA" "earnings reaction"'
+    - 'site:x.com "$META" "sold off after earnings"'
+    - 'site:x.com "$AMD" "earnings reaction"'
+    - 'site:x.com "$MSFT" "earnings reaction"'
+    - 'site:x.com "$GOOGL" "earnings reaction"'
+    - 'site:x.com "$AMZN" "earnings reaction"'
+    - 'site:x.com "$NFLX" "earnings reaction"'
+    - 'site:x.com "$SOFI" "earnings reaction"'
+    - 'site:x.com "$HOOD" "earnings reaction"'
+
+  # "Why is this moving?" confusion posts on liquid names
+  ticker_confusion:
+    - 'site:x.com "$NVDA" "why is it moving"'
+    - 'site:x.com "$TSLA" "makes no sense"'
+    - 'site:x.com "$PLTR" "why is this moving"'
+    - 'site:x.com "$META" "why is this moving"'
+    - 'site:x.com "$AMD" "why is this moving"'
+    - 'site:x.com "$SOFI" "makes no sense"'
+    - 'site:x.com "$COIN" "why is it moving"'
+    - 'site:x.com "why is this stock moving" "$"'
+    - 'site:x.com "stock makes no sense" "$"'
+    - 'site:x.com "market reaction makes no sense" "$"'
+    - 'site:x.com "$SMCI" "makes no sense"'
+    - 'site:x.com "$APP" "why is this moving"'
+    - 'site:x.com "$CRWD" "why is this moving"'
+
+  # Premarket and after-hours confusion and chatter
+  premarket_afterhours:
+    - 'site:x.com "premarket" "why is" "$"'
+    - 'site:x.com "after hours" "why is" "$"'
+    - 'site:x.com "$HOOD" "premarket"'
+    - 'site:x.com "$COIN" "after hours"'
+    - 'site:x.com "$NVDA" "premarket"'
+    - 'site:x.com "$TSLA" "premarket"'
+    - 'site:x.com "$MSTR" "after hours"'
+    - 'site:x.com "$PLTR" "premarket"'
+
+  # AI-stock hype, bubble talk, and chasing narratives
+  ai_stock_hype:
+    - 'site:x.com "AI stocks" "chasing"'
+    - 'site:x.com "AI stock" "bubble" "$"'
+    - 'site:x.com "$NVDA" "AI hype"'
+    - 'site:x.com "$PLTR" "retail chasing"'
+    - 'site:x.com "$IONQ" "retail chasing"'
+    - 'site:x.com "AI stock" "ripping after earnings"'
+    - 'site:x.com "$APP" "ripping after earnings"'
+    - 'site:x.com "$AVGO" "AI"'
+    - 'site:x.com "$NVDA" "chasing"'
+
+  # Retail FOMO and momentum-chasing behaviour
+  retail_chasing:
+    - 'site:x.com "retail is chasing" "$"'
+    - 'site:x.com "chasing stocks" "$"'
+    - 'site:x.com "$MSTR" "retail chasing"'
+    - 'site:x.com "$RBLX" "why is this moving"'
+    - 'site:x.com "$SMCI" "retail chasing"'
+    - 'site:x.com "FOMO" "buying" "$"'
+    - 'site:x.com "$HOOD" "retail chasing"'
+    - 'site:x.com "$UBER" "retail chasing"'
+
+  # Thesis-unchanged vs. stock-moved conflict posts
+  thesis_changed:
+    - 'site:x.com "$PLTR" "thesis changed"'
+    - 'site:x.com "$TSLA" "nothing changed"'
+    - 'site:x.com "nothing changed" "stock" "$"'
+    - 'site:x.com "thesis changed" "$"'
+    - 'site:x.com "investing thesis changed" "$"'
+    - 'site:x.com "$NVDA" "thesis changed"'
+    - 'site:x.com "$CRWD" "thesis changed"'
+    - 'site:x.com "the chart moved" "$"'
+
+  # Selloff or rally that doesn't match fundamentals
+  selloff_rally_confusion:
+    - 'site:x.com "selloff makes no sense" "$"'
+    - 'site:x.com "rally makes no sense" "$"'
+    - 'site:x.com "$CRWD" "sold off"'
+    - 'site:x.com "$UBER" "rally"'
+    - 'site:x.com "$NFLX" "sold off after earnings"'
+    - 'site:x.com "not sure what changed" "$"'
+    - 'site:x.com "$COIN" "selloff"'
+    - 'site:x.com "$MSTR" "rally"'

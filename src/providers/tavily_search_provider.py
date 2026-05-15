@@ -114,16 +114,83 @@ def _select_queries(candidates, max_q, seed):
     return rotated[:max_q]
 
 
+def _build_bucket_queries(buckets, max_q, seed):
+    """
+    Select up to max_q queries from query_buckets with diversified allocation.
+
+    Allocation: base = max_q // n_buckets per bucket; remainder distributed
+    to the earliest buckets. If max_q < n_buckets, first max_q buckets each
+    receive 1 query and the rest are skipped.
+
+    Within each bucket the seed (plus a per-bucket offset) rotates the start
+    position so different days pick different queries from each bucket.
+
+    Returns [(bucket_name, query_string), ...], length <= max_q.
+    """
+    active = [(name, qs) for name, qs in buckets.items() if qs]
+    n = len(active)
+    if n == 0:
+        return []
+
+    if max_q <= n:
+        # 1 query from each of the first max_q buckets
+        alloc = [(name, qs, 1) for name, qs in active[:max_q]]
+    else:
+        base = max_q // n
+        remainder = max_q % n
+        alloc = [
+            (name, qs, base + (1 if i < remainder else 0))
+            for i, (name, qs) in enumerate(active)
+        ]
+
+    selected = []
+    for i, (bucket_name, bucket_queries, count) in enumerate(alloc):
+        n_q = len(bucket_queries)
+        offset = (seed + i) % n_q
+        rotated = bucket_queries[offset:] + bucket_queries[:offset]
+        for q in rotated[:count]:
+            selected.append((bucket_name, q))
+
+    return selected[:max_q]
+
+
 def _build_queries(profile):
+    max_q = int(os.environ.get("MAX_SEARCH_QUERIES", "5"))
+    seed, seed_label = _query_seed()
+
+    buckets = profile.get("query_buckets")
+    if buckets:
+        selected_pairs = _build_bucket_queries(buckets, max_q, seed)
+        if not selected_pairs:
+            raise ValueError(
+                "[Tavily] query_buckets is present but all buckets are empty. "
+                "Add at least one query string to a bucket in profiles/signal_shift.yaml."
+            )
+        total_in_buckets = sum(len(v) for v in buckets.values() if v)
+        print(
+            f"[Tavily] Query buckets: {len(buckets)} | "
+            f"Total bucket queries: {total_in_buckets} | "
+            f"Selected (cap={max_q}): {len(selected_pairs)} | Seed: {seed_label}"
+        )
+        print(f"[Tavily] Selected queries:")
+        idx = 1
+        current_bucket = None
+        for bucket_name, query in selected_pairs:
+            if bucket_name != current_bucket:
+                print(f"  {bucket_name}:")
+                current_bucket = bucket_name
+            print(f"    {idx}. {query}")
+            idx += 1
+        return [q for _, q in selected_pairs]
+
+    # Legacy path: search_terms + query_templates
     search_terms = profile.get("search_terms", [])
     if not search_terms:
         raise ValueError(
-            "[Tavily] No search_terms found in profile YAML. "
-            "Add a 'search_terms' list to profiles/signal_shift.yaml."
+            "[Tavily] No search_terms or query_buckets found in profile YAML. "
+            "Add a 'search_terms' list or 'query_buckets' dict to profiles/signal_shift.yaml."
         )
-    max_q = int(os.environ.get("MAX_SEARCH_QUERIES", "5"))
     candidates = _build_candidate_queries(profile)
-    seed, seed_label = _query_seed()
     selected = _select_queries(candidates, max_q, seed)
 
     templates = profile.get("query_templates", _DEFAULT_QUERY_TEMPLATES)

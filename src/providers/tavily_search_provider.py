@@ -77,6 +77,43 @@ def _build_candidate_queries(profile):
     return candidates
 
 
+def _query_seed():
+    """
+    Return (seed_int, seed_label) for deterministic daily query rotation.
+    QUERY_SEED env var overrides the date — useful for testing different
+    query selections without waiting for a new calendar day.
+    """
+    seed_str = os.environ.get("QUERY_SEED", "").strip()
+    if seed_str:
+        try:
+            return int(seed_str), f"QUERY_SEED={seed_str}"
+        except ValueError:
+            print(f"[Tavily] QUERY_SEED={seed_str!r} is not an integer — using date seed instead.")
+    today = datetime.now(timezone.utc).date()
+    return today.toordinal(), f"date={today.isoformat()}"
+
+
+def _select_queries(candidates, max_q, seed):
+    """
+    Select max_q queries from candidates using seed-based rotation within
+    a priority window (top max_q * 10 candidates).
+
+    High-priority queries (lower index) are always in the window so they
+    are favoured. The seed offsets the start position within that window
+    so each day selects a different slice — same seed always produces the
+    same selected queries.
+    """
+    if not candidates:
+        return []
+    if len(candidates) <= max_q:
+        return list(candidates)
+    window_size = min(len(candidates), max_q * 10)
+    offset = seed % window_size
+    window = candidates[:window_size]
+    rotated = window[offset:] + window[:offset]
+    return rotated[:max_q]
+
+
 def _build_queries(profile):
     search_terms = profile.get("search_terms", [])
     if not search_terms:
@@ -86,11 +123,15 @@ def _build_queries(profile):
         )
     max_q = int(os.environ.get("MAX_SEARCH_QUERIES", "5"))
     candidates = _build_candidate_queries(profile)
-    selected = candidates[:max_q]
+    seed, seed_label = _query_seed()
+    selected = _select_queries(candidates, max_q, seed)
 
     templates = profile.get("query_templates", _DEFAULT_QUERY_TEMPLATES)
     print(f"[Tavily] Query templates available: {len(templates)}")
-    print(f"[Tavily] Candidate queries: {len(candidates)} | Selected (cap={max_q}): {len(selected)}")
+    print(
+        f"[Tavily] Candidate queries: {len(candidates)} | "
+        f"Selected (cap={max_q}): {len(selected)} | Seed: {seed_label}"
+    )
     for i, q in enumerate(selected, 1):
         print(f"[Tavily]   {i}. {q}")
 

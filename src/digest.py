@@ -18,7 +18,7 @@ def _opp_emoji(opp):
     }.get(opp, "")
 
 
-def _build_best_3(posts_with_replies):
+def _build_best_3(posts_with_replies, has_inspiration=False):
     eligible = [
         p for p in posts_with_replies
         if p["score"] in ("Strong fit", "Decent fit")
@@ -35,7 +35,8 @@ def _build_best_3(posts_with_replies):
 
     if not top3:
         lines.append("*No suitable reply opportunities found today.*")
-        lines.append("*Check the Save for Inspiration section below for older posts worth referencing.*")
+        if has_inspiration:
+            lines.append("*Check the Save for Inspiration section below for older posts worth referencing.*")
         lines.append("")
         return lines
 
@@ -156,9 +157,9 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule, mode="Mock"
     lines.append("---")
     lines.append("")
 
-    lines.extend(_build_best_3(posts_with_replies))
-
     inspiration = _build_inspiration(posts_with_replies)
+    lines.extend(_build_best_3(posts_with_replies, has_inspiration=bool(inspiration)))
+
     if inspiration:
         lines.append("---")
         lines.append("")

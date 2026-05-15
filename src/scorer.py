@@ -389,30 +389,73 @@ def _score_fit_dynamic(post, profile):
     weak_kw = keywords.get("weak", [])
     decent_kw = keywords.get("decent", [])
     strong_kw = keywords.get("strong", [])
+    context_kw = keywords.get("market_context_required", [])
+    off_topic_kw = keywords.get("off_topic", [])
+    out_of_scope_kw = keywords.get("out_of_scope_market", [])
 
     text_lower = post.get("text", "").lower()
 
-    # Check avoid first — hard stop regardless of any other signals
+    # Pre-compute market context gate; guard allows profiles without this section
+    has_market_context = (
+        any(kw.lower() in text_lower for kw in context_kw) if context_kw else True
+    )
+
+    # Step 1: Avoid — hard stop before all other signals
     for kw in avoid_kw:
         if kw.lower() in text_lower:
             return {
                 "score": "Avoid",
                 "reason": _avoid_reason(kw),
                 "reply_account": "Do not reply",
+                "out_of_scope": False,
             }
+
+    # Step 2: Off-topic rejection — sports/entertainment/politics without market context
+    if not has_market_context:
+        for kw in off_topic_kw:
+            if kw.lower() in text_lower:
+                return {
+                    "score": "Weak fit",
+                    "reason": (
+                        f"Post contains '{kw}' — off-topic content (sports/entertainment/politics) "
+                        "with no investing or market context. Not a Signal Shift reply target."
+                    ),
+                    "reply_account": "Do not reply",
+                    "out_of_scope": False,
+                }
 
     # Count signals per tier
     strong_hits = [kw for kw in strong_kw if kw.lower() in text_lower]
     decent_hits = [kw for kw in decent_kw if kw.lower() in text_lower]
     weak_hits = [kw for kw in weak_kw if kw.lower() in text_lower]
 
-    # Weak keywords outweigh positive signals
+    # Step 3: Weak keywords outweigh positive signals
     if weak_hits:
         return {
             "score": "Weak fit",
             "reason": _weak_reason(weak_hits),
             "reply_account": "Do not reply",
+            "out_of_scope": False,
         }
+
+    # Step 4: Domain relevance — require market context for Strong/Decent promotion
+    if not has_market_context and (strong_hits or decent_hits):
+        return {
+            "score": "Weak fit",
+            "reason": (
+                "Post hits fit keywords but lacks any investing or market context. "
+                "The terms may appear in a non-financial context — not a suitable reply target."
+            ),
+            "reply_account": "Do not reply",
+            "out_of_scope": False,
+        }
+
+    # Step 5: Out-of-scope market check — non-US equity markets
+    out_of_scope = False
+    for kw in out_of_scope_kw:
+        if kw.lower() in text_lower:
+            out_of_scope = True
+            break
 
     if len(strong_hits) >= 2:
         return {
@@ -423,6 +466,7 @@ def _score_fit_dynamic(post, profile):
                 "Signal Shift is built to solve."
             ),
             "reply_account": "Either",
+            "out_of_scope": out_of_scope,
         }
 
     if strong_hits:
@@ -434,6 +478,7 @@ def _score_fit_dynamic(post, profile):
                 "the retail decision-clarity pain point Signal Shift addresses."
             ),
             "reply_account": "Either",
+            "out_of_scope": out_of_scope,
         }
 
     if decent_hits:
@@ -445,6 +490,7 @@ def _score_fit_dynamic(post, profile):
                 "has a genuine retail investor angle before replying."
             ),
             "reply_account": "Either",
+            "out_of_scope": out_of_scope,
         }
 
     return {
@@ -455,6 +501,7 @@ def _score_fit_dynamic(post, profile):
             "earnings-clarity angle Signal Shift is built around."
         ),
         "reply_account": "Do not reply",
+        "out_of_scope": False,
     }
 
 
@@ -466,9 +513,20 @@ def score_posts(posts, profile=None):
         fit_data = FIT_SCORES.get(post_id) if isinstance(post_id, int) else None
         if fit_data is None:
             fit_data = _score_fit_dynamic(post, profile)
+        fit_data = dict(fit_data)
+        out_of_scope = fit_data.pop("out_of_scope", False)
         fit_score = fit_data["score"]
         visibility = _compute_visibility(post)
         opportunity, opp_reason = _score_opportunity(post, fit_score, visibility)
+
+        # Out-of-scope posts with Unknown visibility → Low opportunity, excluded from Best 3
+        if out_of_scope and visibility == "Unknown visibility":
+            opportunity = "Low opportunity"
+            opp_reason = (
+                "Investing-related but outside current Signal Shift scope (non-US market). "
+                "Excluded from Today's Best 3 — use as broad inspiration only."
+            )
+
         action = _suggested_action(fit_score, opportunity, post.get("reply_count", 0))
         eng_summary = _engagement_summary(post)
 
@@ -482,5 +540,6 @@ def score_posts(posts, profile=None):
             "suggested_action": action,
             "freshness_tier": _freshness_tier(post.get("age_hours")),
             "age_label": _age_label(post) if post.get("metrics_confidence") == "low" else None,
+            "out_of_scope": out_of_scope,
         })
     return results

@@ -193,3 +193,64 @@ fit_keywords:
     - altcoin
     - "crypto pump"
     - webinar
+
+  # At least one of these must appear for a post to score Strong or Decent fit.
+  # Prevents generic "noise/clarity/pressure" posts without market context from
+  # being mistaken for investing-related reply targets.
+  market_context_required:
+    - stock
+    - stocks
+    - equities
+    - market
+    - markets
+    - investing
+    - investor
+    - investors
+    - trading
+    - trader
+    - earnings
+    - portfolio
+    - premarket
+    - "after hours"
+    - "$"
+    - FinTwit
+    - "S&P"
+    - Nasdaq
+    - NYSE
+    - CPI
+    - ETF
+    - IPO
+    - "rate cut"
+    - "small cap"
+    - "mega cap"
+    - thesis
+    - valuation
+    - "stock market"
+    - "financial market"
+    - "financial media"
+
+  # Off-topic content — sports, entertainment, politics without market context.
+  # When present alongside no market context, posts score Weak fit.
+  off_topic:
+    - "football club"
+    - "rugby club"
+    - "cricket match"
+    - "squad depth"
+    - esports
+    - "film review"
+    - "TV show"
+
+  # Out-of-current-scope market indicators (non-US equity markets).
+  # Posts with these terms are downgraded to Low opportunity and excluded from
+  # Today's Best 3. They may appear in Save for Inspiration with a scope label.
+  out_of_scope_market:
+    - rupee
+    - Nifty
+    - Sensex
+    - SEBI
+    - FTSE
+    - Nikkei
+    - "Indian market"
+    - "Indian stock"
+    - "UK market"
+    - "UK stock"

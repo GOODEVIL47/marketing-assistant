@@ -400,3 +400,35 @@ query_buckets:
     - 'site:x.com "not sure what changed" "$"'
     - 'site:x.com "$COIN" "selloff"'
     - 'site:x.com "$MSTR" "rally"'
+
+  # Loose (unquoted) variants — broader matching, more likely to surface fresh posts.
+  # No double-quotes so TAVILY_QUERY_STYLE=loose will prefer these.
+  # Complements the exact quoted queries in the buckets above.
+  loose_discovery:
+    - site:x.com NVDA earnings reaction today
+    - site:x.com TSLA premarket confusing
+    - site:x.com PLTR stock reaction confused
+    - site:x.com META sold off earnings
+    - site:x.com AMD after hours why moving
+    - site:x.com earnings reaction today stock
+    - site:x.com premarket movers confused stock
+    - site:x.com AI stocks chasing today
+    - site:x.com stock sold off after earnings
+    - site:x.com why stock moving today
+    - site:x.com NVDA why is this moving
+    - site:x.com TSLA makes no sense today
+    - site:x.com retail investor overwhelmed stocks
+    - site:x.com investing thesis unchanged stock moving
+    - site:x.com information overload stocks
+
+  # Topic/ticker discovery — today-style market mover queries.
+  # Intended to surface timely posts for Worth Checking or Save for Inspiration
+  # even when they don't match exact phrase patterns.
+  market_movers:
+    - site:x.com US stocks moving today
+    - site:x.com premarket movers today stocks
+    - site:x.com earnings today stocks reaction
+    - site:x.com AI stocks moving today
+    - site:x.com retail traders chasing stocks today
+    - site:x.com stock market confused today
+    - site:x.com market reaction today retail

@@ -47,6 +47,10 @@ jobs:
           TAVILY_TOPIC: ${{ vars.TAVILY_TOPIC }}
           TAVILY_DAYS: ${{ vars.TAVILY_DAYS }}
           TAVILY_TIME_RANGE: ${{ vars.TAVILY_TIME_RANGE }}
+          # TAVILY_AUTO_PARAMETERS: "true" to send auto_parameters=true in payload
+          # TAVILY_QUERY_STYLE: "exact" / "loose" / "mixed" (default mixed)
+          TAVILY_AUTO_PARAMETERS: ${{ vars.TAVILY_AUTO_PARAMETERS }}
+          TAVILY_QUERY_STYLE: ${{ vars.TAVILY_QUERY_STYLE }}
         run: python run_search.py
 
       - name: Upload digest as artifact

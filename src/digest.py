@@ -78,6 +78,7 @@ def _build_inspiration(posts_with_replies):
         if p["score"] in ("Strong fit", "Decent fit")
         and p.get("metrics_confidence") == "low"
         and p.get("freshness_tier") == "old"
+        and p.get("inspiration_angles")
     ]
     if not inspiration:
         return []
@@ -92,11 +93,16 @@ def _build_inspiration(posts_with_replies):
         lines.append(f"- **{post['author']}** · {post['score']} · {post.get('age_label', '')}")
         lines.append(f"  > {post['text'][:120]}{'...' if len(post['text']) > 120 else ''}")
         lines.append(f"  {post.get('post_url', '')}")
+        angles = post.get("inspiration_angles") or []
+        if angles:
+            lines.append("  **Inspiration angles:**")
+            for angle in angles:
+                lines.append(f"  - {angle}")
         lines.append("")
     return lines
 
 
-def _build_original_posts(posts_schedule):
+def _build_original_posts(posts_schedule, mode="Mock"):
     lines = []
     lines.append("## Original Posts to Publish")
     lines.append("")
@@ -115,6 +121,11 @@ def _build_original_posts(posts_schedule):
             med = post.get("media") or {}
             lines.append(f"**Format:** {fmt.get('type', 'N/A')} — *{fmt.get('reason', '')}*")
             lines.append(f"**Media:** {med.get('type', 'No media')} — *{med.get('reason', '')}*")
+            if mode != "Mock":
+                lines.append(
+                    f"*Check {handle} manually before posting "
+                    f"(posting history unavailable in {mode} mode).*"
+                )
         else:
             lines.append("No original post needed today.")
             lines.append("")
@@ -194,7 +205,18 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule, mode="Mock"
         lines.append(f"**Why this is / is not worth engaging:** {post['opportunity_reason']}")
         lines.append("")
 
-        if post["replies"]:
+        reply_note = post.get("reply_note")
+        inspiration_angles = post.get("inspiration_angles")
+        if reply_note:
+            lines.append(f"*{reply_note}*")
+            lines.append("")
+        elif inspiration_angles:
+            lines.append("**Inspiration angles (do not reply — use for original posts):**")
+            lines.append("")
+            for angle in inspiration_angles:
+                lines.append(f"- {angle}")
+            lines.append("")
+        elif post["replies"]:
             media = post.get("media") or {}
             lines.append(f"**Media suggestion:** {media.get('type', 'No media')}")
             lines.append(f"*{media.get('reason', '')}*")
@@ -212,7 +234,7 @@ def build_markdown(profile_name, posts_with_replies, posts_schedule, mode="Mock"
         lines.append("---")
         lines.append("")
 
-    lines.extend(_build_original_posts(posts_schedule))
+    lines.extend(_build_original_posts(posts_schedule, mode=mode))
 
     return "\n".join(lines)
 

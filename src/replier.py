@@ -197,6 +197,32 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index_b": 1,
+        "options_c": [
+            {
+                "style": "A — Question",
+                "text": (
+                    "What's one thing from the past week that actually changed your thesis? "
+                    "Not what got louder — what genuinely changed."
+                ),
+            },
+            {
+                "style": "B — Agreement + reframe",
+                "text": (
+                    "That exact feeling is the signal. "
+                    "The moment financial media becomes exhausting, it's usually doing exactly "
+                    "what it's designed to do — keeping your attention, not informing you."
+                ),
+            },
+            {
+                "style": "C — Key point",
+                "text": (
+                    "The key distinction isn't more vs. less information. "
+                    "It's useful vs. feels urgent. "
+                    "Most of the noise falls in the second category."
+                ),
+            },
+        ],
+        "best_option_index_c": 2,
         "media": {
             "type": "Optional GIF",
             "reason": (
@@ -254,6 +280,31 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index_b": 2,
+        "options_c": [
+            {
+                "style": "A — Question",
+                "text": (
+                    "What would actually change your mind on this? "
+                    "Not make you doubt it — actually change it?"
+                ),
+            },
+            {
+                "style": "B — Agreement + reframe",
+                "text": (
+                    "Totally. And what makes it hard is that the feeling of having thought "
+                    "something through carefully is almost indistinguishable from the feeling "
+                    "of having rationalized it."
+                ),
+            },
+            {
+                "style": "C — Key point",
+                "text": (
+                    "The meta-skill is noticing when your analysis has stopped looking for "
+                    "disconfirming evidence. That's usually when the conviction has outrun the evidence."
+                ),
+            },
+        ],
+        "best_option_index_c": 2,
         "media": {
             "type": "Quote repost",
             "reason": (
@@ -310,6 +361,30 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index_b": 1,
+        "options_c": [
+            {
+                "style": "A — Question",
+                "text": (
+                    "If you had to name one thing you're actually trying to answer — "
+                    "not gather more about, but actually answer — what would it be?"
+                ),
+            },
+            {
+                "style": "B — Agreement + reframe",
+                "text": (
+                    "That clarity usually has to precede the research, not emerge from it. "
+                    "Otherwise you're just reading until something feels right."
+                ),
+            },
+            {
+                "style": "C — Key point",
+                "text": (
+                    "Best framing test: if something changed the picture completely, would you know it? "
+                    "If not, the signal probably isn't specific enough yet."
+                ),
+            },
+        ],
+        "best_option_index_c": 1,
         "media": {
             "type": "No media",
             "reason": "These replies land better as clean text — adding media would dilute the point.",
@@ -365,6 +440,31 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index_b": 1,
+        "options_c": [
+            {
+                "style": "A — Question",
+                "text": (
+                    "What's the default action here — and would you make the same call "
+                    "without the price move prompting it?"
+                ),
+            },
+            {
+                "style": "B — Agreement + reframe",
+                "text": (
+                    "Less reactive is the underrated edge. "
+                    "Almost every financial incentive — media, platforms, commentary — "
+                    "is pointing in the other direction."
+                ),
+            },
+            {
+                "style": "C — Key point",
+                "text": (
+                    "The market prices in action. It doesn't price in patience. "
+                    "Which is part of why patience keeps being where the edge is."
+                ),
+            },
+        ],
+        "best_option_index_c": 1,
         "media": {
             "type": "Optional GIF",
             "reason": (
@@ -422,6 +522,31 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index_b": 0,
+        "options_c": [
+            {
+                "style": "A — Question",
+                "text": (
+                    "What would you need to believe about this to make a real decision? "
+                    "That question tends to cut through a lot faster than another data pull."
+                ),
+            },
+            {
+                "style": "B — Agreement + reframe",
+                "text": (
+                    "Right — and more data often makes it harder, not easier. "
+                    "It gives you more things to rationalize with rather than more clarity."
+                ),
+            },
+            {
+                "style": "C — Key point",
+                "text": (
+                    "The gap is almost always at the level of the question, not the data. "
+                    "A sharper question makes what you already have useful. "
+                    "More data doesn't fix a blurry question."
+                ),
+            },
+        ],
+        "best_option_index_c": 2,
         "media": {
             "type": "No media",
             "reason": "Reply A is punchy enough on its own — adding media would dilute it.",
@@ -472,6 +597,30 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index_b": 2,
+        "options_c": [
+            {
+                "style": "A — Question",
+                "text": (
+                    "What's the actual decision you're trying to make here — "
+                    "and what would move the needle on it?"
+                ),
+            },
+            {
+                "style": "B — Agreement + reframe",
+                "text": (
+                    "The underappreciated part: how much of 'doing more research' is just "
+                    "delaying a decision that probably doesn't require more information."
+                ),
+            },
+            {
+                "style": "C — Key point",
+                "text": (
+                    "This is the part that rarely gets enough airtime: what the process looks like "
+                    "before you look at anything, not after."
+                ),
+            },
+        ],
+        "best_option_index_c": 0,
         "media": {
             "type": "No media",
             "reason": "Generic fallback reply works better as clean text.",
@@ -522,12 +671,73 @@ _DYNAMIC_TEMPLATES = {
             },
         ],
         "best_option_index_b": 0,
+        "options_c": [
+            {
+                "style": "A — Question",
+                "text": (
+                    "What's the thing that would make this clearer — "
+                    "more information, or a sharper question to start from?"
+                ),
+            },
+            {
+                "style": "B — Agreement + reframe",
+                "text": (
+                    "Worth naming — there's a version of gathering more data that is just "
+                    "a more sophisticated form of procrastination. "
+                    "Doesn't make it wrong, but it's worth knowing which one you're doing."
+                ),
+            },
+            {
+                "style": "C — Key point",
+                "text": (
+                    "The framing matters at least as much as the content. "
+                    "What you're looking for shapes what you find."
+                ),
+            },
+        ],
+        "best_option_index_c": 2,
         "media": {
             "type": "No media",
             "reason": "Generic fallback reply works better as clean text.",
         },
     },
 }
+
+# ---------------------------------------------------------------------------
+# Inspiration angles — used for "old" web-search posts in Save for Inspiration.
+# Framed as original post ideas, not reply options.
+# ---------------------------------------------------------------------------
+_INSPIRATION_ANGLES = {
+    "noise_overwhelm": [
+        "Market noise feels useful because it's urgent. But urgency and usefulness are not the same thing. Worth separating them.",
+        "There's a version of research that is just looking for permission to act. Worth checking which one you're doing.",
+    ],
+    "bias_emotional": [
+        "Conviction and clarity feel identical from the inside. That's the problem — and why process matters more than the conclusion you've already reached.",
+        "A calm investing process starts by separating what genuinely changed from what merely got louder. They feel the same in the moment.",
+    ],
+    "clarity_signal": [
+        "The question matters more than the data. A sharp question makes what you already have useful. More data doesn't fix a blurry question.",
+        "Most research is just reading until a position feels defensible — which isn't the same as understanding it.",
+    ],
+    "reactive_slow_down": [
+        "Less reactive is the underrated edge. Almost every financial incentive — media, platforms, commentary — points in the other direction.",
+        "The market prices in action. It doesn't price in patience. Which is part of why patience keeps being where the edge is.",
+    ],
+    "data_vs_insight": [
+        "Information and understanding are not the same thing. Most tools are built for the first. Almost nothing is built for the second.",
+        "More data often makes decisions harder, not easier — it gives you more things to rationalize with rather than more clarity.",
+    ],
+    "generic_strong": [
+        "The real work happens before you look at any data — getting clear on what you're trying to answer and what would actually change your mind.",
+        "Most serious investors talk about process more than outcomes. That probably isn't a coincidence.",
+    ],
+    "generic_decent": [
+        "The framing matters as much as the information. The question you start with shapes everything you find.",
+        "Good questions tend to surface faster than good answers. Making the question sharper is usually the best next move.",
+    ],
+}
+
 
 # Keyword lists for theme detection — order matters, checked top-to-bottom.
 _THEME_KEYWORDS = [
@@ -541,18 +751,33 @@ _THEME_KEYWORDS = [
 
 def _pick_reply_options(tweet_id, template):
     """
-    Select A/B/C options from a template, rotating between the primary set and
-    the 'options_b' alternate set based on the tweet ID. Posts with different IDs
-    that share the same theme get different wording. Mock posts are never routed here.
+    Select A/B/C options from one of three named variant sets, chosen by
+    tweet_id % 3. Posts with different IDs and the same theme get different
+    wording. Output is deterministic: same ID always yields the same set.
+    Mock posts are never routed here.
     """
     try:
-        use_b = int(tweet_id) % 2 == 1
+        idx = int(tweet_id) % 3
     except (ValueError, TypeError):
-        use_b = False
+        idx = 0
 
-    if use_b and "options_b" in template:
-        return template["options_b"], template.get("best_option_index_b", 0)
-    return template["options"], template.get("best_option_index", 0)
+    sets = [
+        ("options",   "best_option_index"),
+        ("options_b", "best_option_index_b"),
+        ("options_c", "best_option_index_c"),
+    ]
+    opt_key, best_key = sets[idx]
+    options = template.get(opt_key) or template["options"]
+    best_idx = template.get(best_key, template.get("best_option_index", 0))
+    return options, best_idx
+
+
+def _get_inspiration_angles(post):
+    """Return up to 2 original-post inspiration angles keyed by the post's theme."""
+    theme = _detect_reply_theme(post)
+    if theme is None:
+        theme = "generic_strong" if post.get("score") == "Strong fit" else "generic_decent"
+    return _INSPIRATION_ANGLES.get(theme, _INSPIRATION_ANGLES["generic_strong"])[:2]
 
 
 def _detect_reply_theme(post):
@@ -566,8 +791,44 @@ def _detect_reply_theme(post):
 def generate_replies(scored_posts):
     results = []
     for post in scored_posts:
-        if post["score"] in ("Strong fit", "Decent fit"):
-            post_id = post["id"]
+        post_id = post["id"]
+        fit_score = post["score"]
+        is_web_search = post.get("metrics_confidence") == "low"
+        freshness_tier = post.get("freshness_tier")
+        opportunity = post.get("opportunity", "")
+
+        # Web-search posts that are stale or Poor opportunity:
+        # show a clear "do not reply" note, no reply options, no inspiration angles.
+        if is_web_search and (
+            freshness_tier in ("stale", "very_stale")
+            or opportunity == "Poor opportunity"
+        ):
+            results.append({
+                **post,
+                "replies": [],
+                "media": None,
+                "best_reply": None,
+                "reply_note": "No reply suggested — stale post. Use as inspiration only.",
+                "inspiration_angles": None,
+            })
+            continue
+
+        # Web-search posts that are "old" (48h–7d) with good fit:
+        # show inspiration angles instead of reply options.
+        if is_web_search and freshness_tier == "old" and fit_score in ("Strong fit", "Decent fit"):
+            results.append({
+                **post,
+                "replies": [],
+                "media": None,
+                "best_reply": None,
+                "reply_note": None,
+                "inspiration_angles": _get_inspiration_angles(post),
+            })
+            continue
+
+        # Fresh/borderline web posts and all mock/real-X posts with good fit:
+        # normal reply generation.
+        if fit_score in ("Strong fit", "Decent fit"):
             if isinstance(post_id, int):
                 # Mock post — use hardcoded replies (IDs 1–8); never change this path.
                 post_data = REPLIES.get(post_id, {})
@@ -576,15 +837,29 @@ def generate_replies(scored_posts):
                 best_idx = post_data.get("best_option_index", 0)
                 best_reply = options[best_idx] if options else None
             else:
-                # Real X post — detect theme from post text, fall back to generic.
+                # Real X post — detect theme, pick variant by tweet ID.
                 theme = _detect_reply_theme(post)
                 if theme is None:
-                    theme = "generic_strong" if post["score"] == "Strong fit" else "generic_decent"
+                    theme = "generic_strong" if fit_score == "Strong fit" else "generic_decent"
                 template = _DYNAMIC_TEMPLATES[theme]
                 options, best_idx = _pick_reply_options(post_id, template)
                 media = template["media"]
                 best_reply = options[best_idx]
-            results.append({**post, "replies": options, "media": media, "best_reply": best_reply})
+            results.append({
+                **post,
+                "replies": options,
+                "media": media,
+                "best_reply": best_reply,
+                "reply_note": None,
+                "inspiration_angles": None,
+            })
         else:
-            results.append({**post, "replies": [], "media": None, "best_reply": None})
+            results.append({
+                **post,
+                "replies": [],
+                "media": None,
+                "best_reply": None,
+                "reply_note": None,
+                "inspiration_angles": None,
+            })
     return results

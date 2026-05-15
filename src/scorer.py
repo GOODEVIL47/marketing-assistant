@@ -318,10 +318,71 @@ def _suggested_action(fit_score, opportunity, reply_count):
     return "Do not engage"
 
 
+_AVOID_CRYPTO = frozenset({"xrp", "web3", "memecoin", "meme coin", "altcoin", "crypto pump"})
+_AVOID_HYPE = frozenset({"100x", "moon", "gem", "next 10x", "get rich", "guaranteed"})
+_AVOID_BAIT = frozenset({
+    "link in bio", "screenshot this", "thank me later",
+    "signal group", "join my discord", "free webinar", "paid group",
+})
+_AVOID_SENTIMENT = frozenset({
+    "smart money", "everyone is bullish", "everyone is bearish",
+    "fear is spreading", "highest level since",
+})
+_AVOID_TA = frozenset({
+    "rsi", "macd", "moving average", "chart pattern", "technical analysis",
+    "day trading", "swing trade", "screener", "entry point", "exit point",
+    "bull trap", "bear trap",
+})
+
+
+def _avoid_reason(kw):
+    kl = kw.lower()
+    if kl in _AVOID_CRYPTO or any(t in kl for t in _AVOID_CRYPTO):
+        return (
+            f"Post contains '{kw}' — crypto-specific content outside Signal Shift's lane. "
+            "Engaging could misalign the brand with crypto hype culture."
+        )
+    if kl in _AVOID_HYPE or any(t in kl for t in _AVOID_HYPE):
+        return (
+            f"Post contains '{kw}' — hype or get-rich framing. "
+            "Incompatible with Signal Shift's calm, plain-English voice."
+        )
+    if kl in _AVOID_BAIT or any(t in kl for t in _AVOID_BAIT):
+        return (
+            f"Post contains '{kw}' — promotional or engagement-bait content. "
+            "Signal Shift's voice is the opposite of this."
+        )
+    if kl in _AVOID_SENTIMENT or any(t in kl for t in _AVOID_SENTIMENT):
+        return (
+            f"Post contains '{kw}' — generic market sentiment bait. "
+            "No retail decision-clarity angle. Not worth engaging."
+        )
+    return (
+        f"Post contains '{kw}' — matches an avoid keyword. "
+        "Engaging could associate Signal Shift with low-quality content."
+    )
+
+
+def _weak_reason(weak_hits):
+    hits_lower = {h.lower() for h in weak_hits}
+    if hits_lower & _AVOID_TA:
+        return (
+            f"Post matches technical-analysis keyword(s): {', '.join(weak_hits[:3])}. "
+            "Audience is likely active traders focused on entries/exits — "
+            "not retail investors seeking decision clarity."
+        )
+    return (
+        f"Post matches weak-fit keyword(s): {', '.join(weak_hits[:3])}. "
+        "Topic is misaligned with Signal Shift's retail-investor clarity positioning."
+    )
+
+
 def _score_fit_dynamic(post, profile):
     """
     Keyword-based fit scoring for real X posts whose IDs are not in FIT_SCORES.
     Uses fit_keywords from the profile YAML. Falls back gracefully if missing.
+    Avoid keywords are checked first and override all other signals.
+    Weak keywords block strong/decent promotion.
     """
     keywords = profile.get("fit_keywords", {}) if profile else {}
     avoid_kw = keywords.get("avoid", [])
@@ -331,15 +392,12 @@ def _score_fit_dynamic(post, profile):
 
     text_lower = post.get("text", "").lower()
 
-    # Check avoid first — hard stop regardless of other signals
+    # Check avoid first — hard stop regardless of any other signals
     for kw in avoid_kw:
         if kw.lower() in text_lower:
             return {
                 "score": "Avoid",
-                "reason": (
-                    f"Post contains '{kw}' — matches an avoid keyword. "
-                    "Engaging could associate Signal Shift with low-quality content."
-                ),
+                "reason": _avoid_reason(kw),
                 "reply_account": "Do not reply",
             }
 
@@ -352,10 +410,7 @@ def _score_fit_dynamic(post, profile):
     if weak_hits:
         return {
             "score": "Weak fit",
-            "reason": (
-                f"Post matches weak-fit keyword(s): {', '.join(weak_hits[:3])}. "
-                "Audience is likely misaligned with Signal Shift's positioning."
-            ),
+            "reason": _weak_reason(weak_hits),
             "reply_account": "Do not reply",
         }
 
@@ -363,8 +418,9 @@ def _score_fit_dynamic(post, profile):
         return {
             "score": "Strong fit",
             "reason": (
-                f"Post hits multiple strong-fit keywords: {', '.join(strong_hits[:3])}. "
-                "Likely relevant to the exact pain point Signal Shift addresses."
+                f"Post hits multiple strong-fit signals: {', '.join(strong_hits[:3])}. "
+                "Directly addresses the retail investor overwhelm or clarity gap "
+                "Signal Shift is built to solve."
             ),
             "reply_account": "Either",
         }
@@ -373,8 +429,9 @@ def _score_fit_dynamic(post, profile):
         return {
             "score": "Decent fit",
             "reason": (
-                f"Post hits strong-fit keyword '{strong_hits[0]}'. "
-                "Relevant angle but not enough signal to guarantee a strong-fit reply opportunity."
+                f"Post hits strong-fit signal '{strong_hits[0]}'. "
+                "Relevant angle but a single keyword is not enough to confirm "
+                "the retail decision-clarity pain point Signal Shift addresses."
             ),
             "reply_account": "Either",
         }
@@ -383,8 +440,9 @@ def _score_fit_dynamic(post, profile):
         return {
             "score": "Decent fit",
             "reason": (
-                f"Post matches decent-fit keyword(s): {', '.join(decent_hits[:3])}. "
-                "Adjacent to Signal Shift's positioning — worth considering."
+                f"Post matches decent-fit signal(s): {', '.join(decent_hits[:3])}. "
+                "Adjacent to Signal Shift's positioning — check whether the post "
+                "has a genuine retail investor angle before replying."
             ),
             "reply_account": "Either",
         }
@@ -392,8 +450,9 @@ def _score_fit_dynamic(post, profile):
     return {
         "score": "Weak fit",
         "reason": (
-            "Post did not match any strong or decent fit keywords. "
-            "May not be relevant to Signal Shift's core audience."
+            "Post did not match Signal Shift's core fit keywords. "
+            "The topic may not address the retail investor overwhelm or "
+            "earnings-clarity angle Signal Shift is built around."
         ),
         "reply_account": "Do not reply",
     }

@@ -67,29 +67,30 @@ avoid_signals:
   - anything that could associate the brand with bad actors
 
 # X post discovery — search terms ordered by reply-target priority (most timely first).
-# These are phrased like real X posts, not SEO titles. Ordered so the first few
-# terms produce the most reply-worthy results when MAX_SEARCH_QUERIES is small.
+# Terms are phrased like real X users complaining, reflecting, or asking questions.
+# Removed: "everyone is bullish/bearish", "stock is ripping/dumping", "market feels broken"
+# (these attract low-quality sentiment bait and crypto hype posts).
 search_terms:
-  - "earnings week confused"
-  - "market noise today"
-  - "retail investor FOMO"
+  - "earnings week is exhausting"
+  - "not sure what changed"
+  - "stock reaction makes no sense"
+  - "stock moved but nothing changed"
+  - "hard to separate signal from noise"
+  - "retail investors overwhelmed"
+  - "investing information overload"
+  - "too many market takes"
+  - "trying to understand the move"
+  - "do your own research noise"
+  - "earnings reaction confusing"
+  - "overwhelmed by market news"
+  - "market noise"
+  - "financial media noise"
+  - "retail investing is exhausting"
+  - "hard to know what matters"
   - "chasing stocks"
-  - "AI stock hype"
-  - "stock market feels confusing"
-  - "why is this stock moving"
   - "investing thesis changed"
-  - "market is exhausting"
-  - "earnings reaction confused"
-  - "retail traders are exhausted"
-  - "everyone is bullish"
-  - "everyone is bearish"
+  - "why is this stock moving"
   - "too much market data"
-  - "I don't understand this move"
-  - "premarket move confusion"
-  - "stock is ripping"
-  - "stock is dumping"
-  - "market feels broken"
-  - "everyone is chasing"
 
 # Query templates applied to each search term. Templates are iterated in order
 # so the first template (plain quote search) fills MAX_SEARCH_QUERIES first,
@@ -108,18 +109,28 @@ query_templates:
 fit_keywords:
   strong:
     - overwhelmed
+    - information overload
+    - overload
     - noise
     - clarity
     - bias
     - slow down
     - chasing
+    - FOMO
     - emotional
     - panic
-    - information overload
     - signal
     - thesis
     - conviction
     - retail investor
+    - exhausting
+    - confused
+    - unclear
+    - don't understand
+    - doesn't make sense
+    - hard to know
+    - hard to separate
+    - too many takes
   decent:
     - framework
     - mental model
@@ -131,6 +142,12 @@ fit_keywords:
     - thinking clearly
     - overreacting
     - reactive
+    - financial media
+    - market takes
+    - stock reaction
+    - volatility
+    - risk reward
+    - investor behavior
   weak:
     - RSI
     - MACD
@@ -142,13 +159,37 @@ fit_keywords:
     - entry point
     - exit point
     - technical analysis
+    - fear greed
+    - bull trap
+    - bear trap
+    - macro outlook
   avoid:
+    - "smart money"
+    - "everyone is bullish"
+    - "everyone is bearish"
+    - "fear is spreading"
+    - "highest level since"
+    - "link in bio"
+    - "screenshot this"
+    - "thank me later"
+    - "signal group"
+    - "join my discord"
+    - "free webinar"
+    - "paid group"
+    - "100x"
     - "buy this"
     - "next 10x"
     - "moon"
     - "🚀"
     - "get rich"
-    - webinar
     - "guaranteed"
     - "insider"
     - "pump"
+    - "gem"
+    - XRP
+    - Web3
+    - memecoin
+    - "meme coin"
+    - altcoin
+    - "crypto pump"
+    - webinar

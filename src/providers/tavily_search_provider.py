@@ -256,6 +256,11 @@ def _normalize(url, title, content, published_date):
     text = _clean_text(title, content, username)
     post_url = f"https://x.com/{username}/status/{tweet_id}"
 
+    # Preserve raw Tavily fields for richer scoring context.
+    # Scoring uses this so out-of-scope terms buried in Tavily's title/snippet
+    # are caught even when _clean_text() extracts a shorter display text.
+    combined_text_for_scoring = " ".join(part for part in [title, content] if part)
+
     # Prefer Snowflake-decoded age (accurate to the second) over Tavily's
     # published_date (search index lag, may differ by hours or days).
     sf_age, sf_source = _decode_snowflake(tweet_id)
@@ -276,6 +281,7 @@ def _normalize(url, title, content, published_date):
         "author_followers": 0,                  # unavailable from web search
         "author_profile_url": f"https://x.com/{username}",
         "text": text,
+        "combined_text_for_scoring": combined_text_for_scoring,
         "likes": 0,                             # unavailable
         "reposts": 0,                           # unavailable
         "reply_count": 0,                       # unavailable

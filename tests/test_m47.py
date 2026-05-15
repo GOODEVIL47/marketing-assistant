@@ -284,12 +284,14 @@ class TestGoodPostsStillQualify(unittest.TestCase):
         )
         self.assertNotEqual(scored["score"], "Avoid")
 
-    def test_fresh_good_post_is_medium_opportunity(self):
+    def test_fresh_good_post_is_low_opportunity_without_us_scope(self):
+        # M4.9: web-search posts without a US-market signal (S&P, earnings, $ticker, etc.)
+        # are capped at Low opportunity even when fit is strong.
         scored = _score(
             "Completely overwhelmed by market noise. Information overload is real.",
             age_hours=6
         )
-        self.assertEqual(scored["opportunity"], "Medium opportunity")
+        self.assertEqual(scored["opportunity"], "Low opportunity")
 
 
 # ---------------------------------------------------------------------------

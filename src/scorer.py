@@ -393,7 +393,10 @@ def _score_fit_dynamic(post, profile):
     off_topic_kw = keywords.get("off_topic", [])
     out_of_scope_kw = keywords.get("out_of_scope_market", [])
 
-    text_lower = post.get("text", "").lower()
+    # Use combined_text_for_scoring (title + Tavily snippet) when available so
+    # out-of-scope terms buried in Tavily's raw fields are caught even if
+    # _clean_text() stripped them from the display text.
+    text_lower = (post.get("combined_text_for_scoring") or post.get("text", "")).lower()
 
     # Pre-compute market context gate; guard allows profiles without this section
     has_market_context = (
@@ -505,6 +508,17 @@ def _score_fit_dynamic(post, profile):
     }
 
 
+def _has_us_scope(post, profile):
+    """True if the post contains at least one US-market context signal."""
+    keywords = ((profile or {}).get("fit_keywords", {})) if profile else {}
+    us_kw = keywords.get("us_scope_market", [])
+    if not us_kw:
+        return True  # no restriction when section is absent from profile
+    text = post.get("combined_text_for_scoring") or post.get("text", "")
+    text_lower = text.lower()
+    return any(kw.lower() in text_lower for kw in us_kw)
+
+
 def score_posts(posts, profile=None):
     results = []
     for post in posts:
@@ -525,6 +539,22 @@ def score_posts(posts, profile=None):
             opp_reason = (
                 "Investing-related but outside current Signal Shift scope (non-US market). "
                 "Excluded from Today's Best 3 — use as broad inspiration only."
+            )
+
+        # US scope preference: web-search posts with no US-market signals cap at Low.
+        # Prevents ambiguously-geographic or non-US investing posts from becoming
+        # Medium reply opportunities even when fit keywords match.
+        if (
+            not out_of_scope
+            and visibility == "Unknown visibility"
+            and opportunity == "Medium opportunity"
+            and post.get("metrics_confidence") == "low"
+            and not _has_us_scope(post, profile)
+        ):
+            opportunity = "Low opportunity"
+            opp_reason = (
+                "No clear US equities context detected — post may relate to a non-US market "
+                "or a generic topic. Verify US market relevance before replying."
             )
 
         action = _suggested_action(fit_score, opportunity, post.get("reply_count", 0))

@@ -205,7 +205,42 @@ def _build_queries(profile):
     return selected
 
 
-def _post(query, max_results):
+def _build_optional_params():
+    """
+    Build Tavily API params from optional env vars.
+
+    search_depth always defaults to "basic" (the Tavily API default) and is
+    always included so callers can override it without changing code.
+
+    TAVILY_DAYS must be a positive integer; a non-integer value is warned and
+    skipped — the run continues without the days filter.
+
+    Returns a dict suitable for merging into the POST payload.
+    """
+    params: dict = {}
+
+    depth = os.environ.get("TAVILY_SEARCH_DEPTH", "basic").strip() or "basic"
+    params["search_depth"] = depth
+
+    topic = os.environ.get("TAVILY_TOPIC", "").strip()
+    if topic:
+        params["topic"] = topic
+
+    days_str = os.environ.get("TAVILY_DAYS", "").strip()
+    if days_str:
+        try:
+            params["days"] = int(days_str)
+        except ValueError:
+            print(f"[Tavily] TAVILY_DAYS={days_str!r} is not an integer — skipped.")
+
+    time_range = os.environ.get("TAVILY_TIME_RANGE", "").strip()
+    if time_range:
+        params["time_range"] = time_range
+
+    return params
+
+
+def _post(query, max_results, optional_params=None):
     """Single POST to Tavily Search API. Returns parsed JSON or None."""
     # Key goes in the request body — never in headers or logs.
     try:
@@ -219,6 +254,8 @@ def _post(query, max_results):
         "max_results": max_results,
         "search_depth": "basic",
     }
+    if optional_params:
+        payload.update(optional_params)
 
     try:
         resp = requests.post(_TAVILY_API_URL, json=payload, timeout=15)
@@ -375,6 +412,13 @@ def get_posts(profile):
     max_results = int(os.environ.get("MAX_RESULTS_PER_QUERY", "5"))
     print(f"[Tavily] Results per query: {max_results}")
 
+    optional_params = _build_optional_params()
+    non_default = {k: v for k, v in optional_params.items()
+                   if not (k == "search_depth" and v == "basic")}
+    if non_default:
+        print("[Tavily] Active freshness params: " +
+              ", ".join(f"{k}={v!r}" for k, v in sorted(non_default.items())))
+
     raw_count = 0
     url_count = 0
     seen_ids = set()
@@ -382,7 +426,7 @@ def get_posts(profile):
 
     for i, query in enumerate(queries):
         print(f"[Tavily] Query {i + 1}/{len(queries)}: {query}")
-        data = _post(query, max_results)
+        data = _post(query, max_results, optional_params=optional_params)
         if not data:
             continue
 

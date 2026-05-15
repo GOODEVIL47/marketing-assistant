@@ -524,12 +524,14 @@ Go to your repository on GitHub:
 
 Get a free Tavily API key (no credit card) at [app.tavily.com](https://app.tavily.com).
 
-### Step 2 — Optionally set query limits as GitHub Variables
+### Step 2 — Optionally set query limits and freshness parameters as GitHub Variables
 
-Query limits are stored as repository **Variables** (not Secrets) so they are
-visible and easy to adjust without touching code.
+Query limits and Tavily freshness parameters are stored as repository **Variables**
+(not Secrets) so they are visible and easy to adjust without touching code.
 
 **Settings → Secrets and variables → Actions → Variables tab → New repository variable**
+
+**Query volume**
 
 | Variable name | Default if not set | Recommended for first test |
 |---|---|---|
@@ -539,6 +541,32 @@ visible and easy to adjust without touching code.
 If neither variable is set, the workflow makes at most 2 Tavily API calls per
 run (one per query), returning up to 6 total results (3 per query). Increase
 these once you are happy with the output quality.
+
+**Tavily freshness parameters (optional — leave unset to use Tavily defaults)**
+
+| Variable name | Default | Notes |
+|---|---|---|
+| `TAVILY_SEARCH_DEPTH` | `basic` | Set to `advanced` for deeper crawling (~2× API credit cost per query) |
+| `TAVILY_TOPIC` | _(not sent)_ | Set to `news` to use Tavily's news-mode index; `days` only works with `topic=news` |
+| `TAVILY_DAYS` | _(not sent)_ | Integer — restrict results to the last N days (e.g. `1` for last 24 h); requires `TAVILY_TOPIC=news` |
+| `TAVILY_TIME_RANGE` | _(not sent)_ | `day`, `week`, `month`, or `year` — alternative freshness filter (general topic) |
+
+**How to test for fresher results:**
+
+```
+TAVILY_SEARCH_DEPTH=advanced
+TAVILY_TOPIC=news
+TAVILY_DAYS=1
+```
+
+Setting all three is the most aggressive freshness configuration. Start with one change
+at a time and compare stale-post ratios across runs. If 3 runs with these params still
+produce 0 fresh posts, Tavily's X index is too slow for real-time discovery — treat
+auto-discovery as Inspiration-only and submit post links manually.
+
+If `TAVILY_DAYS` is set to a non-integer value it is silently skipped (a warning is
+printed to the run log). Invalid values for other params are passed through to Tavily
+and may cause an API error, which is caught and logged per query without stopping the run.
 
 ### Step 3 — Run Mel Search Digest manually
 

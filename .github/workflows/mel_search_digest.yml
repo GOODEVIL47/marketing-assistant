@@ -37,6 +37,16 @@ jobs:
           # keeping the first live test small.
           MAX_SEARCH_QUERIES: ${{ vars.MAX_SEARCH_QUERIES || '2' }}
           MAX_RESULTS_PER_QUERY: ${{ vars.MAX_RESULTS_PER_QUERY || '3' }}
+          # Optional Tavily freshness parameters — set as GitHub Variables to tune
+          # freshness without code changes. Leave unset to use Tavily defaults.
+          # TAVILY_SEARCH_DEPTH: "advanced" for deeper crawling (~2x credit cost)
+          # TAVILY_TOPIC: "news" enables news-mode index (required for TAVILY_DAYS)
+          # TAVILY_DAYS: integer — restrict to last N days (requires TAVILY_TOPIC=news)
+          # TAVILY_TIME_RANGE: "day" / "week" / "month" / "year"
+          TAVILY_SEARCH_DEPTH: ${{ vars.TAVILY_SEARCH_DEPTH }}
+          TAVILY_TOPIC: ${{ vars.TAVILY_TOPIC }}
+          TAVILY_DAYS: ${{ vars.TAVILY_DAYS }}
+          TAVILY_TIME_RANGE: ${{ vars.TAVILY_TIME_RANGE }}
         run: python run_search.py
 
       - name: Upload digest as artifact

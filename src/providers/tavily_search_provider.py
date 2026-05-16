@@ -154,12 +154,66 @@ def _build_bucket_queries(buckets, max_q, seed):
     return selected[:max_q]
 
 
+_VALID_QUERY_STYLES = frozenset({"exact", "loose", "mixed"})
+
+
+def _query_style():
+    """
+    Read TAVILY_QUERY_STYLE env var.
+    'exact': only queries containing double-quotes (precise phrase matching).
+    'loose': only queries without double-quotes (broader matching).
+    'mixed': all queries — default, no filtering.
+    Empty or unset value returns 'mixed'. Invalid values log a warning and
+    fall back to 'mixed'.
+    """
+    style = os.environ.get("TAVILY_QUERY_STYLE", "").strip().lower()
+    if not style:
+        return "mixed"
+    if style not in _VALID_QUERY_STYLES:
+        print(
+            f"[Tavily] TAVILY_QUERY_STYLE={style!r} is not valid "
+            "(exact/loose/mixed) — using 'mixed'."
+        )
+        return "mixed"
+    return style
+
+
+def _filter_by_style(queries, style):
+    """
+    Filter a list of query strings by style.
+    'exact': keep only queries containing double-quotes.
+    'loose': keep only queries without double-quotes.
+    'mixed': return all queries unchanged.
+    Returns an empty list when no queries match — callers handle fallback.
+    """
+    if style == "mixed" or not queries:
+        return list(queries)
+    if style == "exact":
+        return [q for q in queries if '"' in q]
+    return [q for q in queries if '"' not in q]  # loose
+
+
 def _build_queries(profile):
     max_q = int(os.environ.get("MAX_SEARCH_QUERIES", "5"))
     seed, seed_label = _query_seed()
+    style = _query_style()
 
     buckets = profile.get("query_buckets")
     if buckets:
+        if style != "mixed":
+            filtered = {
+                name: _filter_by_style(qs, style)
+                for name, qs in buckets.items()
+            }
+            filtered = {name: qs for name, qs in filtered.items() if qs}
+            if filtered:
+                buckets = filtered
+            else:
+                print(
+                    f"[Tavily] TAVILY_QUERY_STYLE={style!r} filtered all "
+                    "bucket queries — using mixed."
+                )
+
         selected_pairs = _build_bucket_queries(buckets, max_q, seed)
         if not selected_pairs:
             raise ValueError(
@@ -170,7 +224,8 @@ def _build_queries(profile):
         print(
             f"[Tavily] Query buckets: {len(buckets)} | "
             f"Total bucket queries: {total_in_buckets} | "
-            f"Selected (cap={max_q}): {len(selected_pairs)} | Seed: {seed_label}"
+            f"Selected (cap={max_q}): {len(selected_pairs)} | "
+            f"Seed: {seed_label} | Style: {style}"
         )
         print(f"[Tavily] Selected queries:")
         idx = 1
@@ -191,13 +246,23 @@ def _build_queries(profile):
             "Add a 'search_terms' list or 'query_buckets' dict to profiles/signal_shift.yaml."
         )
     candidates = _build_candidate_queries(profile)
+    if style != "mixed":
+        filtered_cands = _filter_by_style(candidates, style)
+        if filtered_cands:
+            candidates = filtered_cands
+        else:
+            print(
+                f"[Tavily] TAVILY_QUERY_STYLE={style!r} filtered all "
+                "candidates — using mixed."
+            )
     selected = _select_queries(candidates, max_q, seed)
 
     templates = profile.get("query_templates", _DEFAULT_QUERY_TEMPLATES)
     print(f"[Tavily] Query templates available: {len(templates)}")
     print(
         f"[Tavily] Candidate queries: {len(candidates)} | "
-        f"Selected (cap={max_q}): {len(selected)} | Seed: {seed_label}"
+        f"Selected (cap={max_q}): {len(selected)} | "
+        f"Seed: {seed_label} | Style: {style}"
     )
     for i, q in enumerate(selected, 1):
         print(f"[Tavily]   {i}. {q}")
@@ -236,6 +301,10 @@ def _build_optional_params():
     time_range = os.environ.get("TAVILY_TIME_RANGE", "").strip()
     if time_range:
         params["time_range"] = time_range
+
+    auto_str = os.environ.get("TAVILY_AUTO_PARAMETERS", "").strip().lower()
+    if auto_str == "true":
+        params["auto_parameters"] = True
 
     return params
 

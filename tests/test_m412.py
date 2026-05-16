@@ -88,13 +88,18 @@ class TestProfileHasBuckets(unittest.TestCase):
     def test_query_buckets_key_present(self):
         self.assertIn("query_buckets", self.profile)
 
-    def test_all_eight_buckets_present(self):
+    def test_original_buckets_present(self):
+        # Checks the 8 buckets introduced in M4.12 are still present.
+        # issubset so future milestones can add more buckets without breaking this test.
         expected = {
             "broad_signal", "earnings_reaction", "ticker_confusion",
             "premarket_afterhours", "ai_stock_hype", "retail_chasing",
             "thesis_changed", "selloff_rally_confusion",
         }
-        self.assertEqual(expected, set(self.buckets.keys()))
+        self.assertTrue(
+            expected.issubset(set(self.buckets.keys())),
+            f"Missing buckets: {expected - set(self.buckets.keys())}"
+        )
 
     def test_each_bucket_nonempty(self):
         for name, queries in self.buckets.items():

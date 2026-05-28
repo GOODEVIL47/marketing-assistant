@@ -1,3 +1,5 @@
+import re
+
 FIT_SCORES = {
     1: {
         "score": "Strong fit",
@@ -323,6 +325,60 @@ def _suggested_action(fit_score, opportunity, reply_count):
     return "Do not engage"
 
 
+# ---------------------------------------------------------------------------
+# Broadcast/research/promo detection — M4.16
+# ---------------------------------------------------------------------------
+
+# Words/phrases that signal a post is reporting news or making announcements
+# rather than expressing personal reaction or inviting conversation.
+_BROADCAST_WORDS = frozenset([
+    "announces", "announced", "announcing", "announcement",
+    "launches", "launched", "launching",
+    "according to", "per bloomberg", "per reuters", "per cnbc",
+    "reveals", "revealed", "unveils", "unveiled",
+    "opens new", "opened its", "opens its",
+    "proud to announce", "proud to share", "excited to share",
+    "new report:", "new data:", "breaking:", "thread:",
+    "just released", "just published",
+    "confirmed that", "confirms that",
+])
+
+# Any of these in the post text indicates a conversation hook —
+# the author is reacting, questioning, or inviting engagement.
+_DISCUSSION_HOOKS = [
+    "?", "thoughts", "agree", "disagree", "am i wrong", "am i missing",
+    "why ", "what do you", "confused", "don't understand",
+    "doesn't make sense", "makes no sense",
+    "story stock", "overpriced", "nothing changed", "thesis unchanged",
+]
+
+_BROADCAST_THREAD_RE = re.compile(r'(?:^|\s)1\s*/\s*\d+|/thread\b', re.IGNORECASE)
+
+
+def _is_broadcast_post(text: str) -> bool:
+    """
+    Return True if the post looks like a research/news/announcement broadcast
+    without a clear discussion hook. Such posts are relevant topically but do
+    not invite conversational replies — better as Inspiration than Best 3.
+
+    Requires at least one broadcast signal AND no discussion hook.
+    Applied only to web-search posts; never affects mock or API-sourced posts.
+    """
+    text_lower = text.lower()
+
+    has_broadcast_word = any(w in text_lower for w in _BROADCAST_WORDS)
+    has_thread_notation = bool(_BROADCAST_THREAD_RE.search(text))
+
+    if not (has_broadcast_word or has_thread_notation):
+        return False
+
+    for hook in _DISCUSSION_HOOKS:
+        if hook in text_lower:
+            return False
+
+    return True
+
+
 _AVOID_CRYPTO = frozenset({"xrp", "web3", "memecoin", "meme coin", "altcoin", "crypto pump"})
 _AVOID_HYPE = frozenset({"100x", "moon", "gem", "next 10x", "get rich", "guaranteed"})
 _AVOID_BAIT = frozenset({
@@ -561,6 +617,25 @@ def score_posts(posts, profile=None):
                 "No clear US equities context detected — post may relate to a non-US market "
                 "or a generic topic. Verify US market relevance before replying."
             )
+
+        # Broadcast/research/news post without a discussion hook: downgrade to Low.
+        # Research broadcasts are useful topically but rarely invite conversation —
+        # better as Save for Inspiration than Today's Best 3.
+        # Only applies to web-search posts at Medium opportunity (not already downgraded).
+        if (
+            visibility == "Unknown visibility"
+            and opportunity == "Medium opportunity"
+            and post.get("metrics_confidence") == "low"
+            and fit_score in ("Strong fit", "Decent fit")
+        ):
+            post_text = post.get("combined_text_for_scoring") or post.get("text", "")
+            if _is_broadcast_post(post_text):
+                opportunity = "Low opportunity"
+                opp_reason = (
+                    "Post reads like a research/news broadcast without a clear discussion hook. "
+                    "Topically relevant but unlikely to generate conversation. "
+                    "Save for Inspiration — do not use as a direct reply target."
+                )
 
         action = _suggested_action(fit_score, opportunity, post.get("reply_count", 0))
         eng_summary = _engagement_summary(post)

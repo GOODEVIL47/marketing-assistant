@@ -1,3 +1,5 @@
+import re as _re
+
 # Mock post replies — keyed by integer ID (1–8). Never change these.
 REPLIES = {
     1: {
@@ -945,6 +947,87 @@ def _detect_reply_theme(post):
     return None
 
 
+# ---------------------------------------------------------------------------
+# Context extraction for contextual replies — M4.16
+# ---------------------------------------------------------------------------
+
+_TICKER_RE = _re.compile(r'\$[A-Z]{1,5}\b')
+_PCT_RE = _re.compile(r'[+\-−]?\d+(?:\.\d+)?\s*%')
+
+# Specific market drivers, structural themes, and catalysts worth naming in replies.
+_CONTEXT_DRIVERS = [
+    "onshoring", "reshoring", "defense", "supply chain",
+    "chips act", "germanium", "photonics", "optical capacity",
+    "power semis", "semiconductor sovereignty", "scarcity",
+    "story stock", "52-week high", "all-time high",
+    "short squeeze", "earnings surprise", "retail chasing",
+]
+
+
+def _extract_post_context(post):
+    """
+    Extract concrete market context from post text.
+    Uses combined_text_for_scoring (Tavily title+content) when available.
+    Returns a dict with tickers, pct_changes, and identified drivers.
+    """
+    text = post.get("combined_text_for_scoring") or post.get("text") or ""
+    text_lower = text.lower()
+    tickers = list(dict.fromkeys(_TICKER_RE.findall(text)))   # deduped, order preserved
+    pct_changes = _PCT_RE.findall(text)
+    drivers = [kw for kw in _CONTEXT_DRIVERS if kw in text_lower]
+    return {
+        "tickers": tickers[:3],
+        "pct_changes": pct_changes[:2],
+        "drivers": drivers[:4],
+    }
+
+
+def _build_contextual_reply(context):
+    """
+    Build one context-aware reply line referencing concrete elements from the post.
+    Returns None when context is too thin for a specific reply.
+    Callers inject this as option C so at least one reply is post-specific.
+    """
+    tickers = context.get("tickers", [])
+    pct_changes = context.get("pct_changes", [])
+    drivers = context.get("drivers", [])
+
+    ticker_str = " / ".join(tickers[:2]) if tickers else None
+
+    if not ticker_str:
+        return None
+
+    if pct_changes and drivers:
+        driver = drivers[0]
+        pct = pct_changes[0]
+        return (
+            f"That {pct} move in {ticker_str} while the broader market moved the "
+            f"other way is the question in one number — is the {driver} thesis "
+            "real, or is this a story with momentum? Hard to tell from the chart alone."
+        )
+
+    if drivers:
+        driver = drivers[0]
+        return (
+            f"The {driver} angle on {ticker_str} is worth being specific about — "
+            "there's a real difference between a structural shift and a trade riding "
+            "a narrative. The price move doesn't resolve that question on its own."
+        )
+
+    if pct_changes:
+        pct = pct_changes[0]
+        return (
+            f"{ticker_str} at {pct} against the tape is worth unpacking — "
+            "what actually changed in the thesis, and what's just the market "
+            "pricing in a story?"
+        )
+
+    return (
+        f"Worth being specific about what the {ticker_str} move is actually telling you — "
+        "what changed in the underlying picture, and what just got louder."
+    )
+
+
 def generate_replies(scored_posts):
     results = []
     for post in scored_posts:
@@ -1030,7 +1113,27 @@ def generate_replies(scored_posts):
                 template = _DYNAMIC_TEMPLATES[theme]
                 options, best_idx = _pick_reply_options(post_id, post.get("text", ""), theme, template)
                 media = template["media"]
-                best_reply = options[best_idx]
+
+                # Context injection: when the post contains specific market elements
+                # (tickers + price change or structural driver), replace option C with a
+                # post-specific reply. This ensures Best 3 replies reference actual
+                # catalysts rather than falling back to generic process language.
+                context = _extract_post_context(post)
+                contextual = _build_contextual_reply(context)
+                if contextual:
+                    options = list(options)
+                    ctx_option = {"style": "C — Context-aware", "text": contextual}
+                    if len(options) >= 3:
+                        options[2] = ctx_option
+                        contextual_idx = 2
+                    else:
+                        options.append(ctx_option)
+                        contextual_idx = len(options) - 1
+                    # Make the contextual reply the recommended one — it references
+                    # actual catalysts, which is always stronger than a generic take.
+                    best_idx = contextual_idx
+
+                best_reply = options[min(best_idx, len(options) - 1)]
             results.append({
                 **post,
                 "replies": options,

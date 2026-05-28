@@ -474,6 +474,54 @@ class TestGenerateRepliesContextInjection(unittest.TestCase):
             f"Expected C — Context-aware option for LPTH post. Styles: {styles}"
         )
 
+    def test_lpth_best_reply_is_contextual_not_generic(self):
+        # The recommended (starred) reply must be the contextual one, not a
+        # generic process-level fallback. It should reference $LPTH, the price
+        # move, or a structural driver (onshoring/defense/germanium).
+        result = self._score_and_reply(_lpth_post())
+        best = result.get("best_reply") or {}
+        best_text = best.get("text", "")
+        has_context = (
+            "$LPTH" in best_text
+            or "8.4" in best_text
+            or "onshoring" in best_text
+            or "defense" in best_text
+            or "germanium" in best_text
+            or "optical capacity" in best_text
+            or "story stock" in best_text.lower()
+        )
+        self.assertTrue(
+            has_context,
+            f"Recommended reply for LPTH post is generic. best_reply: {best_text[:300]}"
+        )
+        self.assertEqual(
+            best.get("style"), "C — Context-aware",
+            f"best_reply should be 'C — Context-aware', got: {best.get('style')!r}"
+        )
+
+    def test_xfab_best_reply_is_contextual_not_generic(self):
+        # XFAB structural thesis post — recommended reply must reference photonics,
+        # power semis, CHIPS Act, $NVDA/$NOK, or semiconductor sovereignty.
+        result = self._score_and_reply(_xfab_post())
+        best = result.get("best_reply") or {}
+        best_text = best.get("text", "")
+        has_context = (
+            "$XFAB" in best_text
+            or "photonics" in best_text.lower()
+            or "chips act" in best_text.lower()
+            or "power semis" in best_text.lower()
+            or "$NVDA" in best_text
+            or "semiconductor sovereignty" in best_text.lower()
+        )
+        self.assertTrue(
+            has_context,
+            f"Recommended reply for XFAB post is generic. best_reply: {best_text[:300]}"
+        )
+        self.assertEqual(
+            best.get("style"), "C — Context-aware",
+            f"best_reply should be 'C — Context-aware', got: {best.get('style')!r}"
+        )
+
     def test_mock_posts_replies_unchanged(self):
         from mock_data.posts import MOCK_POSTS
         scored = score_posts(MOCK_POSTS)

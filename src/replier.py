@@ -1127,6 +1127,9 @@ def generate_replies(scored_posts):
                         options[2] = ctx_option
                     else:
                         options.append(ctx_option)
+                    # Make the contextual reply the recommended one — it references
+                    # actual catalysts, which is always stronger than a generic take.
+                    best_idx = len(options) - 1
 
                 best_reply = options[min(best_idx, len(options) - 1)]
             results.append({

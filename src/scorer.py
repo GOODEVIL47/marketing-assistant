@@ -1,4 +1,5 @@
 import re
+import unicodedata
 
 FIT_SCORES = {
     1: {
@@ -329,6 +330,14 @@ def _suggested_action(fit_score, opportunity, reply_count):
 # Broadcast/research/promo detection — M4.16
 # ---------------------------------------------------------------------------
 
+def _nfkc(text: str) -> str:
+    """NFKC-normalize text so stylized Unicode letters map to ASCII equivalents.
+    Converts mathematical bold/italic variants (𝗨𝗻𝘃𝗲𝗶𝗹𝘀 → Unveils) used in
+    research/analyst posts so keyword matching works on real-world X content.
+    """
+    return unicodedata.normalize("NFKC", text) if text else text
+
+
 # Words/phrases that signal a post is reporting news or making announcements
 # rather than expressing personal reaction or inviting conversation.
 _BROADCAST_WORDS = frozenset([
@@ -364,6 +373,7 @@ def _is_broadcast_post(text: str) -> bool:
     Requires at least one broadcast signal AND no discussion hook.
     Applied only to web-search posts; never affects mock or API-sourced posts.
     """
+    text = _nfkc(text)      # normalize stylized Unicode (𝗨𝗻𝘃𝗲𝗶𝗹𝘀 → Unveils)
     text_lower = text.lower()
 
     has_broadcast_word = any(w in text_lower for w in _BROADCAST_WORDS)
@@ -621,11 +631,11 @@ def score_posts(posts, profile=None):
         # Broadcast/research/news post without a discussion hook: downgrade to Low.
         # Research broadcasts are useful topically but rarely invite conversation —
         # better as Save for Inspiration than Today's Best 3.
-        # Only applies to web-search posts at Medium opportunity (not already downgraded).
+        # Unknown visibility already implies a web-search post; no separate
+        # metrics_confidence check needed.
         if (
             visibility == "Unknown visibility"
             and opportunity == "Medium opportunity"
-            and post.get("metrics_confidence") == "low"
             and fit_score in ("Strong fit", "Decent fit")
         ):
             post_text = post.get("combined_text_for_scoring") or post.get("text", "")

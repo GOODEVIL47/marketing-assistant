@@ -99,6 +99,56 @@ def _xfab_post():
     )
 
 
+# Example D — CounterPointTR-style broadcast post using stylized Unicode text.
+# Research/analyst accounts commonly bold-style their posts using Mathematical
+# Bold Sans-Serif Unicode characters. After NFKC normalization:
+#   𝗡𝗩𝗜𝗗𝗜𝗔 → NVIDIA, 𝗮𝗻𝗻𝗼𝘂𝗻𝗰𝗲𝘀 → announces, 𝗨𝗻𝘃𝗲𝗶𝗹𝘀 → Unveils
+# Without normalization the broadcast words are invisible to ASCII matching.
+_UNICODE_BROADCAST_BODY = (
+    "𝗡𝗩𝗜𝗗𝗜𝗔 𝗨𝗻𝘃𝗲𝗶𝗹𝘀 new AI campus expansion in Taiwan. "
+    "The company 𝗮𝗻𝗻𝗼𝘂𝗻𝗰𝗲𝘀 the latest GTC 2026 AI data center partnership. "
+    "𝗥𝗲𝗮𝗱 𝗼𝘂𝗿 𝗶𝗻𝘀𝗶𝗴𝗵𝘁𝘀 for the full analysis. "
+    "Retail investors tracking $NVDA noise around the AI expansion."
+)
+# Shaped like real Tavily combined_text_for_scoring (username prefix + body twice)
+_UNICODE_BROADCAST_COMBINED = (
+    'CounterPointTR on X: "' + _UNICODE_BROADCAST_BODY + '" '
+    + _UNICODE_BROADCAST_BODY
+)
+
+def _nvda_unicode_broadcast_post():
+    """CounterPointTR-style post using stylized Unicode bold text — real Tavily shape."""
+    return _base_post(
+        id="1900000000000001005",
+        text=_UNICODE_BROADCAST_BODY,
+        combined_text_for_scoring=_UNICODE_BROADCAST_COMBINED,
+    )
+
+
+# Example E — LPTH post shaped exactly like Tavily provider output.
+# combined_text_for_scoring = raw Tavily title + " " + raw Tavily content.
+# The cleaned display text is shorter; full context lives in combined_text.
+_LPTH_TAVILY_TITLE = (
+    'PhotonCap on X: "$LPTH up +8.4%, near 52-week highs. Loss-making IR optics."'
+)
+_LPTH_TAVILY_CONTENT = (
+    "Market may be buying scarce U.S.-based optical capacity in a defense supply "
+    "chain moving away from Chinese germanium. "
+    "Onshoring premium or overpriced story stock? "
+    "Around $50M FY26 nine-month revenue, around $1B market cap."
+)
+
+def _lpth_real_tavily_post():
+    """LPTH post in exact Tavily provider shape (display text short; context in combined)."""
+    return _base_post(
+        id="1900000000000001004",
+        # Display text: what _clean_text extracts (truncated excerpt)
+        text="$LPTH up +8.4%, near 52-week highs. Loss-making IR optics.",
+        # combined_text_for_scoring: Tavily title + " " + Tavily content (full context)
+        combined_text_for_scoring=f"{_LPTH_TAVILY_TITLE} {_LPTH_TAVILY_CONTENT}",
+    )
+
+
 def _minimal_profile():
     return {
         "fit_keywords": {
@@ -195,6 +245,23 @@ class TestBroadcastDetection(unittest.TestCase):
         text = "Per Reuters, $NVDA opens new facility. Why is the stock confused here?"
         self.assertFalse(_is_broadcast_post(text))
 
+    def test_unicode_bold_unveils_is_broadcast(self):
+        # 𝗨𝗻𝘃𝗲𝗶𝗹𝘀 → Unveils after NFKC; broadcast word must be detected.
+        self.assertTrue(_is_broadcast_post(_UNICODE_BROADCAST_BODY))
+
+    def test_unicode_bold_announces_is_broadcast(self):
+        # 𝗮𝗻𝗻𝗼𝘂𝗻𝗰𝗲𝘀 → announces after NFKC normalization.
+        text = (
+            "𝗡𝗩𝗜𝗗𝗜𝗔 𝗮𝗻𝗻𝗼𝘂𝗻𝗰𝗲𝘀 major partnership with Taiwan foundry. "
+            "Read the full report for details. Retail investors tracking $NVDA."
+        )
+        self.assertTrue(_is_broadcast_post(text))
+
+    def test_unicode_broadcast_with_question_is_not_broadcast(self):
+        # Even with Unicode bold text, a question mark is a discussion hook.
+        text = _UNICODE_BROADCAST_BODY + " But why is the stock still down?"
+        self.assertFalse(_is_broadcast_post(text))
+
 
 # ---------------------------------------------------------------------------
 # 2. Broadcast opportunity downgrade in score_posts()
@@ -263,6 +330,27 @@ class TestBroadcastDowngrade(unittest.TestCase):
         self.assertNotEqual(
             scored[0]["opportunity"], "Low opportunity",
             "Broadcast check should not downgrade posts with real engagement metrics"
+        )
+
+    def test_unicode_broadcast_post_downgraded(self):
+        # CounterPointTR-style post with stylized Unicode bold text.
+        # Without NFKC normalization the broadcast words are invisible to ASCII matching
+        # and the post would reach Today's Best 3 as Medium opportunity.
+        # With normalization it must be downgraded to Low opportunity.
+        post = _nvda_unicode_broadcast_post()
+        scored = score_posts([post], profile=_minimal_profile())
+        s = scored[0]
+        self.assertIn(
+            s["score"], ("Strong fit", "Decent fit"),
+            "Unicode broadcast post should still score as Decent/Strong fit"
+        )
+        self.assertEqual(
+            s["opportunity"], "Low opportunity",
+            f"Unicode broadcast post must be downgraded. Got: {s['opportunity']}"
+        )
+        self.assertEqual(
+            s["suggested_action"], "Save for inspiration",
+            "Unicode broadcast post must not be Today's Best 3"
         )
 
 
@@ -339,6 +427,30 @@ class TestExtractPostContext(unittest.TestCase):
         )
         ctx = _extract_post_context(post)
         self.assertLessEqual(len(ctx["tickers"]), 3)
+
+    def test_real_tavily_shape_lpth_extracts_context(self):
+        # Real Tavily posts: display text is short; rich context is in combined_text_for_scoring.
+        post = _lpth_real_tavily_post()
+        ctx = _extract_post_context(post)
+        self.assertIn("$LPTH", ctx["tickers"],
+                      "Must find $LPTH ticker from combined_text_for_scoring")
+        self.assertTrue(
+            any("8.4" in p for p in ctx["pct_changes"]),
+            "Must find +8.4% pct change"
+        )
+        has_driver = any(d in ("onshoring", "defense", "scarce", "optical capacity", "germanium")
+                         for d in ctx["drivers"])
+        self.assertTrue(has_driver,
+                        f"Must find at least one relevant driver. Got: {ctx['drivers']}")
+
+    def test_scarce_extracted_as_driver(self):
+        post = _base_post(
+            id="1900000000000001096",
+            text="Market buying scarce U.S. optical capacity. Defense supply chain shift.",
+            combined_text_for_scoring="Market buying scarce U.S. optical capacity. Defense supply chain shift.",
+        )
+        ctx = _extract_post_context(post)
+        self.assertIn("scarce", ctx["drivers"])
 
 
 # ---------------------------------------------------------------------------
@@ -541,6 +653,46 @@ class TestGenerateRepliesContextInjection(unittest.TestCase):
         post = _nvda_broadcast_post()
         scored = score_posts([post], profile=_minimal_profile())
         self.assertEqual(scored[0]["suggested_action"], "Save for inspiration")
+
+    def test_real_tavily_shape_lpth_best_reply_is_contextual(self):
+        # Validates the full pipeline with real Tavily output shape.
+        # display text is short; context lives in combined_text_for_scoring.
+        # The recommended reply must be contextual, not a generic fallback.
+        result = self._score_and_reply(_lpth_real_tavily_post())
+        best = result.get("best_reply") or {}
+        best_text = best.get("text", "")
+        has_context = (
+            "$LPTH" in best_text
+            or "8.4" in best_text
+            or "onshoring" in best_text.lower()
+            or "defense" in best_text.lower()
+            or "germanium" in best_text.lower()
+            or "optical capacity" in best_text.lower()
+            or "scarce" in best_text.lower()
+            or "story stock" in best_text.lower()
+        )
+        self.assertTrue(
+            has_context,
+            f"Recommended reply for real-shape LPTH post is generic. best_reply: {best_text[:300]}"
+        )
+        self.assertEqual(
+            best.get("style"), "C — Context-aware",
+            f"best_reply should be 'C — Context-aware', got: {best.get('style')!r}"
+        )
+
+    def test_unicode_broadcast_post_not_in_best3(self):
+        # CounterPointTR-style Unicode broadcast post must be downgraded —
+        # not surfaced as Today's Best 3 / Medium opportunity.
+        post = _nvda_unicode_broadcast_post()
+        scored = score_posts([post], profile=_minimal_profile())
+        self.assertNotEqual(
+            scored[0]["opportunity"], "Medium opportunity",
+            "Unicode broadcast post must not remain Medium opportunity"
+        )
+        self.assertNotEqual(
+            scored[0]["suggested_action"], "Reply",
+            "Unicode broadcast post must not have suggested_action=Reply"
+        )
 
 
 # ---------------------------------------------------------------------------

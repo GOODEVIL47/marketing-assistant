@@ -1125,11 +1125,13 @@ def generate_replies(scored_posts):
                     ctx_option = {"style": "C — Context-aware", "text": contextual}
                     if len(options) >= 3:
                         options[2] = ctx_option
+                        contextual_idx = 2
                     else:
                         options.append(ctx_option)
+                        contextual_idx = len(options) - 1
                     # Make the contextual reply the recommended one — it references
                     # actual catalysts, which is always stronger than a generic take.
-                    best_idx = len(options) - 1
+                    best_idx = contextual_idx
 
                 best_reply = options[min(best_idx, len(options) - 1)]
             results.append({

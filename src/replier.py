@@ -1,4 +1,5 @@
 import re as _re
+import unicodedata as _unicodedata
 
 # Mock post replies — keyed by integer ID (1–8). Never change these.
 REPLIES = {
@@ -958,19 +959,43 @@ _PCT_RE = _re.compile(r'[+\-−]?\d+(?:\.\d+)?\s*%')
 _CONTEXT_DRIVERS = [
     "onshoring", "reshoring", "defense", "supply chain",
     "chips act", "germanium", "photonics", "optical capacity",
-    "power semis", "semiconductor sovereignty", "scarcity",
+    "power semis", "semiconductor sovereignty", "scarcity", "scarce",
     "story stock", "52-week high", "all-time high",
     "short squeeze", "earnings surprise", "retail chasing",
 ]
 
 
+def _nfkc(text: str) -> str:
+    """NFKC-normalize text so stylized Unicode letters map to ASCII equivalents."""
+    return _unicodedata.normalize("NFKC", text) if text else text
+
+
+def _gather_post_text(post) -> str:
+    """
+    Combine and NFKC-normalize all available text fields into one string for
+    context extraction. Reads combined_text_for_scoring first (Tavily's title+content
+    joined), then falls back to other fields a provider might set.
+    This ensures tickers like $𝗟𝗣𝗧𝗛 (stylized Unicode) match after normalization.
+    """
+    parts = []
+    for field in (
+        "combined_text_for_scoring", "text", "title", "content",
+        "source_title", "source_content", "raw_text", "excerpt", "description",
+    ):
+        val = post.get(field)
+        if val and isinstance(val, str):
+            parts.append(val)
+    return _nfkc(" ".join(parts))
+
+
 def _extract_post_context(post):
     """
     Extract concrete market context from post text.
-    Uses combined_text_for_scoring (Tavily title+content) when available.
+    Reads all available text fields and normalizes Unicode so stylized ticker
+    symbols and driver keywords from real X posts are correctly matched.
     Returns a dict with tickers, pct_changes, and identified drivers.
     """
-    text = post.get("combined_text_for_scoring") or post.get("text") or ""
+    text = _gather_post_text(post)
     text_lower = text.lower()
     tickers = list(dict.fromkeys(_TICKER_RE.findall(text)))   # deduped, order preserved
     pct_changes = _PCT_RE.findall(text)
@@ -1132,6 +1157,9 @@ def generate_replies(scored_posts):
                     # Make the contextual reply the recommended one — it references
                     # actual catalysts, which is always stronger than a generic take.
                     best_idx = contextual_idx
+                    # Don't show generic fallback media hint when the reply is context-aware.
+                    if "generic fallback" in media.get("reason", "").lower():
+                        media = {"type": "No media", "reason": "Context-aware reply — no media needed."}
 
                 best_reply = options[min(best_idx, len(options) - 1)]
             results.append({

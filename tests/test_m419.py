@@ -845,5 +845,117 @@ class TestOptionalIdeaInHTMLOriginalPosts(unittest.TestCase):
         self.assertIn("Signal Shift", html)
 
 
+# ---------------------------------------------------------------------------
+# M4.19d tests — duplicate-label cleanup
+# ---------------------------------------------------------------------------
+
+class TestEngagementLineNoDuplicateWebSearch(unittest.TestCase):
+    """HTML card engagement line must not repeat 'found via web search'."""
+
+    def _make_tavily_low_confidence_post(self):
+        # engagement_summary for low-confidence Tavily posts already embeds
+        # "found via web search" via scorer._engagement_summary()
+        return _tavily_post(
+            metrics_confidence="low",
+            engagement_summary="Engagement unknown · found via web search · ~14h old",
+        )
+
+    def test_no_duplicate_found_via_web_search(self):
+        posts = [self._make_tavily_low_confidence_post()]
+        schedule = _minimal_posts_schedule()
+        html = render_digest_html("Signal Shift", posts, schedule, mode="Mock")
+        # Count occurrences in the engagement paragraph area
+        count = html.count("found via web search")
+        self.assertEqual(count, 1, f"'found via web search' appeared {count} times, expected 1")
+
+    def test_engagement_line_still_has_web_search_once(self):
+        posts = [self._make_tavily_low_confidence_post()]
+        schedule = _minimal_posts_schedule()
+        html = render_digest_html("Signal Shift", posts, schedule, mode="Mock")
+        self.assertIn("found via web search", html)
+
+
+class TestMarkdownOptionalIdeaNoDoubleLabel(unittest.TestCase):
+    """Markdown digest optional idea label must not repeat 'Optional idea'."""
+
+    def _make_schedule_with_production_note(self):
+        schedule = _posts_schedule(founder_needed=False)
+        schedule["founder"]["optional_idea"] = {
+            "note": "Optional idea — save for next scheduled post day",
+            "text": "The market is noisy — here's what actually changed.",
+            "format": {"type": "One-liner", "reason": "Short and punchy."},
+            "media": {"type": "No media", "reason": "Text lands clean."},
+        }
+        return schedule
+
+    def test_no_double_optional_idea_label(self):
+        md = "\n".join(_build_original_posts(
+            self._make_schedule_with_production_note(), mode="Mock"
+        ))
+        self.assertNotIn("Optional idea — Optional idea", md)
+        self.assertNotIn("Optional idea (Optional idea", md)
+
+    def test_optional_idea_label_present_once(self):
+        md = "\n".join(_build_original_posts(
+            self._make_schedule_with_production_note(), mode="Mock"
+        ))
+        self.assertIn("Optional idea", md)
+
+    def test_custom_note_gets_prefix(self):
+        schedule = _posts_schedule(founder_needed=False)
+        schedule["founder"]["optional_idea"] = {
+            "note": "save for next scheduled post day",
+            "text": "The market is noisy.",
+            "format": {"type": "One-liner", "reason": "Punchy."},
+            "media": None,
+        }
+        md = "\n".join(_build_original_posts(schedule, mode="Mock"))
+        self.assertIn("Optional idea — save for next scheduled post day", md)
+
+
+class TestHTMLOptionalIdeaNoDoubleLabel(unittest.TestCase):
+    """HTML email optional idea label must not repeat 'Optional idea'."""
+
+    def _make_schedule_with_production_note(self):
+        schedule = _posts_schedule(founder_needed=False)
+        schedule["founder"]["optional_idea"] = {
+            "note": "Optional idea — save for next scheduled post day",
+            "text": "The market is noisy — here's what actually changed.",
+            "format": {"type": "One-liner", "reason": "Short and punchy."},
+            "media": {"type": "No media", "reason": "Text lands clean."},
+        }
+        return schedule
+
+    def test_no_double_optional_idea_in_html(self):
+        posts = _minimal_posts_with_replies()
+        html = render_digest_html(
+            "Signal Shift", posts,
+            self._make_schedule_with_production_note(), mode="Mock",
+        )
+        self.assertNotIn("Optional idea — Optional idea", html)
+        self.assertNotIn("Optional idea &mdash; Optional idea", html)
+
+    def test_optional_idea_label_present_in_html(self):
+        posts = _minimal_posts_with_replies()
+        html = render_digest_html(
+            "Signal Shift", posts,
+            self._make_schedule_with_production_note(), mode="Mock",
+        )
+        self.assertIn("Optional idea", html)
+
+    def test_custom_note_gets_prefix_in_html(self):
+        schedule = _posts_schedule(founder_needed=False)
+        schedule["founder"]["optional_idea"] = {
+            "note": "save for next scheduled post day",
+            "text": "The market is noisy.",
+            "format": {"type": "One-liner", "reason": "Punchy."},
+            "media": None,
+        }
+        posts = _minimal_posts_with_replies()
+        html = render_digest_html("Signal Shift", posts, schedule, mode="Mock")
+        self.assertIn("Optional idea", html)
+        self.assertIn("save for next scheduled post day", html)
+
+
 if __name__ == "__main__":
     unittest.main()

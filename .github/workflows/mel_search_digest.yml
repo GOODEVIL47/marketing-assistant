@@ -1,9 +1,20 @@
 name: Mel Search Digest
 
-# Manual trigger only — no scheduled runs.
-# Run from: Actions tab → Mel Search Digest → Run workflow.
+# Runs daily at 08:05 Europe/London and sends the email digest automatically.
+# Can also be triggered manually from: Actions tab → Mel Search Digest → Run workflow.
+# Manual runs default to email off; set send_email=true to send on a manual run.
 on:
   workflow_dispatch:
+    inputs:
+      send_email:
+        description: "Send email? (true/false)"
+        required: false
+        default: "false"
+        type: string
+
+  schedule:
+    - cron: "5 8 * * *"
+      timezone: "Europe/London"
 
 jobs:
   search-digest:
@@ -26,7 +37,7 @@ jobs:
         env:
           SEARCH_PROVIDER: tavily
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
-          SEND_EMAIL: ${{ secrets.SEND_EMAIL }}
+          SEND_EMAIL: ${{ github.event_name == 'schedule' && 'true' || inputs.send_email || 'false' }}
           EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}

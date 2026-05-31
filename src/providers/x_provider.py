@@ -80,32 +80,55 @@ def _normalize_post(tweet, includes_users=None):
     """Convert a raw X API v2 tweet object to the standard post dict shape."""
     metrics = tweet.get("public_metrics", {})
     author_id = tweet.get("author_id", "")
-    author_handle = ""
+    tweet_id = tweet["id"]
+
+    username = ""
     author_name = ""
     follower_count = 0
 
     if includes_users:
         for user in includes_users:
             if user.get("id") == author_id:
-                author_handle = "@" + user.get("username", "")
+                username = user.get("username", "")
                 author_name = user.get("name", "")
                 follower_count = user.get("public_metrics", {}).get("followers_count", 0)
                 break
 
+    if username:
+        author = "@" + username
+        url = f"https://x.com/{username}/status/{tweet_id}"
+        author_profile_url = f"https://x.com/{username}"
+    else:
+        author = "@unknown"
+        url = f"https://x.com/i/web/status/{tweet_id}"
+        author_profile_url = ""
+
     age_hours = _parse_age_hours(tweet.get("created_at", ""))
+    text = tweet.get("text", "")
 
     return {
-        "id": tweet["id"],
-        "author": author_handle or f"@user_{author_id[:8]}",
+        "id": tweet_id,
+        "author": author,
+        "username": username,
         "author_name": author_name,
-        "follower_count": follower_count,
-        "text": tweet.get("text", ""),
+        "author_followers": follower_count,
+        "author_profile_url": author_profile_url,
+        "text": text,
+        "combined_text_for_scoring": text,
+        "created_at": tweet.get("created_at", ""),
+        "age_hours": age_hours,
+        "age_source": "x_api",
+        "url": url,
+        "post_url": url,
+        "discovery_source": "x_api",
         "likes": metrics.get("like_count", 0),
         "reposts": metrics.get("retweet_count", 0),
         "reply_count": metrics.get("reply_count", 0),
+        "quote_count": metrics.get("quote_count", 0),
         "impressions": metrics.get("impression_count", 0),
-        "age_hours": age_hours,
-        "url": f"https://x.com/i/web/status/{tweet['id']}",
+        "conversation_id": tweet.get("conversation_id", ""),
+        "referenced_tweets": tweet.get("referenced_tweets", []),
+        "lang": tweet.get("lang", ""),
     }
 
 
@@ -130,7 +153,7 @@ def get_posts(profile):
     params = {
         "query": query,
         "max_results": _MAX_RESULTS,
-        "tweet.fields": "created_at,public_metrics,author_id",
+        "tweet.fields": "created_at,public_metrics,author_id,conversation_id,referenced_tweets,lang",
         "expansions": "author_id",
         "user.fields": "username,name,public_metrics",
     }

@@ -518,6 +518,10 @@ class TestWorkflowDefaults(unittest.TestCase):
         # "push" might appear in artifact name, so check for "push:" specifically
         self.assertNotIn("push:", content)
 
+    def test_no_pull_request_trigger(self):
+        content = self._load_workflow()
+        self.assertNotIn("pull_request:", content)
+
     def test_workflow_dispatch_present(self):
         content = self._load_workflow()
         self.assertIn("workflow_dispatch", content)

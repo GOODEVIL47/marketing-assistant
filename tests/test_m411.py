@@ -149,13 +149,13 @@ class TestWorthCheckingAppears(unittest.TestCase):
         posts = [self._decent_low_fresh()]
         lines = _build_worth_checking(posts)
         content = "\n".join(lines)
-        self.assertIn("Reply options", content)
+        self.assertIn("Recommended copy:", content)
 
     def test_worth_checking_shows_media_guidance(self):
         posts = [self._decent_low_fresh()]
         lines = _build_worth_checking(posts)
         content = "\n".join(lines)
-        self.assertIn("Media:", content)
+        self.assertIn("Media/GIF:", content)
 
     def test_best3_note_mentions_worth_checking_when_empty(self):
         posts = [self._decent_low_fresh()]
@@ -280,26 +280,27 @@ class TestBest3ReplyOptions(unittest.TestCase):
     def test_compact_mode_shows_all_reply_options(self):
         posts = [self._best3_post()]
         md = build_markdown("Signal Shift", posts, _make_posts_schedule(), mode="Tavily")
-        self.assertIn("A — One-liner", md)
-        self.assertIn("B — Paragraph", md)
-        self.assertIn("C — Reframe", md)
+        self.assertIn("A — One-liner", md)  # in Other options
+        # B is the recommended reply — shown as normalized label in Recommended format
+        self.assertIn("Recommended copy:", md)
+        self.assertIn("C — Reframe", md)  # in Other options
 
     def test_compact_mode_shows_media_guidance(self):
         posts = [self._best3_post()]
         md = build_markdown("Signal Shift", posts, _make_posts_schedule(), mode="Tavily")
-        self.assertIn("**Media:**", md)
+        self.assertIn("**Media/GIF:**", md)
 
     def test_compact_mode_shows_gif_idea(self):
         posts = [self._best3_post()]
         md = build_markdown("Signal Shift", posts, _make_posts_schedule(), mode="Tavily")
-        self.assertIn("Idea:", md)
+        self.assertIn("**Media idea:**", md)
         self.assertIn("overwhelmed trader", md)
 
     def test_compact_mode_shows_use_if_skip_if(self):
         posts = [self._best3_post()]
         md = build_markdown("Signal Shift", posts, _make_posts_schedule(), mode="Tavily")
-        self.assertIn("Use if:", md)
-        self.assertIn("Skip if:", md)
+        self.assertIn("**Use media if:**", md)
+        self.assertIn("**Skip media if:**", md)
 
     def test_compact_mode_shows_post_url(self):
         posts = [self._best3_post()]
@@ -558,7 +559,7 @@ class TestMockModeUnchangedM411(unittest.TestCase):
         with_replies = generate_replies(scored)
         schedule = generate_posts(0)
         md = build_markdown("Signal Shift", with_replies, schedule, mode="Mock")
-        self.assertIn("Reply options:", md)
+        self.assertIn("Recommended copy:", md)
 
     def test_mock_best3_shows_media_guidance(self):
         from mock_data.posts import MOCK_POSTS
@@ -566,7 +567,7 @@ class TestMockModeUnchangedM411(unittest.TestCase):
         with_replies = generate_replies(scored)
         schedule = generate_posts(0)
         md = build_markdown("Signal Shift", with_replies, schedule, mode="Mock")
-        self.assertIn("**Media:**", md)
+        self.assertIn("**Media/GIF:**", md)
 
 
 if __name__ == "__main__":

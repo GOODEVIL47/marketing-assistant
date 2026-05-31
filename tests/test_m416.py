@@ -463,8 +463,10 @@ class TestBuildContextualReply(unittest.TestCase):
         ctx = {"tickers": [], "pct_changes": [], "drivers": []}
         self.assertIsNone(_build_contextual_reply(ctx))
 
-    def test_returns_none_for_no_tickers(self):
-        ctx = {"tickers": [], "pct_changes": ["+8.4%"], "drivers": ["onshoring"]}
+    def test_returns_none_for_no_tickers_and_weak_drivers(self):
+        # No ticker, 1 weak driver (not in _STRONG_STRUCTURAL_DRIVERS) → None.
+        # Strong drivers without a ticker fire the driver-only path (tested in test_m418).
+        ctx = {"tickers": [], "pct_changes": ["+8.4%"], "drivers": ["scarcity"]}
         self.assertIsNone(_build_contextual_reply(ctx))
 
     def test_reply_mentions_ticker(self):
@@ -490,18 +492,15 @@ class TestBuildContextualReply(unittest.TestCase):
         self.assertIn("$XFAB", reply)
         self.assertIn("photonics", reply)
 
-    def test_reply_with_tickers_and_pct_only(self):
+    def test_reply_with_tickers_and_pct_only_is_none(self):
+        # M4.18: ticker + pct but no driver = thin context → None (generic reply is more honest).
         ctx = {"tickers": ["$NVDA"], "pct_changes": ["-3.2%"], "drivers": []}
-        reply = _build_contextual_reply(ctx)
-        self.assertIsNotNone(reply)
-        self.assertIn("$NVDA", reply)
-        self.assertIn("3.2", reply)
+        self.assertIsNone(_build_contextual_reply(ctx))
 
-    def test_reply_with_tickers_only(self):
+    def test_reply_with_tickers_only_is_none(self):
+        # M4.18: ticker alone = thin context → None (generic reply is more honest).
         ctx = {"tickers": ["$AMD"], "pct_changes": [], "drivers": []}
-        reply = _build_contextual_reply(ctx)
-        self.assertIsNotNone(reply)
-        self.assertIn("$AMD", reply)
+        self.assertIsNone(_build_contextual_reply(ctx))
 
     def test_reply_uses_up_to_two_tickers(self):
         ctx = {"tickers": ["$XFAB", "$NVDA", "$NOK"], "pct_changes": [], "drivers": ["photonics"]}

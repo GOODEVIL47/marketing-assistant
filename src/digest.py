@@ -55,21 +55,133 @@ def _render_media_block(media, lines):
     if not media:
         return
     media_type = media.get("type", "No media")
-    lines.append(f"**Media:** {media_type}")
-    if media_type == "Optional GIF":
-        if media.get("idea"):
-            lines.append(f"Idea: \"{media['idea']}\"")
-        if media.get("use_if"):
-            lines.append(f"Use if: {media['use_if']}")
-        if media.get("skip_if"):
-            lines.append(f"Skip if: {media['skip_if']}")
-    elif media_type == "Quote repost":
-        if media.get("use_if"):
-            lines.append(f"Use if: {media['use_if']}")
-        if media.get("skip_if"):
-            lines.append(f"Skip if: {media['skip_if']}")
-    elif media_type == "No media" and media.get("reason"):
-        lines.append(f"*{media['reason']}*")
+    lines.append(f"**Media/GIF:** {media_type}")
+    if media.get("idea"):
+        lines.append(f"**Media idea:** {media['idea']}")
+    if media.get("use_if"):
+        lines.append(f"**Use media if:** {media['use_if']}")
+    if media.get("skip_if"):
+        lines.append(f"**Skip media if:** {media['skip_if']}")
+    if media.get("reason"):
+        lines.append(f"**Reason:** *{media['reason']}*")
+
+
+# ── M4.19 output contract helpers ──────────────────────────────────────────
+
+_REPLY_DEFAULT_MEDIA = {
+    "type": "No media",
+    "reason": "Clean text reply — the point lands without a visual.",
+}
+
+_FOUNDER_DEFAULT_MEDIA = {
+    "type": "No media",
+    "reason": "Let the words do the work.",
+}
+
+_PRODUCT_DEFAULT_MEDIA = {
+    "type": "Simple branded image",
+    "idea": "clean Signal Shift text card or plain-English brief mockup",
+    "use_if": "you want more feed presence without adding hype",
+    "skip_if": "the copy is strong enough as text or the visual would feel salesy",
+    "reason": "Product posts usually work best with clean branded visuals, not meme GIFs.",
+}
+
+_MEDIA_FALLBACKS = {
+    "No media": {
+        "reason": "Clean text post — the copy works without a visual.",
+    },
+    "Optional GIF": {
+        "idea": "calm/analytical moment — chart, notebook, or focused work",
+        "use_if": "the copy has a casual or self-aware tone",
+        "skip_if": "the post is analytical or the copy already lands as text",
+    },
+    "Simple branded image": {
+        "idea": "plain-text card with the key line from the post",
+        "use_if": "you want more feed presence without adding hype",
+        "skip_if": "the copy is strong enough as text or the visual would feel salesy",
+    },
+    "Screenshot-style graphic": {
+        "idea": "screenshot-style text card with the key stat or quote",
+        "use_if": "the data point or quote is visually striking",
+        "skip_if": "the raw text is clear enough on its own",
+    },
+    "Text card": {
+        "idea": "clean text card — white background, brand font, key line only",
+        "use_if": "you want the key point to stand alone visually",
+        "skip_if": "the thread text is self-sufficient",
+    },
+    "Simple text card": {
+        "idea": "clean text card with the key line in large, readable type",
+        "use_if": "you want the key point to stand alone visually",
+        "skip_if": "the thread text is self-sufficient",
+    },
+    "Product mockup": {
+        "idea": "brief mockup or interface screenshot showing the relevant feature",
+        "use_if": "the post ties directly to a Signal Shift feature or workflow",
+        "skip_if": "the context is conceptual and product placement would feel forced",
+    },
+}
+
+_FORMAT_LABEL_MAP = {
+    "Short and clean": "One-liner",
+    "One-liner": "One-liner",
+    "Paragraph": "Short paragraph",
+    "Casual paragraph": "Short paragraph",
+    "Short paragraph": "Short paragraph",
+    "Agreement + reframe": "Short paragraph",
+    "Question": "Question",
+    "Question/reframe": "Question",
+    "Sharper take": "Sharper take",
+    "Key point": "Short paragraph",
+    "Context-aware": "Context-aware paragraph",
+    "2-3 line structure": "Three-liner",
+    "Three-liner": "Three-liner",
+    "Mini-thread": "Mini-thread",
+    "Short paragraph — sharper take": "Sharper take",
+}
+
+_FORMAT_REASONS = {
+    "One-liner": "Short and punchy — lands the point in one sentence without adding noise.",
+    "Short paragraph": "Conversational — shows the reasoning without lecturing; sounds like a founder, not an analyst.",
+    "Sharper take": "Direct reframe — redirects reactive thinking toward a clear decision question.",
+    "Question": "Invites reflection — asks rather than tells; lets the reader connect the dots.",
+    "Three-liner": "Structured turn — sets the tension, shifts the frame, lands the takeaway.",
+    "Mini-thread": "Multi-part — for when the point needs space across a few connected steps.",
+    "Context-aware paragraph": "Tied directly to the specific ticker or driver — maximally relevant to this post.",
+}
+
+
+def _normalize_format_label(style_name):
+    """Strip letter prefix (e.g. 'B — ') and map to a clean display label."""
+    key = style_name.split(" — ", 1)[-1] if " — " in style_name else style_name
+    return _FORMAT_LABEL_MAP.get(key, key)
+
+
+def _format_reason_for(style_name):
+    label = _normalize_format_label(style_name)
+    return _FORMAT_REASONS.get(label, label)
+
+
+def _manual_review_note(post):
+    if post.get("discovery_source") == "tavily_search":
+        return "Tavily search result — verify post is live and engagement is real before replying."
+    return ""
+
+
+def _fill_media_fallbacks(med, role=None):
+    """Return med with missing fields filled from _MEDIA_FALLBACKS.
+    If med is empty/None, returns a role-appropriate default so the media block is never blank.
+    role: 'founder' or 'product' (lowercase); used only when med is empty.
+    """
+    if not med:
+        return _PRODUCT_DEFAULT_MEDIA if (role or "").lower() == "product" else _FOUNDER_DEFAULT_MEDIA
+    media_type = med.get("type", "No media")
+    fallback = _MEDIA_FALLBACKS.get(media_type, {})
+    result = dict(med)
+    for key, val in fallback.items():
+        if not result.get(key):
+            result[key] = val
+    return result
 
 
 def _build_best_3(posts_with_replies, has_inspiration=False, worth_checking_count=0):
@@ -115,7 +227,8 @@ def _build_best_3(posts_with_replies, has_inspiration=False, worth_checking_coun
         opp_e = _opp_emoji(post["opportunity"])
         best = post.get("best_reply") or {}
         best_style = best.get("style", "")
-        media = post.get("media") or {}
+        best_text = best.get("text", "")
+        media = post.get("media") or _REPLY_DEFAULT_MEDIA
         replies = post.get("replies") or []
 
         lines.append(f"**{i}. {post['author']}**")
@@ -127,25 +240,38 @@ def _build_best_3(posts_with_replies, has_inspiration=False, worth_checking_coun
         lines.append(f"Engagement: {post['engagement_summary']}")
         if post.get("age_label"):
             lines.append(post["age_label"])
-        lines.append(f"Reply from: {post['reply_account']} · Action: {post['suggested_action']}")
         if post.get("post_url"):
             lines.append(post["post_url"])
         lines.append("")
 
-        if replies:
-            lines.append("**Reply options:**")
-            lines.append("")
-            for reply in replies:
-                rec = " ✅" if reply.get("style") == best_style else ""
-                lines.append(f"**{reply['style']}{rec}**")
-                lines.append(f"> {reply['text']}")
-                lines.append("")
-        elif best.get("text"):
-            lines.append(f"Best reply: *\"{best['text']}\"*")
+        if best_style:
+            lines.append(f"**Recommended format:** {_normalize_format_label(best_style)}")
+        if best_text:
+            lines.append("**Recommended copy:**")
+            lines.append(f"> {best_text}")
             lines.append("")
 
         _render_media_block(media, lines)
         lines.append("")
+
+        if best_style:
+            lines.append(f"**Why this format:** {_format_reason_for(best_style)}")
+        lines.append(f"**Account:** {post['reply_account']}")
+        note = _manual_review_note(post)
+        if note:
+            lines.append(f"**Manual review note:** {note}")
+        lines.append("")
+
+        other_replies = [r for r in replies if r.get("style") != best_style]
+        if not best_style and replies:
+            other_replies = replies
+        if other_replies:
+            lines.append("**Other options:**")
+            lines.append("")
+            for reply in other_replies:
+                lines.append(f"**{reply['style']}**")
+                lines.append(f"> {reply['text']}")
+                lines.append("")
 
     return lines
 
@@ -226,30 +352,46 @@ def _build_original_posts(posts_schedule, mode="Mock"):
 
         if data["needed"]:
             post = data["post"]
+            fmt = post.get("format") or {}
+            med = _fill_media_fallbacks(post.get("media") or {}, role=role.lower())
+            fmt_type = _FORMAT_LABEL_MAP.get(fmt.get("type", ""), fmt.get("type", "N/A"))
+            fmt_reason = fmt.get("reason", "")
+            lines.append(f"**Recommended format:** {fmt_type}")
+            lines.append("")
+            lines.append("**Recommended copy:**")
             lines.append(f"> {post['text']}")
             lines.append("")
-            fmt = post.get("format") or {}
-            med = post.get("media") or {}
-            lines.append(f"**Format:** {fmt.get('type', 'N/A')} — *{fmt.get('reason', '')}*")
-            lines.append(f"**Media:** {med.get('type', 'No media')} — *{med.get('reason', '')}*")
+            _render_media_block(med, lines)
+            lines.append("")
+            if fmt_reason:
+                lines.append(f"**Why this format:** {fmt_reason}")
+            lines.append(f"**Account:** {handle}")
             if mode != "Mock":
                 lines.append(
-                    f"*Check {handle} manually before posting "
-                    f"(posting history unavailable in {mode} mode).*"
+                    f"**Manual review note:** Check {handle} manually before posting "
+                    f"(posting history unavailable in {mode} mode)."
                 )
         else:
             lines.append("No original post needed today.")
             lines.append("")
             idea = data.get("optional_idea")
             if idea:
+                fmt = idea.get("format") or {}
+                med = _fill_media_fallbacks(idea.get("media") or {}, role=role.lower())
+                fmt_type = _FORMAT_LABEL_MAP.get(fmt.get("type", ""), fmt.get("type", "N/A"))
+                fmt_reason = fmt.get("reason", "")
                 lines.append(f"**Optional idea ({idea['note']}):**")
                 lines.append("")
+                lines.append(f"**Recommended format:** {fmt_type}")
+                lines.append("")
+                lines.append("**Recommended copy:**")
                 lines.append(f"> {idea['text']}")
                 lines.append("")
-                fmt = idea.get("format") or {}
-                med = idea.get("media") or {}
-                lines.append(f"**Format:** {fmt.get('type', 'N/A')} — *{fmt.get('reason', '')}*")
-                lines.append(f"**Media:** {med.get('type', 'No media')} — *{med.get('reason', '')}*")
+                _render_media_block(med, lines)
+                lines.append("")
+                if fmt_reason:
+                    lines.append(f"**Why this format:** {fmt_reason}")
+                lines.append(f"**Account:** {handle}")
 
         lines.append("")
 
@@ -316,8 +458,9 @@ def _build_worth_checking(posts_with_replies):
         snippet = text[:120] + ("..." if len(text) > 120 else "")
         best = post.get("best_reply") or {}
         best_style = best.get("style", "")
+        best_text = best.get("text", "")
         replies = post.get("replies") or []
-        media = post.get("media") or {}
+        media = post.get("media") or _REPLY_DEFAULT_MEDIA
 
         lines.append(f"**{i}. {post['author']}**")
         lines.append(f"Fit: {post['score']} {fit_e} · Opportunity: Low opportunity ⏳")
@@ -335,17 +478,35 @@ def _build_worth_checking(posts_with_replies):
         lines.append("**Skip if:** engagement is dead or the thread has moved on.")
         lines.append("")
 
-        if replies:
-            lines.append("**Reply options:**")
+        if best_style:
+            lines.append(f"**Recommended format:** {_normalize_format_label(best_style)}")
+        if best_text:
+            lines.append("**Recommended copy:**")
+            lines.append(f"> {best_text}")
             lines.append("")
-            for reply in replies:
-                rec = " ✅" if reply.get("style") == best_style else ""
-                lines.append(f"**{reply['style']}{rec}**")
-                lines.append(f"> {reply['text']}")
-                lines.append("")
 
         _render_media_block(media, lines)
         lines.append("")
+
+        if best_style:
+            lines.append(f"**Why this format:** {_format_reason_for(best_style)}")
+        lines.append(f"**Account:** {post['reply_account']}")
+        note = _manual_review_note(post)
+        if note:
+            lines.append(f"**Manual review note:** {note}")
+        lines.append("")
+
+        other_replies = [r for r in replies if r.get("style") != best_style]
+        if not best_style and replies:
+            other_replies = replies
+        if other_replies:
+            lines.append("**Other options:**")
+            lines.append("")
+            for reply in other_replies:
+                lines.append(f"**{reply['style']}**")
+                lines.append(f"> {reply['text']}")
+                lines.append("")
+
         lines.append("---")
         lines.append("")
 

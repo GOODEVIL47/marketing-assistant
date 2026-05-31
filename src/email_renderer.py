@@ -1,7 +1,16 @@
 import html as _html
 from datetime import date as _date
 
-from src.digest import _SCORE_ORDER, _OPP_ORDER, _categorize_rejected
+from src.digest import (
+    _SCORE_ORDER,
+    _OPP_ORDER,
+    _categorize_rejected,
+    _normalize_format_label,
+    _format_reason_for,
+    _manual_review_note,
+    _fill_media_fallbacks,
+    _FORMAT_LABEL_MAP,
+)
 
 # Maps discovery_source values to human-readable provider labels.
 # Add new web search providers here — source notes update automatically.
@@ -91,32 +100,16 @@ def _html_media_block(media):
     lh = "font-size:12px;line-height:1.4;"
     rows = [
         f'<p style="margin:0 0 4px;{lh}font-weight:700;color:#374151;">'
-        f'Media: {_esc(media_type)}</p>'
+        f'Media/GIF: {_esc(media_type)}</p>'
     ]
-
-    if media_type == "Optional GIF":
-        idea = media.get("idea", "")
-        use_if = media.get("use_if", "")
-        skip_if = media.get("skip_if", "")
-        if idea:
-            rows.append(f'<p style="margin:0 0 2px;{lh}color:#555;">Idea: {_esc(idea)}</p>')
-        if use_if:
-            rows.append(f'<p style="margin:0 0 2px;{lh}color:#555;">Use: {_esc(use_if)}</p>')
-        if skip_if:
-            rows.append(f'<p style="margin:0;{lh}color:#888;">Skip: {_esc(skip_if)}</p>')
-
-    elif media_type == "Quote repost":
-        use_if = media.get("use_if", "")
-        skip_if = media.get("skip_if", "")
-        if use_if:
-            rows.append(f'<p style="margin:0 0 2px;{lh}color:#555;">Use: {_esc(use_if)}</p>')
-        if skip_if:
-            rows.append(f'<p style="margin:0;{lh}color:#888;">Skip: {_esc(skip_if)}</p>')
-
-    elif media_type == "No media":
-        reason = media.get("reason", "")
-        if reason:
-            rows.append(f'<p style="margin:0;{lh}color:#888;">Reason: {_esc(reason)}</p>')
+    if media.get("idea"):
+        rows.append(f'<p style="margin:0 0 2px;{lh}color:#555;">Media idea: {_esc(media["idea"])}</p>')
+    if media.get("use_if"):
+        rows.append(f'<p style="margin:0 0 2px;{lh}color:#555;">Use media if: {_esc(media["use_if"])}</p>')
+    if media.get("skip_if"):
+        rows.append(f'<p style="margin:0 0 2px;{lh}color:#888;">Skip media if: {_esc(media["skip_if"])}</p>')
+    if media.get("reason"):
+        rows.append(f'<p style="margin:0;{lh}color:#888;font-style:italic;">{_esc(media["reason"])}</p>')
 
     inner = "".join(rows)
     return f"""
@@ -135,11 +128,28 @@ def _html_replies_block(post):
     best_text = best_reply.get("text", "")
     all_replies = post.get("replies") or []
     other_replies = [r for r in all_replies if r.get("style") != best_style]
+    if not best_style and all_replies:
+        other_replies = all_replies
 
     if not best_text:
         return ""
 
-    # Recommended reply
+    fmt_label = _esc(_normalize_format_label(best_style))
+    fmt_reason = _esc(_format_reason_for(best_style))
+    account = _esc(post.get("reply_account", ""))
+    note = _manual_review_note(post)
+    lh = "font-size:11px;line-height:1.4;"
+
+    meta_rows = (
+        f'<p style="margin:6px 0 2px;{lh}color:#555;">Why this format: {fmt_reason}</p>'
+        f'<p style="margin:0 0 2px;{lh}color:#555;">Account: {account}</p>'
+    )
+    if note:
+        meta_rows += (
+            f'<p style="margin:0;{lh}color:#92400e;font-style:italic;">'
+            f'&#x26A0; {_esc(note)}</p>'
+        )
+
     recommended = f"""
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
@@ -147,11 +157,12 @@ def _html_replies_block(post):
                      border-radius:0 4px 4px 0;padding:10px 12px;">
             <p style="margin:0 0 5px;font-size:11px;color:#1a2e4a;
                        text-transform:uppercase;letter-spacing:0.6px;font-weight:700;">
-              &#x2705; Recommended &mdash; {_esc(best_style)}
+              &#x2705; Recommended format: {fmt_label}
             </p>
             <p style="margin:0;font-size:13px;color:#1a2e4a;line-height:1.5;">
               &ldquo;{_esc(best_text)}&rdquo;
             </p>
+            {meta_rows}
           </td>
         </tr>
       </table>"""
@@ -228,7 +239,8 @@ def _html_post_card(rank, post):
         media_block = ""
     else:
         replies_block = _html_replies_block(post)
-        media_block = _html_media_block(post.get("media"))
+        raw_media = post.get("media") or {"type": "No media", "reason": "Clean text reply — the point lands without a visual."}
+        media_block = _html_media_block(raw_media)
 
     return f"""
     <table width="100%" cellpadding="0" cellspacing="0"
@@ -249,10 +261,6 @@ def _html_post_card(rank, post):
           <p style="margin:0 0 8px;color:#888;font-size:12px;">{eng}</p>
           {f'<p style="margin:0 0 8px;font-size:11px;color:#6b7280;">{_esc(age_label)}</p>' if age_label else ""}
           {source_note}
-
-          <p style="margin:0 0 12px;font-size:12px;color:#444;">
-            <strong>Reply from:</strong> {account}
-          </p>
 
           {replies_block}
           {media_block}
@@ -393,28 +401,40 @@ def _html_rejected_summary(posts_with_replies):
 
 
 def _html_original_posts(posts_schedule, mode="Mock"):
+    lh = "font-size:11px;line-height:1.4;"
     parts = []
     for role in ("founder", "product"):
         data = posts_schedule[role]
         handle = _esc(data["handle"])
         if data["needed"]:
             post = data["post"]
-            fmt = _esc((post.get("format") or {}).get("type", ""))
-            med = _esc((post.get("media") or {}).get("type", "No media"))
+            fmt_obj = post.get("format") or {}
+            fmt_label = _esc(_FORMAT_LABEL_MAP.get(fmt_obj.get("type", ""), fmt_obj.get("type", "N/A")))
+            fmt_reason = _esc(fmt_obj.get("reason", ""))
+            med = _fill_media_fallbacks(post.get("media") or {}, role=role)
             text = post.get("text", "").replace("\n\n", " ").replace("\n", " ")
             check_note = (
-                f'<p style="margin:0 0 14px;font-size:11px;color:#92400e;font-style:italic;">'
-                f'Check {handle} manually before posting (posting history unavailable in {_esc(mode)} mode).</p>'
+                f'<p style="margin:4px 0 0;{lh}color:#92400e;font-style:italic;">'
+                f'&#x26A0; Check {handle} manually before posting '
+                f'(posting history unavailable in {_esc(mode)} mode).</p>'
                 if mode != "Mock" else ""
+            )
+            media_block = _html_media_block(med)
+            why_row = (
+                f'<p style="margin:4px 0 0;{lh}color:#555;">Why this format: {fmt_reason}</p>'
+                if fmt_reason else ""
             )
             parts.append(
                 f'<p style="margin:0 0 5px;font-size:12px;font-weight:700;color:#1a2e4a;">'
                 f'{role.title()} ({handle}) &mdash; Recommended today</p>'
+                f'<p style="margin:0 0 3px;{lh}font-weight:600;color:#374151;">Recommended format: {fmt_label}</p>'
                 f'<p style="margin:0 0 5px;font-size:12px;color:#444;line-height:1.5;'
                 f'font-style:italic;">&ldquo;{_esc(text)}&rdquo;</p>'
-                f'<p style="margin:0 0 5px;font-size:11px;color:#888;">'
-                f'Format: {fmt} &nbsp;&middot;&nbsp; Media: {med}</p>'
+                + media_block
+                + why_row
+                + f'<p style="margin:4px 0 0;{lh}color:#555;">Account: {handle}</p>'
                 + check_note
+                + '<p style="margin:0 0 14px;"></p>'
             )
         else:
             reason = _esc(data.get("reason", "Not scheduled today."))
@@ -641,17 +661,36 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule, mode="M
                 f"{i}. {author}",
                 f"   {post['score']} · {post['visibility']} · {post['opportunity']}",
                 f"   {post.get('engagement_summary', '')}",
-                f"   Reply from: {post.get('reply_account', '')}",
             ]
             if _src_label:
                 lines.append(f"   [{_src_label}] Check engagement manually before replying.")
             lines.append("")
 
+            if best_style:
+                lines.append(f"   Recommended format: {_normalize_format_label(best_style)}")
             if best_text:
                 lines += [
-                    f"   * Recommended — {best_style}:",
+                    f"   Recommended copy:",
                     f'   "{best_text}"',
                 ]
+
+            media = post.get("media") or {"type": "No media", "reason": "Clean text reply — the point lands without a visual."}
+            lines.append(f"   Media/GIF: {media.get('type', 'No media')}")
+            if media.get("idea"):
+                lines.append(f"   Media idea: {media['idea']}")
+            if media.get("use_if"):
+                lines.append(f"   Use media if: {media['use_if']}")
+            if media.get("skip_if"):
+                lines.append(f"   Skip media if: {media['skip_if']}")
+            if media.get("reason"):
+                lines.append(f"   Reason: {media['reason']}")
+
+            if best_style:
+                lines.append(f"   Why this format: {_format_reason_for(best_style)}")
+            lines.append(f"   Account: {post.get('reply_account', '')}")
+            note = _manual_review_note(post)
+            if note:
+                lines.append(f"   Manual review note: {note}")
 
             if other_replies:
                 lines += ["", "   Other options:"]
@@ -661,31 +700,6 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule, mode="M
                         f'   "{reply.get("text", "")}"',
                         "",
                     ]
-
-            media = post.get("media") or {}
-            media_type = media.get("type", "No media")
-            lines.append(f"   Media: {media_type}")
-            if media_type == "Optional GIF":
-                idea = media.get("idea", "")
-                use_if = media.get("use_if", "")
-                skip_if = media.get("skip_if", "")
-                if idea:
-                    lines.append(f"   Idea: {idea}")
-                if use_if:
-                    lines.append(f"   Use: {use_if}")
-                if skip_if:
-                    lines.append(f"   Skip: {skip_if}")
-            elif media_type == "Quote repost":
-                use_if = media.get("use_if", "")
-                skip_if = media.get("skip_if", "")
-                if use_if:
-                    lines.append(f"   Use: {use_if}")
-                if skip_if:
-                    lines.append(f"   Skip: {skip_if}")
-            elif media_type == "No media":
-                reason = media.get("reason", "")
-                if reason:
-                    lines.append(f"   Reason: {reason}")
 
             lines += [
                 "",
@@ -727,13 +741,35 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule, mode="M
 
     for role in ("founder", "product"):
         data = posts_schedule[role]
-        status = "Recommended today" if data["needed"] else "Not needed today"
-        lines.append(f"{role.title()} ({data['handle']}): {status}")
-        if data["needed"] and mode != "Mock":
-            lines.append(
-                f"  Check {data['handle']} manually before posting "
-                f"(posting history unavailable in {mode} mode)."
-            )
+        handle = data["handle"]
+        if data["needed"]:
+            post = data["post"]
+            fmt_obj = post.get("format") or {}
+            fmt_label = _FORMAT_LABEL_MAP.get(fmt_obj.get("type", ""), fmt_obj.get("type", "N/A"))
+            fmt_reason = fmt_obj.get("reason", "")
+            med = _fill_media_fallbacks(post.get("media") or {}, role=role)
+            lines.append(f"{role.title()} ({handle}): Recommended today")
+            lines.append(f"  Recommended format: {fmt_label}")
+            lines.append(f'  "{post["text"]}"')
+            lines.append(f"  Media/GIF: {med.get('type', 'No media')}")
+            if med.get("idea"):
+                lines.append(f"  Media idea: {med['idea']}")
+            if med.get("use_if"):
+                lines.append(f"  Use media if: {med['use_if']}")
+            if med.get("skip_if"):
+                lines.append(f"  Skip media if: {med['skip_if']}")
+            if med.get("reason"):
+                lines.append(f"  Reason: {med['reason']}")
+            if fmt_reason:
+                lines.append(f"  Why this format: {fmt_reason}")
+            lines.append(f"  Account: {handle}")
+            if mode != "Mock":
+                lines.append(
+                    f"  Manual review note: Check {handle} manually before posting "
+                    f"(posting history unavailable in {mode} mode)."
+                )
+        else:
+            lines.append(f"{role.title()} ({handle}): Not needed today")
 
     cats = _categorize_rejected(posts_with_replies)
     total_rejected = sum(len(v) for v in cats.values())

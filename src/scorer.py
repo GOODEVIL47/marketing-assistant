@@ -389,6 +389,32 @@ def _is_broadcast_post(text: str) -> bool:
     return True
 
 
+# Phrases that signal a stock newsletter, advisory recommendation, or price-target post.
+# Individually these may appear in legitimate analytical posts; 2+ together = advisory content.
+_STOCK_PICK_SOFT_SIGNALS = frozenset([
+    "target price remains",     # "our target price remains unchanged"
+    "our recommendation",
+    "stay patient",
+    "let the market do the work",
+    "biggest winners",
+    "exceptional investors",
+    "conviction remains",
+    "maintain our",
+    "we remain buyers",
+    "long-term thesis unchanged",
+    "our price target",
+])
+
+
+def _is_stock_recommendation(text: str) -> bool:
+    """
+    Return True when 2+ advisory/newsletter soft signals are present. Threshold of 2
+    prevents false positives on legitimate posts mentioning conviction or thesis alone.
+    """
+    text_lower = _nfkc(text).lower()
+    return sum(1 for s in _STOCK_PICK_SOFT_SIGNALS if s in text_lower) >= 2
+
+
 _AVOID_CRYPTO = frozenset({"xrp", "web3", "memecoin", "meme coin", "altcoin", "crypto pump"})
 _AVOID_HYPE = frozenset({"100x", "moon", "gem", "next 10x", "get rich", "guaranteed"})
 _AVOID_BAIT = frozenset({
@@ -644,6 +670,22 @@ def score_posts(posts, profile=None):
                 opp_reason = (
                     "Post reads like a research/news broadcast without a clear discussion hook. "
                     "Topically relevant but unlikely to generate conversation. "
+                    "Save for Inspiration — do not use as a direct reply target."
+                )
+
+        # Stock newsletter / advisory recommendation posts: audience is looking for
+        # stock picks, not analytical clarity. Downgrade to Low so they don't reach Best 3.
+        if (
+            visibility == "Unknown visibility"
+            and opportunity == "Medium opportunity"
+            and fit_score in ("Strong fit", "Decent fit")
+        ):
+            post_text = post.get("combined_text_for_scoring") or post.get("text", "")
+            if _is_stock_recommendation(post_text):
+                opportunity = "Low opportunity"
+                opp_reason = (
+                    "Post reads like a stock newsletter or advisory recommendation. "
+                    "Audience is looking for stock picks, not analytical clarity. "
                     "Save for Inspiration — do not use as a direct reply target."
                 )
 

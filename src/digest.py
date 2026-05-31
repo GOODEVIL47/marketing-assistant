@@ -87,6 +87,12 @@ def _build_best_3(posts_with_replies, has_inspiration=False, worth_checking_coun
     lines.append("## Today's Best 3")
     lines.append("")
 
+    if any(p.get("discovery_source") == "tavily_search" for p in posts_with_replies):
+        lines.append(
+            "*Tavily web-search mode — verify post text and engagement on X before replying.*"
+        )
+        lines.append("")
+
     if not top3:
         parts = ["No strong reply opportunities today."]
         if worth_checking_count > 0:

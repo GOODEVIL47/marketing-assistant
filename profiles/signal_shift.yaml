@@ -1,3 +1,13 @@
+# === M4.18 FREEZE — FINAL TAVILY SETTINGS ===
+# TAVILY_TOPIC=general
+# TAVILY_TIME_RANGE=day
+# TAVILY_SEARCH_DEPTH=advanced
+# TAVILY_QUERY_STYLE=loose
+# TAVILY_AUTO_PARAMETERS=false
+# MAX_SEARCH_QUERIES=10
+# MAX_RESULTS_PER_QUERY=10
+# ============================================
+
 name: Signal Shift
 tagline: "Calm AI-powered market briefing for retail investors"
 url: https://signalshift.app
@@ -193,6 +203,12 @@ fit_keywords:
     - altcoin
     - "crypto pump"
     - webinar
+    - "today's recommendation"
+    - "this is free money"
+    - "easy trade"
+    - "loaded the boat"
+    - "backing up the truck"
+    - "10-bagger"
 
   # At least one of these must appear for a post to score Strong or Decent fit.
   # Prevents generic "noise/clarity/pressure" posts without market context from
@@ -420,6 +436,16 @@ query_buckets:
     - site:x.com retail investor overwhelmed stocks
     - site:x.com investing thesis unchanged stock moving
     - site:x.com information overload stocks
+    - site:x.com NVDA confused retail investor today
+    - site:x.com META earnings reaction confused today
+    - site:x.com AMD move confusing after hours
+    - site:x.com CRWD selloff makes no sense
+    - site:x.com COIN premarket confusing today
+    - site:x.com earnings week confusing retail stocks
+    - site:x.com US stock market noise today
+    - site:x.com stock thesis unchanged still moving today
+    - site:x.com retail investor overwhelmed earnings this week
+    - site:x.com small cap stock moving confusing today
 
   # Topic/ticker discovery — today-style market mover queries.
   # Intended to surface timely posts for Worth Checking or Save for Inspiration

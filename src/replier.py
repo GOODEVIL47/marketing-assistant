@@ -960,9 +960,25 @@ _CONTEXT_DRIVERS = [
     "onshoring", "reshoring", "defense", "supply chain",
     "chips act", "germanium", "photonics", "optical capacity",
     "power semis", "semiconductor sovereignty", "scarcity", "scarce",
-    "story stock", "52-week high", "all-time high",
+    "story stock", "52-week high", "52-week low", "all-time high",
     "short squeeze", "earnings surprise", "retail chasing",
+    # Financial context terms — needed so ChrisQuelch-style analytical posts
+    # (ticker + EPS/earnings/valuation language) hit Case 2, not the thin-context path.
+    "eps", "earnings", "revenue", "margins", "guidance",
+    "valuation", "market cap", "analyst upgrade", "analyst downgrade",
+    "short interest", "ai capex",
 ]
+
+# Subset used as the quality gate for driver-only replies (no ticker present).
+# A lone generic driver like "scarcity" does not qualify; strong structural or
+# financial drivers do.
+_STRONG_STRUCTURAL_DRIVERS = frozenset({
+    "onshoring", "reshoring", "defense", "supply chain", "chips act", "germanium",
+    "photonics", "optical capacity", "power semis", "semiconductor sovereignty",
+    "52-week high", "52-week low", "all-time high", "short squeeze", "earnings surprise",
+    "eps", "earnings", "revenue", "margins", "guidance", "valuation", "market cap",
+    "analyst upgrade", "analyst downgrade", "short interest", "ai capex",
+})
 
 
 def _nfkc(text: str) -> str:
@@ -1011,7 +1027,10 @@ def _build_contextual_reply(context):
     """
     Build one context-aware reply line referencing concrete elements from the post.
     Returns None when context is too thin for a specific reply.
-    Callers inject this as option C so at least one reply is post-specific.
+
+    Requires a ticker PLUS a driver (Case 1/2), OR qualifying drivers without
+    a ticker (driver-only path). A ticker alone or a ticker with only a pct_change
+    but no driver is insufficient — those cases produce generic replies instead.
     """
     tickers = context.get("tickers", [])
     pct_changes = context.get("pct_changes", [])
@@ -1019,10 +1038,8 @@ def _build_contextual_reply(context):
 
     ticker_str = " / ".join(tickers[:2]) if tickers else None
 
-    if not ticker_str:
-        return None
-
-    if pct_changes and drivers:
+    # Case 1: ticker + pct + driver — most specific reply
+    if ticker_str and pct_changes and drivers:
         driver = drivers[0]
         pct = pct_changes[0]
         return (
@@ -1031,7 +1048,8 @@ def _build_contextual_reply(context):
             "real, or is this a story with momentum? Hard to tell from the chart alone."
         )
 
-    if drivers:
+    # Case 2: ticker + driver, no pct — structural reply
+    if ticker_str and drivers:
         driver = drivers[0]
         return (
             f"The {driver} angle on {ticker_str} is worth being specific about — "
@@ -1039,18 +1057,22 @@ def _build_contextual_reply(context):
             "a narrative. The price move doesn't resolve that question on its own."
         )
 
-    if pct_changes:
-        pct = pct_changes[0]
-        return (
-            f"{ticker_str} at {pct} against the tape is worth unpacking — "
-            "what actually changed in the thesis, and what's just the market "
-            "pricing in a story?"
-        )
+    # Cases 3 and 4 (ticker + pct only, or ticker only) are intentionally omitted.
+    # A ticker without a driver signals thin context — a generic reply is more honest.
 
-    return (
-        f"Worth being specific about what the {ticker_str} move is actually telling you — "
-        "what changed in the underlying picture, and what just got louder."
-    )
+    # Driver-only path (no ticker) — quality-gated: requires 2+ drivers OR 1 strong one.
+    if not ticker_str and drivers:
+        strong = [d for d in drivers if d in _STRONG_STRUCTURAL_DRIVERS]
+        if len(drivers) >= 2 or strong:
+            driver = strong[0] if strong else drivers[0]
+            return (
+                f"The {driver} angle is worth being precise about — there's a real "
+                f"difference between a structural shift that changes the fundamentals "
+                f"and a theme trade running on narrative. The price move doesn't "
+                f"resolve that question on its own."
+            )
+
+    return None
 
 
 def generate_replies(scored_posts):

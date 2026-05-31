@@ -390,7 +390,7 @@ _DYNAMIC_TEMPLATES = {
         "options_b": [
             {
                 "style": "A — Short and clean",
-                "text": "The right question matters more than the right answer.",
+                "text": "What actually changed around the stock — that's the useful question. Not just what got louder.",
             },
             {
                 "style": "B — Casual paragraph",
@@ -626,22 +626,22 @@ _DYNAMIC_TEMPLATES = {
         "options": [
             {
                 "style": "A — Short and clean",
-                "text": "This is the part almost no tool is actually built for.",
+                "text": "The useful question is what actually changed around the stock — not just what got louder on the feed.",
             },
             {
                 "style": "B — Casual paragraph",
                 "text": (
-                    "The hard part isn't finding more information. "
-                    "It's having a clear enough frame to know what to do with what you already have — "
-                    "before you act on any of it."
+                    "Price moves get attention. "
+                    "What matters is whether the thesis, risk, or key levels actually changed. "
+                    "Most market noise doesn't move those."
                 ),
             },
             {
                 "style": "C — Sharper take",
                 "text": (
-                    "Most of the real work happens before you look at any data — "
-                    "knowing what you're trying to answer, and what would actually change your mind. "
-                    "That part doesn't get talked about much."
+                    "Not every move needs action. "
+                    "Sometimes the first job is just figuring out what the market is reacting to — "
+                    "before deciding whether it matters to you."
                 ),
             },
         ],
@@ -724,22 +724,20 @@ _DYNAMIC_TEMPLATES = {
         "options": [
             {
                 "style": "A — Short and clean",
-                "text": "There's more to untangle here than it looks.",
+                "text": "For retail investors, the hard part is separating a real shift in the setup from another noisy headline.",
             },
             {
                 "style": "B — Casual paragraph",
                 "text": (
-                    "The framing matters as much as the information. "
-                    "Most of the time, the question you're asking is already shaping "
-                    "the answer you're going to find — and that part rarely gets examined."
+                    "Most market moves don't change the actual thesis — they just feel like they do. "
+                    "The useful check is whether the risk profile, key levels, or underlying setup actually shifted."
                 ),
             },
             {
                 "style": "C — Sharper take",
                 "text": (
-                    "A clear process beats instinct almost every time — "
-                    "not because instincts are always wrong, "
-                    "but because a process gives you something to learn from when they are."
+                    "A lot of reactive investing starts with the price move and works backward to a story. "
+                    "The cleaner move is asking what you would have needed to see to act — before the move happened."
                 ),
             },
         ],
@@ -747,20 +745,20 @@ _DYNAMIC_TEMPLATES = {
         "options_b": [
             {
                 "style": "A — Short and clean",
-                "text": "The assumptions you start with shape everything you find.",
+                "text": "Price moves get attention. Whether the thesis actually changed is the harder question.",
             },
             {
                 "style": "B — Casual paragraph",
                 "text": (
-                    "Worth thinking about whether the difficulty here is finding the right information "
-                    "or having a clear enough lens to know what to do with it."
+                    "For retail investors, the hard part is separating a real shift in the setup "
+                    "from another noisy headline. Most moves don't change the actual story."
                 ),
             },
             {
                 "style": "C — Sharper take",
                 "text": (
-                    "Good questions tend to surface faster than good answers. "
-                    "Usually the best next move is making the question sharper."
+                    "A cleaner frame: did the catalyst change the story, "
+                    "or did the price just move faster than the explanation?"
                 ),
             },
         ],
@@ -861,8 +859,8 @@ _INSPIRATION_ANGLES = {
         "The best investors are very specific about what they're trying to decide — before they start researching.",
     ],
     "generic_decent": [
-        "The framing matters as much as the information. The question you start with shapes everything you find.",
-        "Good questions tend to surface faster than good answers. Making the question sharper is usually the best next move.",
+        "The framing matters as much as the information. Price moves get attention — what actually changed in the setup is the harder question.",
+        "Price moves get attention. Whether the thesis, risk, or key levels actually changed is what matters.",
         "Worth naming what you're actually trying to figure out — before gathering more information about it.",
         "There's a version of staying informed that is just staying reactive. Worth knowing which one you're doing.",
     ],

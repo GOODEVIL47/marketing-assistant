@@ -10,6 +10,7 @@ from src.digest import (
     _manual_review_note,
     _fill_media_fallbacks,
     _FORMAT_LABEL_MAP,
+    _display_account,
 )
 
 # Maps discovery_source values to human-readable provider labels.
@@ -136,7 +137,7 @@ def _html_replies_block(post):
 
     fmt_label = _esc(_normalize_format_label(best_style))
     fmt_reason = _esc(_format_reason_for(best_style))
-    account = _esc(post.get("reply_account", ""))
+    account = _esc(_display_account(post.get("reply_account", "")))
     note = _manual_review_note(post)
     lh = "font-size:11px;line-height:1.4;"
 
@@ -205,18 +206,10 @@ def _html_post_card(rank, post):
         post["visibility"], (post["visibility"], "#f3f4f6", "#374151")
     )
 
-    eng = _esc(post.get("engagement_summary", ""))
-    age_label = post.get("age_label") or ""
-    account = _esc(post.get("reply_account", ""))
-
     _provider_label = _WEB_SEARCH_LABELS.get(post.get("discovery_source", ""), "")
-    source_note = (
-        '<p style="margin:0 0 8px;font-size:11px;color:#92400e;'
-        'font-style:italic;line-height:1.4;">'
-        f'&#x1F50D; Found via {_esc(_provider_label)} &mdash; '
-        'check engagement manually before replying.'
-        '</p>'
-    ) if _provider_label else ""
+    _eng_raw = post.get("engagement_summary", "")
+    eng = _esc(_eng_raw + (" · found via web search" if _provider_label else ""))
+    age_label = post.get("age_label") or ""
 
     reply_note = post.get("reply_note")
     inspiration_angles = post.get("inspiration_angles")
@@ -260,7 +253,6 @@ def _html_post_card(rank, post):
 
           <p style="margin:0 0 8px;color:#888;font-size:12px;">{eng}</p>
           {f'<p style="margin:0 0 8px;font-size:11px;color:#6b7280;">{_esc(age_label)}</p>' if age_label else ""}
-          {source_note}
 
           {replies_block}
           {media_block}
@@ -438,12 +430,37 @@ def _html_original_posts(posts_schedule, mode="Mock"):
             )
         else:
             reason = _esc(data.get("reason", "Not scheduled today."))
-            parts.append(
+            idea = data.get("optional_idea")
+            block = (
                 f'<p style="margin:0 0 3px;font-size:12px;font-weight:600;color:#888;">'
                 f'{role.title()} ({handle}) &mdash; Not needed today</p>'
-                f'<p style="margin:0 0 14px;font-size:11px;color:#aaa;line-height:1.5;">'
+                f'<p style="margin:0 0 6px;font-size:11px;color:#aaa;line-height:1.5;">'
                 f'{reason}</p>'
             )
+            if idea:
+                idea_fmt = idea.get("format") or {}
+                idea_label = _esc(_FORMAT_LABEL_MAP.get(idea_fmt.get("type", ""), idea_fmt.get("type", "N/A")))
+                idea_med = _fill_media_fallbacks(idea.get("media") or {}, role=role)
+                idea_text = idea.get("text", "").replace("\n\n", " ").replace("\n", " ")
+                idea_why = _esc(idea_fmt.get("reason", ""))
+                idea_note = _esc(idea.get("note", "Optional idea"))
+                idea_media_block = _html_media_block(idea_med)
+                why_row = (
+                    f'<p style="margin:4px 0 0;{lh}color:#555;">Why this format: {idea_why}</p>'
+                    if idea_why else ""
+                )
+                block += (
+                    f'<p style="margin:0 0 3px;{lh}font-weight:600;color:#6b7280;">'
+                    f'Optional idea &mdash; {idea_note}</p>'
+                    f'<p style="margin:0 0 3px;{lh}font-weight:600;color:#374151;">Recommended format: {idea_label}</p>'
+                    f'<p style="margin:0 0 5px;font-size:12px;color:#444;line-height:1.5;font-style:italic;">'
+                    f'&ldquo;{_esc(idea_text)}&rdquo;</p>'
+                    + idea_media_block
+                    + why_row
+                    + f'<p style="margin:4px 0 0;{lh}color:#555;">Account: {handle}</p>'
+                )
+            block += '<p style="margin:0 0 14px;"></p>'
+            parts.append(block)
     return "".join(parts)
 
 
@@ -687,7 +704,7 @@ def render_digest_text(profile_name, posts_with_replies, posts_schedule, mode="M
 
             if best_style:
                 lines.append(f"   Why this format: {_format_reason_for(best_style)}")
-            lines.append(f"   Account: {post.get('reply_account', '')}")
+            lines.append(f"   Account: {_display_account(post.get('reply_account', ''))}")
             note = _manual_review_note(post)
             if note:
                 lines.append(f"   Manual review note: {note}")

@@ -26,6 +26,7 @@ from src.digest import (
     _normalize_format_label,
     _format_reason_for,
     _manual_review_note,
+    _display_account,
     _build_best_3,
     _build_worth_checking,
     _build_original_posts,
@@ -670,6 +671,178 @@ class TestHTMLEmailOriginalPostsContract(unittest.TestCase):
         schedule = _minimal_posts_schedule()
         html = render_digest_html("Signal Shift", posts, schedule, mode="Mock")
         self.assertIn("Recommended format", html)
+
+
+# ---------------------------------------------------------------------------
+# M4.19c tests
+# ---------------------------------------------------------------------------
+
+class TestDisplayAccount(unittest.TestCase):
+    """_display_account() maps 'Either' to 'Founder by default'; leaves others unchanged."""
+
+    def test_either_maps_to_founder_by_default(self):
+        self.assertEqual(_display_account("Either"), "Founder by default")
+
+    def test_founder_unchanged(self):
+        self.assertEqual(_display_account("Founder"), "Founder")
+
+    def test_product_unchanged(self):
+        self.assertEqual(_display_account("Product"), "Product")
+
+    def test_empty_string_unchanged(self):
+        self.assertEqual(_display_account(""), "")
+
+
+class TestDisplayAccountInMarkdownDigest(unittest.TestCase):
+    """_build_best_3() renders 'Founder by default' when reply_account is 'Either'."""
+
+    def test_either_shows_founder_by_default_in_best3(self):
+        post = _base_scored_post(reply_account="Either")
+        md = "\n".join(_build_best_3([post]))
+        self.assertIn("Founder by default", md)
+        self.assertNotIn("**Account:** Either", md)
+
+    def test_either_shows_founder_by_default_in_worth_checking(self):
+        post = _low_opp_post(reply_account="Either")
+        md = "\n".join(_build_worth_checking([post]))
+        self.assertIn("Founder by default", md)
+        self.assertNotIn("**Account:** Either", md)
+
+
+class TestDisplayAccountInPlaintext(unittest.TestCase):
+    """render_digest_text() renders 'Founder by default' when reply_account is 'Either'."""
+
+    def test_either_shows_founder_by_default(self):
+        posts = [_base_scored_post(reply_account="Either")]
+        schedule = _minimal_posts_schedule()
+        text = render_digest_text("Signal Shift", posts, schedule, mode="Mock")
+        self.assertIn("Founder by default", text)
+        for line in text.splitlines():
+            if "Account:" in line:
+                self.assertNotIn("Either", line)
+
+
+class TestDisplayAccountInHTML(unittest.TestCase):
+    """render_digest_html() renders 'Founder by default' when reply_account is 'Either'."""
+
+    def test_either_shows_founder_by_default_in_html(self):
+        posts = [_base_scored_post(reply_account="Either")]
+        schedule = _minimal_posts_schedule()
+        html = render_digest_html("Signal Shift", posts, schedule, mode="Mock")
+        self.assertIn("Founder by default", html)
+
+
+class TestNoDuplicateTavilyWarningInHTMLCard(unittest.TestCase):
+    """HTML email: source_note paragraph is gone from the card; only the replies block note remains."""
+
+    def setUp(self):
+        posts = [_tavily_post()]
+        schedule = _minimal_posts_schedule()
+        self.html = render_digest_html("Signal Shift", posts, schedule, mode="Mock")
+
+    def test_found_via_web_search_in_engagement_line(self):
+        self.assertIn("found via web search", self.html)
+
+    def test_no_standalone_found_via_tavily_search_paragraph(self):
+        # The old "Found via Tavily Search" source_note p-tag should be gone.
+        # The signal "Found via Tavily" (capital F, full phrase) was the duplicate.
+        self.assertNotIn("Found via Tavily Search", self.html)
+
+    def test_manual_review_note_still_present_in_html(self):
+        # HTML renders the Tavily note inline (with ⚠ symbol) rather than a "Manual review note:" label
+        self.assertIn("Tavily search result", self.html)
+        self.assertIn("verify post is live", self.html)
+
+
+class TestGenericFallbackReplyVoice(unittest.TestCase):
+    """Generic fallback replies are finance-native and contain no hype or advice language."""
+
+    _HYPE_TERMS = [
+        "buy", "sell", "hold", "invest now", "guaranteed", "explosive", "to the moon",
+        "can't miss", "massive returns", "profit", "risk-free",
+    ]
+    _BUY_SELL_HOLD = {"buy", "sell", "hold"}
+
+    def _get_generic_options_text(self):
+        from src.replier import _DYNAMIC_TEMPLATES
+        texts = []
+        for key in ("generic_strong", "generic_decent"):
+            fb = _DYNAMIC_TEMPLATES.get(key, {})
+            for group in ("options", "options_b", "options_c"):
+                for opt in fb.get(group, []):
+                    texts.append(opt.get("text", ""))
+        return texts
+
+    def test_no_buy_sell_hold_recommendation(self):
+        texts = self._get_generic_options_text()
+        self.assertTrue(len(texts) > 0, "Expected generic fallback reply options")
+        for text in texts:
+            words = set(text.lower().split())
+            overlap = words & self._BUY_SELL_HOLD
+            self.assertEqual(overlap, set(), f"Found buy/sell/hold in: {text!r}")
+
+    def test_no_hype_language(self):
+        texts = self._get_generic_options_text()
+        for text in texts:
+            lower = text.lower()
+            for term in self._HYPE_TERMS:
+                if term in self._BUY_SELL_HOLD:
+                    continue  # already checked above
+                self.assertNotIn(term, lower, f"Found hype term {term!r} in: {text!r}")
+
+    def test_market_context_language_present(self):
+        texts = self._get_generic_options_text()
+        market_terms = ["thesis", "move", "price", "market", "setup", "investor", "stock"]
+        joined = " ".join(texts).lower()
+        found = [t for t in market_terms if t in joined]
+        self.assertTrue(len(found) >= 3, f"Expected market-context language; found only: {found}")
+
+
+class TestOptionalIdeaInHTMLOriginalPosts(unittest.TestCase):
+    """HTML original posts section renders optional_idea when post is not needed today."""
+
+    def _make_schedule_with_optional_idea(self):
+        schedule = _posts_schedule(founder_needed=False)
+        schedule["founder"]["reason"] = "Founder already posted today."
+        schedule["founder"]["optional_idea"] = {
+            "note": "good angle if you have capacity",
+            "text": "The market is noisy — here's what actually changed.",
+            "format": {
+                "type": "One-liner",
+                "reason": "Short and punchy.",
+            },
+            "media": {
+                "type": "No media",
+                "reason": "Text lands clean.",
+            },
+        }
+        return schedule
+
+    def test_optional_idea_text_shown(self):
+        posts = _minimal_posts_with_replies()
+        schedule = self._make_schedule_with_optional_idea()
+        html = render_digest_html("Signal Shift", posts, schedule, mode="Mock")
+        self.assertIn("The market is noisy", html)
+
+    def test_optional_idea_format_shown(self):
+        posts = _minimal_posts_with_replies()
+        schedule = self._make_schedule_with_optional_idea()
+        html = render_digest_html("Signal Shift", posts, schedule, mode="Mock")
+        self.assertIn("One-liner", html)
+
+    def test_optional_idea_note_shown(self):
+        posts = _minimal_posts_with_replies()
+        schedule = self._make_schedule_with_optional_idea()
+        html = render_digest_html("Signal Shift", posts, schedule, mode="Mock")
+        self.assertIn("good angle if you have capacity", html)
+
+    def test_no_optional_idea_renders_cleanly(self):
+        posts = _minimal_posts_with_replies()
+        schedule = _posts_schedule(founder_needed=False)
+        schedule["founder"]["optional_idea"] = None
+        html = render_digest_html("Signal Shift", posts, schedule, mode="Mock")
+        # Should not crash and should still contain product content
+        self.assertIn("Signal Shift", html)
 
 
 if __name__ == "__main__":

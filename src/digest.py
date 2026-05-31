@@ -125,6 +125,7 @@ _MEDIA_FALLBACKS = {
 _FORMAT_LABEL_MAP = {
     "Short and clean": "One-liner",
     "One-liner": "One-liner",
+    "Paragraph": "Short paragraph",
     "Casual paragraph": "Short paragraph",
     "Short paragraph": "Short paragraph",
     "Agreement + reframe": "Short paragraph",

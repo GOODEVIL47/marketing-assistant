@@ -272,6 +272,12 @@ class TestFillMediaFallbacks(unittest.TestCase):
 
 class TestNormalizeFormatLabel(unittest.TestCase):
 
+    def test_paragraph_bare_maps_to_short_paragraph(self):
+        self.assertEqual(_normalize_format_label("Paragraph"), "Short paragraph")
+
+    def test_paragraph_with_prefix_maps_to_short_paragraph(self):
+        self.assertEqual(_normalize_format_label("B — Paragraph"), "Short paragraph")
+
     def test_strips_letter_prefix(self):
         self.assertEqual(_normalize_format_label("B — Casual paragraph"), "Short paragraph")
 

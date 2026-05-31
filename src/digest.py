@@ -168,6 +168,11 @@ def _manual_review_note(post):
     return ""
 
 
+def _display_account(reply_account):
+    """Map 'Either' to a clearer operational label for display. Does not change the stored value."""
+    return "Founder by default" if reply_account == "Either" else reply_account
+
+
 def _fill_media_fallbacks(med, role=None):
     """Return med with missing fields filled from _MEDIA_FALLBACKS.
     If med is empty/None, returns a role-appropriate default so the media block is never blank.
@@ -256,7 +261,7 @@ def _build_best_3(posts_with_replies, has_inspiration=False, worth_checking_coun
 
         if best_style:
             lines.append(f"**Why this format:** {_format_reason_for(best_style)}")
-        lines.append(f"**Account:** {post['reply_account']}")
+        lines.append(f"**Account:** {_display_account(post['reply_account'])}")
         note = _manual_review_note(post)
         if note:
             lines.append(f"**Manual review note:** {note}")
@@ -490,7 +495,7 @@ def _build_worth_checking(posts_with_replies):
 
         if best_style:
             lines.append(f"**Why this format:** {_format_reason_for(best_style)}")
-        lines.append(f"**Account:** {post['reply_account']}")
+        lines.append(f"**Account:** {_display_account(post['reply_account'])}")
         note = _manual_review_note(post)
         if note:
             lines.append(f"**Manual review note:** {note}")

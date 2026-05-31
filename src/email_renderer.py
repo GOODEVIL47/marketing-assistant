@@ -208,7 +208,9 @@ def _html_post_card(rank, post):
 
     _provider_label = _WEB_SEARCH_LABELS.get(post.get("discovery_source", ""), "")
     _eng_raw = post.get("engagement_summary", "")
-    eng = _esc(_eng_raw + (" · found via web search" if _provider_label else ""))
+    _web_suffix = " · found via web search"
+    _needs_web_suffix = bool(_provider_label) and _web_suffix not in _eng_raw
+    eng = _esc(_eng_raw + (_web_suffix if _needs_web_suffix else ""))
     age_label = post.get("age_label") or ""
 
     reply_note = post.get("reply_note")
@@ -443,7 +445,11 @@ def _html_original_posts(posts_schedule, mode="Mock"):
                 idea_med = _fill_media_fallbacks(idea.get("media") or {}, role=role)
                 idea_text = idea.get("text", "").replace("\n\n", " ").replace("\n", " ")
                 idea_why = _esc(idea_fmt.get("reason", ""))
-                idea_note = _esc(idea.get("note", "Optional idea"))
+                _raw_note = idea.get("note", "Optional idea")
+                idea_note = _esc(
+                    _raw_note if _raw_note.lower().startswith("optional idea")
+                    else f"Optional idea — {_raw_note}"
+                )
                 idea_media_block = _html_media_block(idea_med)
                 why_row = (
                     f'<p style="margin:4px 0 0;{lh}color:#555;">Why this format: {idea_why}</p>'
@@ -451,7 +457,7 @@ def _html_original_posts(posts_schedule, mode="Mock"):
                 )
                 block += (
                     f'<p style="margin:0 0 3px;{lh}font-weight:600;color:#6b7280;">'
-                    f'Optional idea &mdash; {idea_note}</p>'
+                    f'{idea_note}</p>'
                     f'<p style="margin:0 0 3px;{lh}font-weight:600;color:#374151;">Recommended format: {idea_label}</p>'
                     f'<p style="margin:0 0 5px;font-size:12px;color:#444;line-height:1.5;font-style:italic;">'
                     f'&ldquo;{_esc(idea_text)}&rdquo;</p>'

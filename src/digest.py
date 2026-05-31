@@ -385,7 +385,12 @@ def _build_original_posts(posts_schedule, mode="Mock"):
                 med = _fill_media_fallbacks(idea.get("media") or {}, role=role.lower())
                 fmt_type = _FORMAT_LABEL_MAP.get(fmt.get("type", ""), fmt.get("type", "N/A"))
                 fmt_reason = fmt.get("reason", "")
-                lines.append(f"**Optional idea ({idea['note']}):**")
+                _note_text = idea['note']
+                _idea_label = (
+                    _note_text if _note_text.lower().startswith("optional idea")
+                    else f"Optional idea — {_note_text}"
+                )
+                lines.append(f"**{_idea_label}:**")
                 lines.append("")
                 lines.append(f"**Recommended format:** {fmt_type}")
                 lines.append("")

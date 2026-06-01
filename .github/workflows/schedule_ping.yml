@@ -1,0 +1,22 @@
+name: Schedule Ping
+
+# Temporary diagnostic — proves whether GitHub scheduled workflows fire in this repo.
+# Remove once schedule triggering is confirmed working.
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "*/5 * * * *"
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print schedule diagnostic info
+        run: |
+          echo "UTC time:          $(date -u)"
+          echo "Europe/London time: $(TZ='Europe/London' date)"
+          echo "event_name:        ${{ github.event_name }}"
+          echo "ref:               ${{ github.ref }}"
+          echo "sha:               ${{ github.sha }}"

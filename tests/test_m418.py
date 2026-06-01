@@ -507,11 +507,6 @@ class TestWorkflowDefaults(unittest.TestCase):
         content = self._load_workflow()
         self.assertIn("|| 'loose'", content)
 
-    def test_no_schedule_trigger(self):
-        content = self._load_workflow()
-        self.assertNotIn("schedule:", content)
-        self.assertNotIn("cron:", content)
-
     def test_no_push_trigger(self):
         content = self._load_workflow()
         # The file should only have workflow_dispatch

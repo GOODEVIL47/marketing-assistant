@@ -1,8 +1,11 @@
 """
-M4.20 — Schedule Mel Search Digest daily email
+M4.20 / M4.20b — Schedule Mel Search Digest daily email
 
 Tests verify:
-- Daily schedule trigger: cron "5 8 * * *" with Europe/London timezone
+- Two UTC schedule entries cover BST ("5 7 * * *") and GMT ("5 8 * * *")
+- No timezone field in schedule entries (UTC-native crons, guard handles London time)
+- London-time guard step uses TZ="Europe/London" to skip out-of-window scheduled runs
+- Expensive steps are gated on steps.london_time.outputs.should_run == 'true'
 - Scheduled runs: SEND_EMAIL resolves to 'true' via github.event_name == 'schedule'
 - Manual runs: send_email input defaults to "false"
 - workflow_dispatch still present with send_email input
@@ -40,16 +43,28 @@ class TestScheduleTrigger(unittest.TestCase):
         self.assertIn("schedule:", content)
         self.assertIn("cron:", content)
 
-    def test_cron_expression_correct(self):
+    def test_two_schedule_entries(self):
+        schedules = self._triggers()["schedule"]
+        self.assertEqual(len(schedules), 2,
+                         f"Expected 2 schedule entries (BST + GMT), got {len(schedules)}")
+
+    def test_bst_cron_present(self):
         schedules = self._triggers()["schedule"]
         crons = [s["cron"] for s in schedules]
-        self.assertIn("5 8 * * *", crons)
+        self.assertIn("5 7 * * *", crons,
+                      "BST cron '5 7 * * *' (08:05 UTC+1) must be present")
 
-    def test_timezone_europe_london(self):
+    def test_gmt_cron_present(self):
         schedules = self._triggers()["schedule"]
-        timezones = [s.get("timezone", "") for s in schedules]
-        self.assertIn("Europe/London", timezones,
-                      "Schedule must use Europe/London timezone")
+        crons = [s["cron"] for s in schedules]
+        self.assertIn("5 8 * * *", crons,
+                      "GMT cron '5 8 * * *' (08:05 UTC+0) must be present")
+
+    def test_no_timezone_field_in_schedule(self):
+        schedules = self._triggers()["schedule"]
+        for entry in schedules:
+            self.assertNotIn("timezone", entry,
+                             f"Schedule entry must not use a timezone field: {entry}")
 
     def test_workflow_dispatch_still_present(self):
         self.assertIn("workflow_dispatch", self._triggers())
@@ -61,6 +76,74 @@ class TestScheduleTrigger(unittest.TestCase):
     def test_no_pull_request_trigger(self):
         content = self._load_raw()
         self.assertNotIn("pull_request:", content)
+
+
+class TestLondonGuardStep(unittest.TestCase):
+    """Guard step skips real work when a scheduled cron fires outside the London 08:xx window."""
+
+    def _load_raw(self):
+        with open(SEARCH_WORKFLOW) as f:
+            return f.read()
+
+    def _load_yaml(self):
+        with open(SEARCH_WORKFLOW) as f:
+            return yaml.safe_load(f)
+
+    def test_guard_step_uses_london_timezone(self):
+        content = self._load_raw()
+        self.assertIn('TZ="Europe/London"', content,
+                      "Guard step must use TZ=Europe/London to determine local hour")
+
+    def test_guard_step_checks_london_hour_08(self):
+        content = self._load_raw()
+        self.assertIn('"08"', content,
+                      "Guard step must accept runs where London hour == 08")
+
+    def test_guard_outputs_should_run(self):
+        content = self._load_raw()
+        self.assertIn("should_run=true", content)
+        self.assertIn("should_run=false", content)
+
+    def test_guard_step_has_id_london_time(self):
+        data = self._load_yaml()
+        # yaml.safe_load parses 'on:' as True; find steps normally
+        steps = data["jobs"]["search-digest"]["steps"]
+        ids = [s.get("id", "") for s in steps]
+        self.assertIn("london_time", ids,
+                      "Guard step must have id: london_time")
+
+    def test_expensive_steps_gated_on_guard(self):
+        content = self._load_raw()
+        self.assertIn("steps.london_time.outputs.should_run == 'true'", content,
+                      "Expensive steps must be guarded by london_time output")
+
+    def test_checkout_step_is_gated(self):
+        data = self._load_yaml()
+        steps = data["jobs"]["search-digest"]["steps"]
+        checkout = next((s for s in steps if s.get("uses", "").startswith("actions/checkout")), None)
+        self.assertIsNotNone(checkout, "Checkout step not found")
+        self.assertEqual(
+            checkout.get("if", ""),
+            "steps.london_time.outputs.should_run == 'true'",
+            "Checkout step must be gated on london_time guard",
+        )
+
+    def test_run_step_is_gated(self):
+        data = self._load_yaml()
+        steps = data["jobs"]["search-digest"]["steps"]
+        run_step = next((s for s in steps if s.get("run", "").startswith("python run_search")), None)
+        self.assertIsNotNone(run_step, "run_search.py step not found")
+        self.assertEqual(
+            run_step.get("if", ""),
+            "steps.london_time.outputs.should_run == 'true'",
+            "run_search.py step must be gated on london_time guard",
+        )
+
+    def test_manual_run_bypasses_guard(self):
+        content = self._load_raw()
+        # Guard must short-circuit for non-schedule events
+        self.assertIn('"schedule"', content,
+                      "Guard must check github.event_name for schedule vs manual")
 
 
 class TestSendEmailBehavior(unittest.TestCase):
@@ -104,7 +187,6 @@ class TestSendEmailBehavior(unittest.TestCase):
 
     def test_send_email_not_hardwired_to_secret(self):
         content = self._load_raw()
-        # SEND_EMAIL should NOT be a bare secrets.SEND_EMAIL reference anymore
         for line in content.splitlines():
             if "SEND_EMAIL:" in line and "secrets.SEND_EMAIL" in line:
                 self.fail(
